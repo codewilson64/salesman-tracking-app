@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import "./global.css";
+import { Link } from 'expo-router';
 
 export default function App() {
   return (
@@ -7,6 +8,14 @@ export default function App() {
       <Text className="text-xl font-bold text-blue-500">
         Welcome to Nativewind!
       </Text>
+
+      <Link href="/login" className="mt-4 text-blue-500">
+        Go to Login
+      </Link>
+
+      <Link href="/signup" className="mt-2 text-blue-500">
+        Go to Signup
+      </Link> 
     </View>
   );
 }
