@@ -12,7 +12,7 @@ app.use(express.json())
 app.use(cors())
 
 app.use('/api/auth', authRoute)
-app.use('/api/salesman', salesmanRoute)
+app.use('/api/salesmen', salesmanRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");

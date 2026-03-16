@@ -1,8 +1,12 @@
 import express from 'express'
-import { createSalesman } from '../controllers/salesman.controller.js'
+import { createSalesmen, deleteSalesmen, getAllSalesmen, getSalesmenById, updateSalesmen } from '../controllers/salesman.controller.js'
 
 const router = express.Router()
 
-router.post('/', createSalesman)
+router.post("/", createSalesmen)
+router.get("/", getAllSalesmen);
+router.get("/:id", getSalesmenById);
+router.put("/:id", updateSalesmen);
+router.delete("/:id", deleteSalesmen);
 
 export default router
