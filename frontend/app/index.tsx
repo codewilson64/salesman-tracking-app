@@ -1,22 +1,15 @@
 import { Text, View } from 'react-native';
 import "./global.css";
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
+import { useAuthStore } from './stores/authStore';
 
 export default function App() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-blue-500">
-        Welcome to Nativewind!
-      </Text>
+  const accessToken = useAuthStore((state) => state.accessToken);
 
-      <Link href="/login" className="mt-4 text-blue-500">
-        Go to Login
-      </Link>
+  if (!accessToken) {
+    return <Redirect href="/login" />;
+  }
 
-      <Link href="/signup" className="mt-2 text-blue-500">
-        Go to Signup
-      </Link> 
-    </View>
-  );
+  return <Redirect href="/home" />;
 }
 

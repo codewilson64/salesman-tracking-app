@@ -2,23 +2,29 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, TsignUpSchema } from "../libs/types";
-import { signupUser } from "../services/Auth/signupService";
+import { useAuthStore } from "../stores/authStore";
+import { Link } from "expo-router";
 
 export default function SignupScreen() {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<TsignUpSchema>({
     resolver: zodResolver(signUpSchema),
   });
 
+  const signup = useAuthStore((state) => state.signup);
+
   const onSubmit = async (data: TsignUpSchema) => {
     try {
-      const res = await signupUser(data);
-      console.log(res);
+      await signup(data)
     } catch (error: any) {
       console.error(error.response.data);
+      const message = error.response.data.error || "An error occurred";
+
+      setError("root", { type: "server", message });
     }
   };
 
@@ -84,6 +90,21 @@ export default function SignupScreen() {
           {isSubmitting ? "Signing up..." : "Create Account"}
         </Text>
       </Pressable>
+
+      <Text className="text-center mt-4">
+        Already have an account?{" "}
+        <Link href="/login">
+          <Text className="underline text-blue-500 font-semibold">
+            Login
+          </Text>
+        </Link>
+      </Text>
+
+      {errors.root && (
+        <Text className="text-red-500 text-center mt-4">
+          {errors.root.message}
+        </Text>
+      )}
     </View>
   );
 }

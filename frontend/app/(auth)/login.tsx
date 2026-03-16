@@ -2,23 +2,29 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, TloginSchema } from "../libs/types";
-import { loginUser } from "../services/Auth/loginService";
+import { useAuthStore } from "../stores/authStore";
+import { Link } from "expo-router";
 
 export default function LoginScreen() {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<TloginSchema>({
     resolver: zodResolver(loginSchema),
   });
 
+  const login = useAuthStore((state) => state.login)
+
   const onSubmit = async (data: TloginSchema) => {
     try {
-      const res = await loginUser(data);
-      console.log(res);
+      await login(data)
     } catch (error: any) {
       console.error(error.response.data);
+      const message = error.response.data.error || "An error occurred";
+
+      setError("root", { type: "server", message });
     }
   };
 
@@ -68,6 +74,20 @@ export default function LoginScreen() {
           {isSubmitting ? "Logging in" : "Log in"}
         </Text>
       </Pressable>
+
+      <Text className="text-black text-center mt-4">Don't have an account?{" "}
+        <Link href={"/signup"}>
+          <Text className="underline text-blue-500 font-semibold">
+            Sign up
+          </Text>
+        </Link>
+      </Text>
+
+      {errors.root && (
+        <Text className="text-red-500 text-center mt-4">
+          {errors.root.message}
+        </Text>
+      )}
     </View>
   );
 }
