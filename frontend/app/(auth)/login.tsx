@@ -3,7 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, TloginSchema } from "../libs/types";
 import { useAuthStore } from "../stores/authStore";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 export default function LoginScreen() {
   const {
@@ -15,12 +15,16 @@ export default function LoginScreen() {
     resolver: zodResolver(loginSchema),
   });
 
+  const router = useRouter()
+
   const login = useAuthStore((state) => state.login)
 
   const onSubmit = async (data: TloginSchema) => {
     try {
       await login(data)
-    } catch (error: any) {
+      router.replace('/home')
+    } 
+    catch (error: any) {
       console.error(error.response.data);
       const message = error.response.data.error || "An error occurred";
 
