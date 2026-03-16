@@ -7,8 +7,8 @@ type NavbarProps = {
 
 const Navbar = ({ onLogout }: NavbarProps) => {
   return (
-    <View className="h-14 bg-blue-600 flex-row items-center justify-between px-4">
-      <Text className="text-white text-lg font-bold">Home</Text>
+    <View className="h-14 bg-white flex-row items-center justify-between px-4">
+      <Text className="text-lg font-bold">Home</Text>
 
       <Pressable
         onPress={onLogout}
