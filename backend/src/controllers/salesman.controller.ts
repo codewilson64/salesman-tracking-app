@@ -94,7 +94,7 @@ export const getSalesmenById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const salesman = await db
+    const salesmen = await db
       .select({
         id: salesmenTable.id,
         name: salesmenTable.name,
@@ -108,7 +108,7 @@ export const getSalesmenById = async (req: Request, res: Response) => {
       .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
       .where(eq(salesmenTable.id, id));
 
-    if (salesman.length === 0) {
+    if (salesmen.length === 0) {
       return res.status(404).json({
         message: "Salesman not found",
       });
@@ -116,7 +116,7 @@ export const getSalesmenById = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Salesman fetched successfully",
-      data: salesman[0],
+      data: salesmen[0],
     });
 
   } catch (error) {
