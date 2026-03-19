@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
-
-import { usersTable } from "../db/schema.js";
+import { companiesTable, usersTable } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import validator from "validator";
@@ -8,12 +7,14 @@ import { generateToken } from "../utils/generateToken.js";
 import { db } from "../index.js";
 
 export const signup = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, companyName } = req.body;
 
   try {
     // Validate fields
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "All fields must be filled" });
+    if (!username || !email || !password || !companyName) {
+      return res.status(400).json({
+        error: "Username, email, password, and companyName are required",
+      });
     }
 
     if (!validator.isEmail(email)) {
@@ -48,30 +49,55 @@ export const signup = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    // Insert user
-    const newUser = await db
-      .insert(usersTable)
-      .values({
-        username,
-        email,
-        password: hash,
-      })
-      .returning();
+    // Transaction: create company + owner
+    const result = await db.transaction(async (tx) => {
+      // 1. Create company
+      const [company] = await tx
+        .insert(companiesTable)
+        .values({
+          name: companyName,
+        })
+        .returning();
 
-    const user = newUser[0];
+      if (!company) throw new Error("Company creation failed");
+
+      // 2. Create owner user
+      const [user] = await tx
+        .insert(usersTable)
+        .values({
+          username,
+          email,
+          password: hash,
+          role: "owner", 
+          companyId: company.id, 
+        })
+        .returning();
+
+      if (!user) throw new Error("User creation failed");
+
+      return { user, company };
+    });
+
+    const { user, company } = result;
 
     // Create JWT
-    if (user) {
-      const accessToken = generateToken(user.id);
-      return res.status(201).json({
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email
-        },
-        accessToken
-      });
-    }
+    const accessToken = generateToken(user.id, user.companyId, user.role);
+
+    return res.status(201).json({
+      message: "Signup successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        companyId: user.companyId,
+      },
+      company: {
+        id: company.id,
+        name: company.name,
+      },
+      accessToken,
+    });
 
   } catch (error: any) {
     console.error("Error in signup controller:", error.message);
@@ -107,17 +133,19 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    if (user) {
-      const accessToken = generateToken(user.id);
-      return res.status(200).json({
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email
-        },
-        accessToken
-      });
-    }
+    // Generate token
+    const accessToken = generateToken(user.id, user.companyId, user.role);
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,           
+        companyId: user.companyId, 
+      },
+      accessToken,
+    });
 
   } catch (error: any) {
     console.error("Login error:", error.message);

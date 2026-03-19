@@ -9,6 +9,26 @@ export const createSalesmen = async (req: Request, res: Response) => {
   try {
     const { username, email, password, name, address, phone } = req.body;
 
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (!user?.companyId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: "companyId is required in headers",
+      });
+    }
+
     if (!username || !email || !password || !name) {
       return res.status(400).json({
         message: "Missing required fields",
@@ -18,7 +38,7 @@ export const createSalesmen = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await db.transaction(async (tx) => {
-      // create user
+      // create user WITH companyId
       const [user] = await tx
         .insert(usersTable)
         .values({
@@ -26,12 +46,13 @@ export const createSalesmen = async (req: Request, res: Response) => {
           email,
           password: hashedPassword,
           role: "salesman",
+          companyId,
         })
         .returning();
 
       if (!user) throw new Error("User creation failed");
 
-      // create salesman profile
+      // create salesman WITH companyId
       const [salesman] = await tx
         .insert(salesmenTable)
         .values({
@@ -39,6 +60,7 @@ export const createSalesmen = async (req: Request, res: Response) => {
           name,
           address,
           phone,
+          companyId,
         })
         .returning();
 
@@ -54,14 +76,20 @@ export const createSalesmen = async (req: Request, res: Response) => {
     console.error(error);
 
     return res.status(500).json({
-    message: "Failed to create salesmen",
-    error: error instanceof Error ? error.message : error
+      message: "Failed to create salesmen",
+      error: error instanceof Error ? error.message : error
     });
   }
 };
 
 export const getAllSalesmen = async (req: Request, res: Response) => {
   try {
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
     const salesmen = await db
       .select({
         id: salesmenTable.id,
@@ -74,7 +102,8 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
         role: usersTable.role,
       })
       .from(salesmenTable)
-      .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id));
+      .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
+      .where(eq(salesmenTable.companyId, user.companyId)); // 🔥 IMPORTANT
 
     return res.status(200).json({
       message: "Salesmen fetched successfully",

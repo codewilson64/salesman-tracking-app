@@ -1,14 +1,16 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TloginSchema, TsignUpSchema } from "../../../shared/schemas/types";
 import { loginUser } from "../services/Auth/loginService";
 import { signupUser } from "../services/Auth/signupService";
+import { TloginSchema, TsignUpSchema } from "../libs/auth.schema";
 
 type User = {
   id: string;
   username: string;
   email: string;
+  role: string;
+  companyId: string;
 };
 
 type AuthState = {
@@ -27,22 +29,30 @@ export const useAuthStore = create<AuthState>()(
       
       // login
       login: async (data) => {
-        const res = await loginUser(data);
+        try {
+          const res = await loginUser(data);
 
-        set({
-          user: res.user,
-          accessToken: res.accessToken,
-        });
+          set({
+            user: res.user,
+            accessToken: res.accessToken,
+          });
+        } catch (error: any) {
+          throw error.response?.data?.message || "Login failed";
+        }
       },
 
       // sign up
       signup: async (data) => {
-        const res = await signupUser(data)
+        try {
+          const res = await signupUser(data);
 
-        set({
-          user: res.user,
-          accessToken: res.accessToken,
-        });
+          set({
+            user: res.user,
+            accessToken: res.accessToken,
+          });
+        } catch (error: any) {
+          throw error.response?.data?.message || "Sign up failed";
+        }
       },
 
       logout: () => {

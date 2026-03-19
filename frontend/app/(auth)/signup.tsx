@@ -86,6 +86,22 @@ export default function SignupScreen() {
         <Text className="text-red-500 mb-4">{errors.password.message}</Text>
       )}
 
+      <Controller
+        control={control}
+        name="companyName"
+        render={({ field: { onChange, value } }) => (
+          <TextInput
+            placeholder="Company name"
+            value={value}
+            onChangeText={onChange}
+            className="border border-gray-300 rounded-lg p-4 mb-4"
+          />
+        )}
+      />
+      {errors.companyName && (
+        <Text className="text-red-500 mb-4">{errors.companyName.message}</Text>
+      )}
+
       <Pressable
         onPress={handleSubmit(onSubmit)}
         className="bg-black rounded-lg p-4"
