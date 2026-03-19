@@ -1,9 +1,10 @@
 import { View, Text, TextInput, Pressable } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, TloginSchema } from "../libs/types";
+
 import { useAuthStore } from "../stores/authStore";
 import { Link, useRouter } from "expo-router";
+import { loginSchema, TloginSchema } from "../libs/auth.schema";
 
 export default function LoginScreen() {
   const {

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TloginSchema, TsignUpSchema } from "../libs/types";
+import { TloginSchema, TsignUpSchema } from "../../../shared/schemas/types";
 import { loginUser } from "../services/Auth/loginService";
 import { signupUser } from "../services/Auth/signupService";
 

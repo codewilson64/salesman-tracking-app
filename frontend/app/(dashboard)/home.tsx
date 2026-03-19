@@ -34,7 +34,7 @@ const Home = () => {
           >
             {/* Left: icon/letter */}
             <View className="flex-row items-center">
-              <View className="w-14 h-14 bg-blue-500 rounded-full justify-center items-center mr-4">
+              <View className="w-14 h-14 bg-black rounded-full justify-center items-center mr-4">
                 <Text className="text-white font-bold text-lg">
                   {item.name[0]}
                 </Text>

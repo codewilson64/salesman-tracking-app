@@ -5,8 +5,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSalesmanStore } from "../stores/salesmenStore";
 import { useRouter } from "expo-router";
 
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
 const SalesmanScreen = () => {
-  const { salesmen, loading, error, getAllSalesmen } = useSalesmanStore();
+  const salesmen = useSalesmanStore((state) => state.salesmen);
+  const loading = useSalesmanStore((state) => state.loading);
+  const error = useSalesmanStore((state) => state.error);
+  const getAllSalesmen = useSalesmanStore((state) => state.getAllSalesmen);
+
   const router = useRouter()
 
   useEffect(() => {
@@ -56,9 +62,27 @@ const SalesmanScreen = () => {
               <Text className="text-gray-700">{item.phone}</Text>
               <Text className="text-gray-500">{item.role}</Text>
             </View>
+            
+            <Pressable
+              onPress={() => router.push(`salesmen/edit/${item.id}`)}
+              className="absolute bottom-3 right-3 bg-gray-200 p-2 rounded-full"
+            >
+              <FontAwesome6 name="edit" size={16} color="black" />
+            </Pressable>
           </Pressable>
         )}
       />
+
+       {/* CREATE BUTTON */}
+      <Pressable
+        onPress={() => router.push("/salesmen/create")}
+        className="bg-black rounded-lg p-4 mb-4"
+      >
+        <Text className="text-white text-center font-semibold">
+          + Add Salesman
+        </Text>
+      </Pressable>
+
     </SafeAreaView>
   );
 };

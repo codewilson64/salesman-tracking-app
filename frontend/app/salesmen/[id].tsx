@@ -1,12 +1,36 @@
-import { View, Text, ActivityIndicator, Image } from "react-native";
+import { View, Text, ActivityIndicator, Image, Pressable, Alert } from "react-native";
 import React, { useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSalesmanStore } from "../stores/salesmenStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const SalesmanDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedSalesmen, loading, error, getSalesmanById } = useSalesmanStore();
+  const { deleteSalesman } = useSalesmanStore();
+  const router = useRouter();
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Salesman",
+      "Are you sure you want to delete this salesman?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteSalesman(salesmen.id);
+              router.replace("/salesmen");
+            } catch (err) {
+              console.error(err);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
     if (id) {
@@ -81,6 +105,17 @@ const SalesmanDetail = () => {
             <Text className="text-lg font-medium">{salesmen.address}</Text>
             </View>
         </View>
+        </View>
+
+        <View className="flex-1 justify-end mt-6">
+          <Pressable
+            onPress={handleDelete}
+            className="bg-red-600 rounded-lg p-4"
+          >
+            <Text className="text-white text-center font-semibold">
+              Delete Salesman
+            </Text>
+          </Pressable>
         </View>
     </SafeAreaView>
   );

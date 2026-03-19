@@ -1,9 +1,9 @@
 import { View, Text, TextInput, Pressable } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema, TsignUpSchema } from "../libs/types";
 import { useAuthStore } from "../stores/authStore";
 import { Link, useRouter } from "expo-router";
+import { signUpSchema, TsignUpSchema } from "../libs/auth.schema";
 
 export default function SignupScreen() {
   const {
