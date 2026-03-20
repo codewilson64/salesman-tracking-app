@@ -7,8 +7,8 @@ const router = express.Router()
 
 router.post("/", protect, authorize("owner"), createSalesmen)
 router.get("/", protect, getAllSalesmen);
-router.get("/:id", getSalesmenById);
-router.put("/:id", updateSalesmen);
-router.delete("/:id", deleteSalesmen);
+router.get("/:id", protect, getSalesmenById);
+router.put("/:id", protect, authorize("owner"), updateSalesmen);
+router.delete("/:id", protect, authorize("owner"), deleteSalesmen);
 
 export default router

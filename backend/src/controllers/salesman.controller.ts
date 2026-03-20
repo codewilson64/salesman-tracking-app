@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { salesmenTable, usersTable } from "../db/schema.js";
 import { db } from "../index.js";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 
 export const createSalesmen = async (req: Request, res: Response) => {
@@ -22,12 +22,6 @@ export const createSalesmen = async (req: Request, res: Response) => {
     }
 
     const companyId = user.companyId;
-
-    if (!companyId) {
-      return res.status(400).json({
-        message: "companyId is required in headers",
-      });
-    }
 
     if (!username || !email || !password || !name) {
       return res.status(400).json({
@@ -102,7 +96,7 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
         role: usersTable.role,
       })
       .from(salesmenTable)
-      .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
+      .innerJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
       .where(eq(salesmenTable.companyId, user.companyId)); // 🔥 IMPORTANT
 
     return res.status(200).json({
@@ -123,6 +117,12 @@ export const getSalesmenById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
     const salesmen = await db
       .select({
         id: salesmenTable.id,
@@ -134,8 +134,13 @@ export const getSalesmenById = async (req: Request, res: Response) => {
         role: usersTable.role,
       })
       .from(salesmenTable)
-      .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
-      .where(eq(salesmenTable.id, id));
+      .innerJoin(usersTable, eq(salesmenTable.userId, usersTable.id)) 
+      .where(
+        and(
+          eq(salesmenTable.id, id),
+          eq(salesmenTable.companyId, user.companyId) 
+        )
+      );
 
     if (salesmen.length === 0) {
       return res.status(404).json({
@@ -153,7 +158,7 @@ export const getSalesmenById = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       message: "Failed to fetch salesman",
-      error: error instanceof Error ? error.message : error
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
@@ -163,6 +168,12 @@ export const updateSalesmen = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const { name, address, phone } = req.body;
 
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
     const updatedSalesman = await db
       .update(salesmenTable)
       .set({
@@ -170,7 +181,12 @@ export const updateSalesmen = async (req: Request, res: Response) => {
         address,
         phone,
       })
-      .where(eq(salesmenTable.id, id))
+      .where(
+        and(
+          eq(salesmenTable.id, id),
+          eq(salesmenTable.companyId, user.companyId)
+        )
+      )
       .returning();
 
     if (updatedSalesman.length === 0) {
@@ -189,7 +205,7 @@ export const updateSalesmen = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       message: "Failed to update salesman",
-      error: error instanceof Error ? error.message : error
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
@@ -198,31 +214,56 @@ export const deleteSalesmen = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const [salesman] = await db
-      .select()
-      .from(salesmenTable)
-      .where(eq(salesmenTable.id, id));
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
 
-   
-    if (!salesman) {
-      return res.status(404).json({
-        message: "Salesman not found",
+    const result = await db.transaction(async (tx) => {
+      const [salesman] = await tx
+        .select()
+        .from(salesmenTable)
+        .where(
+          and(
+            eq(salesmenTable.id, id),
+            eq(salesmenTable.companyId, user.companyId)
+          )
+        );
+
+      if (!salesman) {
+        throw new Error("NOT_FOUND");
+      }
+
+      // Delete salesman first
+      await tx
+        .delete(salesmenTable)
+        .where(eq(salesmenTable.id, id));
+
+      // Delete related user
+      await tx
+        .delete(usersTable)
+        .where(eq(usersTable.id, salesman.userId));
+
+      return true;
     });
-    }
-
-    await db.delete(salesmenTable).where(eq(salesmenTable.id, id));
-    await db.delete(usersTable).where(eq(usersTable.id, salesman.userId));
 
     return res.status(200).json({
       message: "Salesman deleted successfully",
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+
+    if (error.message === "NOT_FOUND") {
+      return res.status(404).json({
+        message: "Salesman not found",
+      });
+    }
 
     return res.status(500).json({
       message: "Failed to delete salesman",
-      error: error instanceof Error ? error.message : error
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
