@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
-import { companiesTable, usersTable } from "../db/schema.js";
+
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import { generateToken } from "../utils/generateToken.js";
 import { db } from "../index.js";
+import { usersTable } from "../db/schemas/users.js";
+import { companiesTable } from "../db/schemas/companies.js";
 
 export const signup = async (req: Request, res: Response) => {
   const { username, email, password, companyName } = req.body;

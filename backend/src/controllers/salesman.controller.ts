@@ -1,8 +1,10 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { salesmenTable, usersTable } from "../db/schema.js";
+
 import { db } from "../index.js";
 import { and, eq } from "drizzle-orm";
+import { usersTable } from "../db/schemas/users.js";
+import { salesmenTable } from "../db/schemas/salesmen.js";
 
 
 export const createSalesmen = async (req: Request, res: Response) => {
