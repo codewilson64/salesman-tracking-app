@@ -3,33 +3,28 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { createSalesmanSchema, TcreateSalesmanSchema } from "../libs/salesmen.schema";
-import { useSalesmanStore } from "../stores/salesmenStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useCreateSalesman } from "../hooks/useCreateSalesmen";
 
 export default function CreateSalesmanScreen() {
   const {
     control,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<TcreateSalesmanSchema>({
     resolver: zodResolver(createSalesmanSchema),
   });
 
   const router = useRouter();
-  const createSalesman = useSalesmanStore((state) => state.createSalesman);
+  const { mutateAsync, isPending } = useCreateSalesman();
 
   const onSubmit = async (data: TcreateSalesmanSchema) => {
     try {
-      await createSalesman(data);
-      router.replace("/salesmen"); 
-    } 
-    catch (error: any) {
-      console.error(error.response.data);
-      const message = error.response.data.error || "An error occurred";
-
-      setError("root", { type: "server", message });
+      await mutateAsync(data);
+      router.back();
+    } catch (err: any) {
+      setError("root", { message: "Create failed" });
     }
   };
 
@@ -173,10 +168,11 @@ export default function CreateSalesmanScreen() {
 
             <Pressable
               onPress={handleSubmit(onSubmit)}
+              disabled={isPending}
               className="bg-black rounded-lg p-4 mt-8"
             >
               <Text className="text-white text-center font-semibold">
-                {isSubmitting ? "Creating..." : "Create Salesman"}
+                {isPending ? "Creating..." : "Create Salesman"}
               </Text>
             </Pressable>
 

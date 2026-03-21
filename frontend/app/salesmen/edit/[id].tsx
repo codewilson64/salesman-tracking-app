@@ -1,8 +1,9 @@
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSalesmanStore } from "../../stores/salesmenStore";
+import { useUpdateSalesman } from "../../hooks/useUpdateSalesman";
+import { useGetSalesmanById } from "../../hooks/useGetSalesmanById";
 
 type FormData = {
   name: string;
@@ -11,52 +12,42 @@ type FormData = {
 };
 
 export default function EditSalesmanScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
-  const {
-    selectedSalesmen,
-    getSalesmanById,
-    updateSalesman,
-    loading,
-  } = useSalesmanStore();
+  const { mutateAsync, isPending } = useUpdateSalesman();
+  const { data, isLoading } = useGetSalesmanById(id);
 
   const {
     control,
     handleSubmit,
-    setValue,
-    formState: { isDirty, isSubmitting },
+    setError,
+    formState: { isDirty },
+    reset,
   } = useForm<FormData>();
 
-  // Fetch data
   useEffect(() => {
-    if (id) {
-      getSalesmanById(id as string);
+    if (data) {
+      reset({
+        name: data.name ?? "",
+        address: data.address ?? "",
+        phone: data.phone ?? "",
+      });
     }
-  }, [id]);
-
-  // Prefill form
-  useEffect(() => {
-    if (selectedSalesmen) {
-      setValue("name", selectedSalesmen.name);
-      setValue("address", selectedSalesmen.address);
-      setValue("phone", selectedSalesmen.phone);
-    }
-  }, [selectedSalesmen]);
+  }, [data, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      await updateSalesman(id as string, data);
-      router.replace("/salesmen");
-    } catch (err) {
-      console.error(err);
+      await mutateAsync({ id, data });
+      router.back();
+    } catch (err: any) {
+      setError("root", { message: "Update failed" });
     }
   };
 
-  if (loading || !selectedSalesmen) {
+  if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -120,14 +111,14 @@ export default function EditSalesmanScreen() {
 
       {/* BUTTON */}
       <Pressable
-        disabled={!isDirty || isSubmitting}
+        disabled={!isDirty || isPending}
         onPress={handleSubmit(onSubmit)}
         className={`rounded-lg p-4 mt-8 ${
           !isDirty ? "bg-gray-400" : "bg-black"
         }`}
       >
         <Text className="text-white text-center font-semibold">
-          {isSubmitting ? "Updating..." : "Update Salesman"}
+          {isPending ? "Updating..." : "Update Salesman"}
         </Text>
       </Pressable>
     </View>

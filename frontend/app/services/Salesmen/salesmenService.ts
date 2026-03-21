@@ -1,28 +1,33 @@
 import { api } from "../../libs/axios";
 import { TcreateSalesmanSchema } from "../../libs/salesmen.schema";
-import { UpdateSalesmanInput } from "../../stores/salesmenStore";
+
+type FormData = {
+  name: string;
+  address?: string;
+  phone?: string;
+};
 
 export const createSalesmen = async (data: TcreateSalesmanSchema) => {
   const res = await api.post("/salesmen", data)
-  return res.data
+  return res.data.data
 }
 
 export const getAllSalesmen = async () => {
   const res = await api.get("/salesmen");
-  return res.data;
+  return res.data.data;
 };
 
 export const getSalesmenById = async (id: string) => {
   const res = await api.get(`/salesmen/${id}`)
-  return res.data
+  return res.data.data
 }
 
 export const updateSalesmenById = async (
   id: string,
-  data: UpdateSalesmanInput
+  data: FormData
 ) => {
   const res = await api.put(`/salesmen/${id}`, data);
-  return res.data;
+  return res.data.data;
 };
 
 export const deleteSalesmenById = async (id: string) => {

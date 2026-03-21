@@ -99,7 +99,7 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
       })
       .from(salesmenTable)
       .innerJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
-      .where(eq(salesmenTable.companyId, user.companyId)); // 🔥 IMPORTANT
+      .where(eq(salesmenTable.companyId, user.companyId)); 
 
     return res.status(200).json({
       message: "Salesmen fetched successfully",

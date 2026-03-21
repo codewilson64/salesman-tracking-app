@@ -1,25 +1,15 @@
-// screens/Salesman.tsx
 import { View, Text, FlatList, ActivityIndicator, Image, Pressable } from "react-native";
-import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSalesmanStore } from "../stores/salesmenStore";
 import { useRouter } from "expo-router";
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useGetAllSalesmen } from "../hooks/useGetAllSalesmen";
 
 const SalesmanScreen = () => {
-  const salesmen = useSalesmanStore((state) => state.salesmen);
-  const loading = useSalesmanStore((state) => state.loading);
-  const error = useSalesmanStore((state) => state.error);
-  const getAllSalesmen = useSalesmanStore((state) => state.getAllSalesmen);
-
   const router = useRouter()
+  const { data: salesmen = [], isLoading, isError } = useGetAllSalesmen()
 
-  useEffect(() => {
-    getAllSalesmen();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
@@ -27,10 +17,10 @@ const SalesmanScreen = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500 text-lg">{error}</Text>
+        <Text className="text-red-500 text-lg">Error occurred while fetching salesmen.</Text>
       </View>
     );
   }
@@ -64,7 +54,10 @@ const SalesmanScreen = () => {
             </View>
             
             <Pressable
-              onPress={() => router.push(`salesmen/edit/${item.id}`)}
+              onPress={(e) => {
+                e.stopPropagation();
+                router.push(`salesmen/edit/${item.id}`);
+              }}
               className="absolute bottom-3 right-3 bg-gray-200 p-2 rounded-full"
             >
               <FontAwesome6 name="edit" size={16} color="black" />

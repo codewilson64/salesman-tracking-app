@@ -1,28 +1,31 @@
 import { View, Text, ActivityIndicator, Image, Pressable, Alert } from "react-native";
-import React, { useEffect } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSalesmanStore } from "../stores/salesmenStore";
+import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGetSalesmanById } from "../hooks/useGetSalesmanById";
+import { useDeleteSalesman } from "../hooks/useDeleteSalesman";
 
 const SalesmanDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedSalesmen, loading, error, getSalesmanById } = useSalesmanStore();
-  const { deleteSalesman } = useSalesmanStore();
-  const router = useRouter();
+  const router = useRouter()
+  const { data: salesman, isLoading, isError } = useGetSalesmanById(id);
+  const { mutateAsync: deleteSalesman, isPending } = useDeleteSalesman();
 
   const handleDelete = () => {
     Alert.alert(
-      "Delete Salesman",
-      "Are you sure you want to delete this salesman?",
+      `Delete ${salesman?.name}?`,
+      "Are you sure you want to delete this salesman? This action cannot be undone.",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteSalesman(salesmen.id);
-              router.replace("/salesmen");
+              await deleteSalesman(id);
+              router.back();
             } catch (err) {
               console.error(err);
             }
@@ -32,13 +35,7 @@ const SalesmanDetail = () => {
     );
   };
 
-  useEffect(() => {
-    if (id) {
-      getSalesmanById(id);
-    }
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
@@ -46,23 +43,13 @@ const SalesmanDetail = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500">{error}</Text>
+        <Text className="text-red-500">Error loading salesman</Text>
       </View>
     );
   }
-
-  if (!selectedSalesmen) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text>Salesman not found</Text>
-      </View>
-    );
-  }
-
-  const salesmen = selectedSalesmen;
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
@@ -71,13 +58,13 @@ const SalesmanDetail = () => {
         <Image
           source={{
             uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              salesmen.name
+              salesman.name
             )}&size=128`,
           }}
           className="w-32 h-32 rounded-full mb-4"
         />
-        <Text className="text-2xl font-bold">{salesmen.name}</Text>
-        <Text className="text-gray-500">{salesmen.role}</Text>
+        <Text className="text-2xl font-bold">{salesman.name}</Text>
+        <Text className="text-gray-500">{salesman.role}</Text>
       </View>
 
       {/* Info */}
@@ -86,7 +73,7 @@ const SalesmanDetail = () => {
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
             <Text className="text-gray-500 text-sm">Phone</Text>
-            <Text className="text-lg font-medium">{salesmen.phone}</Text>
+            <Text className="text-lg font-medium">{salesman.phone}</Text>
             </View>
         </View>
 
@@ -94,7 +81,7 @@ const SalesmanDetail = () => {
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
             <Text className="text-gray-500 text-sm">Email</Text>
-            <Text className="text-lg font-medium">{salesmen.email}</Text>
+            <Text className="text-lg font-medium">{salesman.email}</Text>
             </View>
         </View>
 
@@ -102,7 +89,7 @@ const SalesmanDetail = () => {
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
             <Text className="text-gray-500 text-sm">Address</Text>
-            <Text className="text-lg font-medium">{salesmen.address}</Text>
+            <Text className="text-lg font-medium">{salesman.address}</Text>
             </View>
         </View>
         </View>
@@ -110,6 +97,7 @@ const SalesmanDetail = () => {
         <View className="flex-1 justify-end mt-6">
           <Pressable
             onPress={handleDelete}
+            disabled={isPending}
             className="bg-red-600 rounded-lg p-4"
           >
             <Text className="text-white text-center font-semibold">
