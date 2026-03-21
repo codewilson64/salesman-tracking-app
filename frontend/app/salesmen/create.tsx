@@ -2,7 +2,7 @@ import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, Scrol
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { createSalesmanSchema, TcreateSalesmanSchema } from "../libs/salesmen.schema";
+import { salesmanSchema, TSalesmanInput } from "../libs/salesmen.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateSalesman } from "../hooks/salesman/useCreateSalesmen";
 
@@ -12,14 +12,14 @@ export default function CreateSalesmanScreen() {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<TcreateSalesmanSchema>({
-    resolver: zodResolver(createSalesmanSchema),
+  } = useForm<TSalesmanInput>({
+    resolver: zodResolver(salesmanSchema),
   });
 
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateSalesman();
 
-  const onSubmit = async (data: TcreateSalesmanSchema) => {
+  const onSubmit = async (data: TSalesmanInput) => {
     try {
       await mutateAsync(data);
       router.back();

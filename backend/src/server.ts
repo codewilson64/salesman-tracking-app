@@ -14,7 +14,7 @@ app.use(cors())
 
 app.use('/api/auth', authRoute)
 app.use('/api/salesmen', salesmanRoute)
-app.use('/api/product', productRoute)
+app.use('/api/products', productRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");

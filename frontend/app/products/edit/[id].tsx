@@ -2,20 +2,20 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingVi
 import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useUpdateSalesman } from "../../hooks/salesman/useUpdateSalesman";
-import { useGetSalesmanById } from "../../hooks/salesman/useGetSalesmanById";
+import { useUpdateProduct } from "../../hooks/product/useUpdateProduct";
+import { useGetProductById } from "../../hooks/product/useGetProductById";
 
 type FormData = {
   name: string;
-  address?: string;
-  phone?: string;
+  description?: string;
+  price: number;
 };
 
-export default function EditSalesmanScreen() {
+export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { mutateAsync, isPending } = useUpdateSalesman();
-  const { data, isLoading } = useGetSalesmanById(id);
+  const { mutateAsync, isPending } = useUpdateProduct();
+  const { data, isLoading } = useGetProductById(id);
 
   const {
     control,
@@ -29,8 +29,8 @@ export default function EditSalesmanScreen() {
     if (data) {
       reset({
         name: data.name ?? "",
-        address: data.address ?? "",
-        phone: data.phone ?? "",
+        description: data.description ?? "",
+        price: data.price ?? "",
       });
     }
   }, [data, reset]);
@@ -59,13 +59,13 @@ export default function EditSalesmanScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     > 
       <Text className="text-3xl font-bold mb-8 text-center">
-        Edit Salesman
+        Edit Product
       </Text>
 
       <View className="gap-y-6">
         {/* NAME */}
         <View>
-          <Text className="mb-3 text-gray-700">Full Name</Text>
+          <Text className="mb-3 text-gray-700">Name</Text>
           <Controller
             control={control}
             name="name"
@@ -79,12 +79,12 @@ export default function EditSalesmanScreen() {
           />
         </View>
 
-        {/* ADDRESS */}
+        {/* DESC */}
         <View>
-          <Text className="mb-3 text-gray-700">Address</Text>
+          <Text className="mb-3 text-gray-700">Description</Text>
           <Controller
             control={control}
-            name="address"
+            name="description"
             render={({ field: { onChange, value } }) => (
               <TextInput
                 value={value}
@@ -95,17 +95,17 @@ export default function EditSalesmanScreen() {
           />
         </View>
 
-        {/* PHONE */}
+        {/* PRICE */}
         <View>
-          <Text className="mb-3 text-gray-700">Phone</Text>
+          <Text className="mb-3 text-gray-700">Price</Text>
           <Controller
             control={control}
-            name="phone"
+            name="price"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                keyboardType="phone-pad"
-                value={value}
-                onChangeText={onChange}
+                value={value?.toString() ?? ""}
+                onChangeText={(text) => onChange(Number(text))}
+                keyboardType="numeric"
                 className="border border-gray-300 rounded-lg p-4"
               />
             )}
@@ -122,7 +122,7 @@ export default function EditSalesmanScreen() {
         }`}
       >
         <Text className="text-white text-center font-semibold">
-          {isPending ? "Updating..." : "Update Salesman"}
+          {isPending ? "Updating..." : "Update Product"}
         </Text>
       </Pressable>
     </KeyboardAvoidingView>

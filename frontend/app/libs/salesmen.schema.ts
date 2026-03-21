@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createSalesmanSchema = z.object({
+export const salesmanSchema = z.object({
   username: z.string().min(3),
   email: z.email("Invalid email"),
   password: z.string().min(8),
@@ -9,4 +9,4 @@ export const createSalesmanSchema = z.object({
   phone: z.string().optional(),
 });
 
-export type TcreateSalesmanSchema = z.infer<typeof createSalesmanSchema>;
+export type TSalesmanInput = z.infer<typeof salesmanSchema>;

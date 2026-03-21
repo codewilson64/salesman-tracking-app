@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateSalesmenById } from "../../services/Salesmen/salesmenService";
+import { updateSalesmanById } from "../../services/Salesmen/salesmenService";
 
 type FormData = {
   name: string;
@@ -17,25 +17,11 @@ export const useUpdateSalesman = () => {
     }: {
       id: string;
       data: FormData;
-    }) => updateSalesmenById(id, data),
+    }) => updateSalesmanById(id, data),
 
-    onSuccess: (updatedSalesman, variables) => {
-      const { id } = variables;
-
-      // Update detail cache instantly
-      queryClient.setQueryData(["salesman", id], updatedSalesman);
-
-      // Update list cache (important!)
-      queryClient.setQueryData(["salesmen"], (old: any) => {
-        if (!old) return old;
-
-        return old.map((item: any) =>
-          item.id === id ? { ...item, ...updatedSalesman } : item
-        );
-      });
-
-      // (optional fallback)
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["salesmen"] });
+      queryClient.invalidateQueries({ queryKey: ["salesman", variables.id] });
     },
   });
 };

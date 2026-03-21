@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createSalesmen } from "../../services/Salesmen/salesmenService";
+import { createSalesman } from "../../services/Salesmen/salesmenService";
 
 export const useCreateSalesman = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createSalesmen,
-
+    mutationFn: createSalesman,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["salesmen"] });
     },
