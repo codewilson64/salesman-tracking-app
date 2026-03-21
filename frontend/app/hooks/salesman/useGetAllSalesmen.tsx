@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getAllSalesmen } from "../services/Salesmen/salesmenService"
+import { getAllSalesmen } from "../../services/Salesmen/salesmenService"
 
 export const useGetAllSalesmen = () => {
   return useQuery({

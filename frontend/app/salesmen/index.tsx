@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useGetAllSalesmen } from "../hooks/useGetAllSalesmen";
+import { useGetAllSalesmen } from "../hooks/salesman/useGetAllSalesmen";
 
 const SalesmanScreen = () => {
   const router = useRouter()

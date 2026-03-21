@@ -1,8 +1,8 @@
 import { View, Text, ActivityIndicator, Image, Pressable, Alert } from "react-native";
 import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGetSalesmanById } from "../hooks/useGetSalesmanById";
-import { useDeleteSalesman } from "../hooks/useDeleteSalesman";
+import { useGetSalesmanById } from "../hooks/salesman/useGetSalesmanById";
+import { useDeleteSalesman } from "../hooks/salesman/useDeleteSalesman";
 
 const SalesmanDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();

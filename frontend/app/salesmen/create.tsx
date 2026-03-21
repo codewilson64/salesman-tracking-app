@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { createSalesmanSchema, TcreateSalesmanSchema } from "../libs/salesmen.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useCreateSalesman } from "../hooks/useCreateSalesmen";
+import { useCreateSalesman } from "../hooks/salesman/useCreateSalesmen";
 
 export default function CreateSalesmanScreen() {
   const {

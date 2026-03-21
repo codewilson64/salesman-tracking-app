@@ -2,8 +2,8 @@ import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-nativ
 import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useUpdateSalesman } from "../../hooks/useUpdateSalesman";
-import { useGetSalesmanById } from "../../hooks/useGetSalesmanById";
+import { useUpdateSalesman } from "../../hooks/salesman/useUpdateSalesman";
+import { useGetSalesmanById } from "../../hooks/salesman/useGetSalesmanById";
 
 type FormData = {
   name: string;

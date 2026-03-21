@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateSalesmenById } from "../services/Salesmen/salesmenService";
+import { updateSalesmenById } from "../../services/Salesmen/salesmenService";
 
 type FormData = {
   name: string;
