@@ -1,11 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProductById } from "../../services/product/productService";
+import { productSchema } from "../../libs/product.schema";
+import z from "zod";
 
-type FormData = {
-  name: string;
-  description?: string;
-  price: number;
-};
+type FormData = z.infer<typeof productSchema>;
 
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();

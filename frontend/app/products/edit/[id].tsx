@@ -4,12 +4,10 @@ import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUpdateProduct } from "../../hooks/product/useUpdateProduct";
 import { useGetProductById } from "../../hooks/product/useGetProductById";
+import { productSchema } from "../../libs/product.schema";
+import z from "zod";
 
-type FormData = {
-  name: string;
-  description?: string;
-  price: number;
-};
+type FormData = z.infer<typeof productSchema>;
 
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

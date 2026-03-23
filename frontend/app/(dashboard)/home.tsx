@@ -18,6 +18,7 @@ const Home = () => {
   const menuItems = [
     { name: "Salesmen Staff", route: "/salesmen" },
     { name: "Products", route: "/products" },
+    { name: "Areas", route: "/areas" },
     { name: "Customers", route: "/customers" },
   ];
 

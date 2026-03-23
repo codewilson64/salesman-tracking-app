@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import authRoute from './routes/auth.route.js'
 import salesmanRoute from './routes/salesman.route.js'
 import productRoute from './routes/product.route.js'
+import areaRoute from './routes/area.route.js'
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(cors())
 app.use('/api/auth', authRoute)
 app.use('/api/salesmen', salesmanRoute)
 app.use('/api/products', productRoute)
+app.use('/api/areas', areaRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");
