@@ -21,7 +21,7 @@ export default function EditSalesmanScreen() {
     control,
     handleSubmit,
     setError,
-    formState: { isDirty },
+    formState: { isDirty, errors },
     reset,
   } = useForm<FormData>();
 
@@ -125,6 +125,13 @@ export default function EditSalesmanScreen() {
           {isPending ? "Updating..." : "Update Salesman"}
         </Text>
       </Pressable>
+
+      {/* GLOBAL ERROR */}
+        {errors.root && (
+          <Text className="text-red-500 text-center mt-4">
+            {errors.root.message}
+          </Text>
+      )}
     </KeyboardAvoidingView>
   );
 }

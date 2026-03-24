@@ -6,6 +6,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
 
 const Home = () => {
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
   const logout = useAuthStore((state) => state.logout)
@@ -16,18 +17,22 @@ const Home = () => {
   };
 
   const menuItems = [
-    { name: "Salesmen Staff", route: "/salesmen" },
-    { name: "Products", route: "/products" },
-    { name: "Areas", route: "/areas" },
-    { name: "Customers", route: "/customers" },
+    { name: "Salesmen Staff", route: "/salesmen", roles: ["owner"] },
+    { name: "Products", route: "/products", roles: ["owner"] },
+    { name: "Areas", route: "/areas", roles: ["owner", "salesman"] },
+    { name: "Customers", route: "/customers", roles: ["owner", "salesman"] },
   ];
+
+  const filteredMenu = menuItems.filter((item) =>
+    item.roles.includes(user?.role || "")
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Navbar onLogout={handleLogout} />
 
       <View className="p-4">
-        {menuItems.map((item) => (
+        {filteredMenu.map((item) => (
            <TouchableOpacity
             key={item.name}
             onPress={() => router.push(item.route)}

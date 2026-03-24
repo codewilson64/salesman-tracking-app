@@ -7,7 +7,6 @@ export const usersTable = pgTable("users", {
   companyId: uuid("company_id")
     .references(() => companiesTable.id)
     .notNull(),
-  username: varchar("username", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   role: roleEnum("role").default("salesman").notNull(),

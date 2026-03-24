@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import validator from "validator";
@@ -9,13 +8,13 @@ import { usersTable } from "../db/schemas/users.js";
 import { companiesTable } from "../db/schemas/companies.js";
 
 export const signup = async (req: Request, res: Response) => {
-  const { username, email, password, companyName } = req.body;
+  const { email, password, companyName } = req.body;
 
   try {
     // Validate fields
-    if (!username || !email || !password || !companyName) {
+    if (!email || !password || !companyName) {
       return res.status(400).json({
-        error: "Username, email, password, and companyName are required",
+        error: "Email, password, and companyName are required",
       });
     }
 
@@ -35,16 +34,6 @@ export const signup = async (req: Request, res: Response) => {
 
     if (emailExists.length > 0) {
       return res.status(400).json({ error: "Email already exists" });
-    }
-
-    // Check username existence
-    const usernameExists = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.username, username));
-
-    if (usernameExists.length > 0) {
-      return res.status(400).json({ error: "Username already exists" });
     }
 
     // Hash password
@@ -67,7 +56,6 @@ export const signup = async (req: Request, res: Response) => {
       const [user] = await tx
         .insert(usersTable)
         .values({
-          username,
           email,
           password: hash,
           role: "owner", 
@@ -89,7 +77,6 @@ export const signup = async (req: Request, res: Response) => {
       message: "Signup successful",
       user: {
         id: user.id,
-        username: user.username,
         email: user.email,
         role: user.role,
         companyId: user.companyId,
@@ -141,7 +128,6 @@ export const login = async (req: Request, res: Response) => {
       message: "Login successful",
       user: {
         id: user.id,
-        username: user.username,
         email: user.email,
         role: user.role,           
         companyId: user.companyId, 

@@ -33,7 +33,7 @@ export default function CreateSalesmanScreen() {
       className="flex-1 bg-white"
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
+      >
       <SafeAreaView>
         <ScrollView 
           contentContainerStyle={{ padding: 24 }}
@@ -45,12 +45,12 @@ export default function CreateSalesmanScreen() {
           </Text>
 
           <View className="gap-y-6">
-            {/* USERNAME */}
+            {/* NAME */}
             <View>
-              <Text className="mb-3 text-gray-700">Username</Text>
+              <Text className="mb-3 text-gray-700">Full Name</Text>
               <Controller
                 control={control}
-                name="username"
+                name="name"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     value={value}
@@ -59,9 +59,9 @@ export default function CreateSalesmanScreen() {
                   />
                 )}
               />
-              {errors.username && (
+              {errors.name && (
                 <Text className="text-red-500 mt-1">
-                  {errors.username.message}
+                  {errors.name.message}
                 </Text>
               )}
             </View>
@@ -107,27 +107,6 @@ export default function CreateSalesmanScreen() {
               {errors.password && (
                 <Text className="text-red-500 mt-1">
                   {errors.password.message}
-                </Text>
-              )}
-            </View>
-
-            {/* NAME */}
-            <View>
-              <Text className="mb-3 text-gray-700">Full Name</Text>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.name && (
-                <Text className="text-red-500 mt-1">
-                  {errors.name.message}
                 </Text>
               )}
             </View>

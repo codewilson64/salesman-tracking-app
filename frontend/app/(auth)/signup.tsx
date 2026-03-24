@@ -26,7 +26,7 @@ export default function SignupScreen() {
     } 
     catch (error: any) {
       console.error(error.response.data);
-      const message = error.response.data.error || "An error occurred";
+      const message = error?.response?.data?.error || "An error occurred";
 
       setError("root", { type: "server", message });
     }
@@ -38,22 +38,6 @@ export default function SignupScreen() {
 
       <Controller
         control={control}
-        name="username"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Username"
-            value={value}
-            onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-2"
-          />
-        )}
-      />
-      {errors.username && (
-        <Text className="text-red-500 mb-3">{errors.username.message}</Text>
-      )}
-
-      <Controller
-        control={control}
         name="email"
         render={({ field: { onChange, value } }) => (
           <TextInput
@@ -61,7 +45,7 @@ export default function SignupScreen() {
             autoCapitalize="none"
             value={value}
             onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-2"
+            className="border border-gray-300 rounded-lg p-4 mb-4"
           />
         )}
       />

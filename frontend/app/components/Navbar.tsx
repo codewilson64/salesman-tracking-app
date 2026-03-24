@@ -1,14 +1,17 @@
 import { View, Text, Pressable } from "react-native";
 import React from "react";
+import { useAuthStore } from "../stores/authStore";
 
 type NavbarProps = {
   onLogout: () => void;
 };
 
 const Navbar = ({ onLogout }: NavbarProps) => {
+  const user = useAuthStore((state) => state.user);
+
   return (
     <View className="h-14 bg-white flex-row items-center justify-between px-4">
-      <Text className="text-lg font-bold">Home</Text>
+      <Text className="text-lg font-bold">{user?.email} ({user?.role})</Text>
 
       <Pressable
         onPress={onLogout}

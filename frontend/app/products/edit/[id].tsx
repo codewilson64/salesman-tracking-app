@@ -19,7 +19,7 @@ export default function EditProductScreen() {
     control,
     handleSubmit,
     setError,
-    formState: { isDirty },
+    formState: { isDirty, errors },
     reset,
   } = useForm<FormData>();
 
@@ -123,6 +123,13 @@ export default function EditProductScreen() {
           {isPending ? "Updating..." : "Update Product"}
         </Text>
       </Pressable>
+
+      {/* GLOBAL ERROR */}
+        {errors.root && (
+          <Text className="text-red-500 text-center mt-4">
+            {errors.root.message}
+          </Text>
+      )}
     </KeyboardAvoidingView>
   );
 }

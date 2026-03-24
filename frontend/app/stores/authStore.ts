@@ -7,7 +7,6 @@ import { TloginSchema, TsignUpSchema } from "../libs/auth.schema";
 
 type User = {
   id: string;
-  username: string;
   email: string;
   role: string;
   companyId: string;
@@ -37,7 +36,8 @@ export const useAuthStore = create<AuthState>()(
             accessToken: res.accessToken,
           });
         } catch (error: any) {
-          throw error.response?.data?.message || "Login failed";
+          console.log("LOGIN ERROR:", error);
+          throw error;
         }
       },
 
@@ -51,7 +51,8 @@ export const useAuthStore = create<AuthState>()(
             accessToken: res.accessToken,
           });
         } catch (error: any) {
-          throw error.response?.data?.message || "Sign up failed";
+          console.log("SIGNUP ERROR:", error);
+          throw error;
         }
       },
 

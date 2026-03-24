@@ -46,7 +46,7 @@ export default function LoginScreen() {
             autoCapitalize="none"
             value={value}
             onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-2"
+            className="border border-gray-300 rounded-lg p-4 mb-4"
           />
         )}
       />

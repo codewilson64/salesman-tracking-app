@@ -9,7 +9,7 @@ import { salesmenTable } from "../db/schemas/salesmen.js";
 
 export const createSalesmen = async (req: Request, res: Response) => {
   try {
-    const { username, email, password, name, address, phone } = req.body;
+    const { email, password, name, address, phone } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -25,7 +25,7 @@ export const createSalesmen = async (req: Request, res: Response) => {
 
     const companyId = user.companyId;
 
-    if (!username || !email || !password || !name) {
+    if (!email || !password || !name) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -38,7 +38,6 @@ export const createSalesmen = async (req: Request, res: Response) => {
       const [user] = await tx
         .insert(usersTable)
         .values({
-          username,
           email,
           password: hashedPassword,
           role: "salesman",
@@ -93,7 +92,6 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
         address: salesmenTable.address,
         phone: salesmenTable.phone,
         userId: usersTable.id,
-        username: usersTable.username,
         email: usersTable.email,
         role: usersTable.role,
       })
@@ -131,7 +129,6 @@ export const getSalesmenById = async (req: Request, res: Response) => {
         name: salesmenTable.name,
         address: salesmenTable.address,
         phone: salesmenTable.phone,
-        username: usersTable.username,
         email: usersTable.email,
         role: usersTable.role,
       })
