@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Image, Pressable, Alert } from "react-native";
+import { View, Text, ActivityIndicator, Pressable, Alert } from "react-native";
 import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetAreaById } from "../hooks/area/useGetAreaById";
@@ -26,10 +26,11 @@ const AreaDetail = () => {
             try {
               await deleteArea(id);
               router.back();
-            } catch (err) {
-              console.error(err);
+            } catch (err: any) {
+              const message = err?.response?.data?.message || "Failed to delete area";
+              Alert.alert("Delete Failed", message);
             }
-          },
+          }
         },
       ]
     );

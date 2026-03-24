@@ -13,6 +13,7 @@ const RootLayout = () => {
             <Stack.Screen name="salesmen" options={{ headerShown: false }}/>
             <Stack.Screen name="products" options={{ headerShown: false }}/>
             <Stack.Screen name="areas" options={{ headerShown: false }}/>
+            <Stack.Screen name="customers" options={{ headerShown: false }}/>
         </Stack>
       </QueryClientProvider>
     )

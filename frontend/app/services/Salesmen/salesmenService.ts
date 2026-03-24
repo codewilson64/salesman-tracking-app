@@ -1,11 +1,8 @@
 import { api } from "../../libs/axios";
-import { TSalesmanInput } from "../../libs/salesmen.schema";
+import { salesmanSchema, TSalesmanInput } from "../../libs/salesmen.schema";
+import z from "zod";
 
-type FormData = {
-  name: string;
-  address?: string;
-  phone?: string;
-};
+type FormData = Partial<z.infer<typeof salesmanSchema>>;
 
 export const createSalesman = async (data: TSalesmanInput) => {
   const res = await api.post("/salesmen", data)
@@ -22,10 +19,7 @@ export const getSalesmanById = async (id: string) => {
   return res.data.data
 }
 
-export const updateSalesmanById = async (
-  id: string,
-  data: FormData
-) => {
+export const updateSalesmanById = async (id: string, data: FormData) => {
   const res = await api.put(`/salesmen/${id}`, data);
   return res.data.data;
 };

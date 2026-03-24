@@ -1,11 +1,8 @@
 import { api } from "../../libs/axios";
-import { TProductInput } from "../../libs/product.schema";
+import { productSchema, TProductInput } from "../../libs/product.schema";
+import z from "zod";
 
-type UpdateProductInput = {
-  name: string;
-  description?: string;
-  price: number;
-};
+type FormData = Partial<z.infer<typeof productSchema>>;
 
 // CREATE
 export const createProduct = async (data: TProductInput) => {
@@ -26,10 +23,7 @@ export const getProductById = async (id: string) => {
 };
 
 // UPDATE
-export const updateProductById = async (
-  id: string,
-  data: UpdateProductInput
-) => {
+export const updateProductById = async (id: string, data: FormData) => {
   const res = await api.put(`/products/${id}`, data);
   return res.data.data;
 };

@@ -3,6 +3,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "..";
 import { salesmenTable } from "../db/schemas";
 import { areasTable } from "../db/schemas/areas";
+import { customersTable } from "../db/schemas/customers";
 
 export const createArea = async (req: Request, res: Response) => {
   try {
@@ -282,7 +283,8 @@ export const deleteArea = async (req: Request, res: Response) => {
       role: string;
     };
 
-    const result = await db.transaction(async (tx) => {
+    await db.transaction(async (tx) => {
+      // 1. Check area exists & belongs to company
       const [area] = await tx
         .select()
         .from(areasTable)
@@ -297,12 +299,20 @@ export const deleteArea = async (req: Request, res: Response) => {
         throw new Error("NOT_FOUND");
       }
 
-      // delete area
+      // 2. Check if area is used by customers
+      const [customer] = await tx
+        .select()
+        .from(customersTable)
+        .where(eq(customersTable.areaId, id));
+
+      if (customer) {
+        throw new Error("AREA_IN_USE");
+      }
+
+      // 3. Safe to delete
       await tx
         .delete(areasTable)
         .where(eq(areasTable.id, id));
-
-      return true;
     });
 
     return res.status(200).json({
@@ -315,6 +325,12 @@ export const deleteArea = async (req: Request, res: Response) => {
     if (error.message === "NOT_FOUND") {
       return res.status(404).json({
         message: "Area not found",
+      });
+    }
+
+    if (error.message === "AREA_IN_USE") {
+      return res.status(400).json({
+        message: "Cannot delete area because it still has customers",
       });
     }
 

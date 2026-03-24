@@ -19,10 +19,7 @@ export const getAreaById = async (id: string) => {
   return res.data.data
 }
 
-export const updateAreaById = async (
-  id: string,
-  data: FormData
-) => {
+export const updateAreaById = async (id: string, data: FormData) => {
   const res = await api.put(`/areas/${id}`, data);
   return res.data.data;
 };
