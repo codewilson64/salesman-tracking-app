@@ -84,6 +84,7 @@ export const createVisit = async (req: Request, res: Response) => {
         salesmanId: user.userId,
         areaId,
         customerId,
+        status: "check-in",
       })
       .returning();
 
@@ -141,7 +142,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       .where(
         and(
           eq(visitsTable.salesmanId, user.userId),
-          isNull(visitsTable.checkOutAt)
+          eq(visitsTable.status, "check-in")
         )
       );
 
@@ -158,6 +159,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
         visitResult: result,
         notes: notes,
         checkOutAt: new Date(),
+        status: "check-out",
       })
       .where(eq(visitsTable.id, activeVisit.id))
       .returning();
@@ -191,6 +193,31 @@ export const getAllVisits = async (req: Request, res: Response) => {
       });
     }
 
+    let condition;
+
+    /* ================= CONDITION ================= */
+
+    if (user.role === "salesman") {
+      // 🔥 map userId → salesmanId
+      const [salesman] = await db
+        .select()
+        .from(salesmenTable)
+        .where(eq(salesmenTable.userId, user.userId));
+
+      if (!salesman) {
+        return res.status(400).json({ message: "Salesman not found" });
+      }
+
+      condition = and(
+        eq(visitsTable.companyId, user.companyId),
+        eq(visitsTable.salesmanId, user.userId) // ✅ direct filter
+      );
+    } else {
+      condition = eq(visitsTable.companyId, user.companyId);
+    }
+
+    /* ================= QUERY ================= */
+
     const visits = await db
       .select({
         // visit info
@@ -220,7 +247,7 @@ export const getAllVisits = async (req: Request, res: Response) => {
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
       .leftJoin(areasTable, eq(visitsTable.areaId, areasTable.id))
       .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.id))
-      .where(eq(visitsTable.companyId, user.companyId));
+      .where(condition);
 
     return res.status(200).json({
       message: "Visits fetched successfully",
@@ -259,6 +286,7 @@ export const getVisitById = async (req: Request, res: Response) => {
         id: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
         checkOutAt: visitsTable.checkOutAt,
+        status: visitsTable.status,
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
         createdAt: visitsTable.createdAt,

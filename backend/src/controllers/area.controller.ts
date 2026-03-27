@@ -104,6 +104,30 @@ export const getAllAreas = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
+    let condition;
+
+    /* ================= CONDITION ================= */
+
+    if (user.role === "salesman") {
+      const [salesman] = await db
+        .select()
+        .from(salesmenTable)
+        .where(eq(salesmenTable.userId, user.userId));
+
+      if (!salesman) {
+        return res.status(400).json({ message: "Salesman not found" });
+      }
+
+      condition = and(
+        eq(areasTable.companyId, user.companyId),
+        eq(areasTable.salesmanId, salesman.id)
+      );
+    } else {
+      condition = eq(areasTable.companyId, user.companyId);
+    }
+
+    /* ================= QUERY ================= */
+
     const areas = await db
       .select({
         id: areasTable.id,
@@ -114,12 +138,13 @@ export const getAllAreas = async (req: Request, res: Response) => {
       })
       .from(areasTable)
       .innerJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))
-      .where(eq(areasTable.companyId, user.companyId));
+      .where(condition);
 
     return res.status(200).json({
       message: "Areas fetched successfully",
       data: areas,
     });
+
   } catch (error) {
     console.error(error);
 

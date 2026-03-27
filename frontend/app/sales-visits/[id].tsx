@@ -92,6 +92,16 @@ const VisitDetail = () => {
 
       {/* Info */}
       <View className="mt-4">
+        {/* Status */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Status</Text>
+            <Text className="text-lg font-medium">
+              {visit.status}
+            </Text>
+          </View>
+        </View>
+
         {/* Shop Name */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>

@@ -115,7 +115,7 @@ const OwnerVisitScreen = () => {
             </View>
 
             {/* RESULT BADGE */}
-            {item.visitResult && (
+            {item.visitResult ? (
               <View
                 className={`mt-1 self-start px-2 py-1 rounded ${getResultStyle(
                   item.visitResult
@@ -125,7 +125,15 @@ const OwnerVisitScreen = () => {
                   {item.visitResult}
                 </Text>
               </View>
-            )}
+            ): <View
+                className={`mt-1 self-start px-2 py-1 rounded ${getResultStyle(
+                  item.visitResult
+                )}`}
+              >
+                <Text className="text-xs font-semibold capitalize">
+                  Checking in...
+                </Text>
+              </View>}
           </Pressable>
         )}
       />

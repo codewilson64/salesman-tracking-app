@@ -10,6 +10,11 @@ export const visitResultEnum = pgEnum("visit_result_enum", [
   "shop closed",
 ]);
 
+export const visitStatusEnum = pgEnum("visit_status", [
+  "check-in",
+  "check-out",
+]);
+
 export const visitsTable = pgTable("visits", {
   id: uuid("id").defaultRandom().primaryKey(),
   companyId: uuid("company_id")
@@ -24,6 +29,7 @@ export const visitsTable = pgTable("visits", {
   customerId: uuid("customer_id")
     .references(() => customersTable.id)
     .notNull(),
+  status: visitStatusEnum("status").default("check-in").notNull(),
   checkInAt: timestamp("check_in_at").defaultNow().notNull(),
   checkOutAt: timestamp("check_out_at"),
   visitResult: visitResultEnum("visit_result"),

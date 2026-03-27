@@ -88,6 +88,31 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       });
     }
 
+    let condition;
+
+    /* ================= CONDITION ================= */
+
+    if (user.role === "salesman") {
+      // 🔥 map userId → salesmanId
+      const [salesman] = await db
+        .select()
+        .from(salesmenTable)
+        .where(eq(salesmenTable.userId, user.userId));
+
+      if (!salesman) {
+        return res.status(400).json({ message: "Salesman not found" });
+      }
+
+      condition = and(
+        eq(customersTable.companyId, user.companyId),
+        eq(areasTable.salesmanId, salesman.id) // ✅ filter via area
+      );
+    } else {
+      condition = eq(customersTable.companyId, user.companyId);
+    }
+
+    /* ================= QUERY ================= */
+
     const customers = await db
       .select({
         id: customersTable.id,
@@ -103,14 +128,14 @@ export const getAllCustomers = async (req: Request, res: Response) => {
         areaName: areasTable.name,
         city: areasTable.city,
 
-        // salesman info (derived from area)
+        // salesman info
         salesmanId: salesmenTable.id,
         salesmanName: salesmenTable.name,
       })
       .from(customersTable)
       .leftJoin(areasTable, eq(customersTable.areaId, areasTable.id))
       .leftJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))
-      .where(eq(customersTable.companyId, user.companyId));
+      .where(condition);
 
     return res.status(200).json({
       message: "Customers fetched successfully",
