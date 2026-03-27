@@ -18,7 +18,7 @@ type Customer = {
   id: string;
   shopName: string;
   address: string;
-  salesmanName: string;
+  salesmanName: string | null;
 };
 
 type GroupedCustomer = {
@@ -35,7 +35,7 @@ const CustomerScreen = () => {
   const groupedCustomers: GroupedCustomer[] = Object.values(
     (customers as Customer[]).reduce<Record<string, GroupedCustomer>>(
       (acc, customer) => {
-        const key = customer.salesmanName;
+        const key = customer.salesmanName || "No Salesman";
 
         if (!acc[key]) {
           acc[key] = {

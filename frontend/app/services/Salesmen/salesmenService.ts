@@ -20,7 +20,7 @@ export const getSalesmanById = async (id: string) => {
 }
 
 export const updateSalesmanById = async (id: string, data: FormData) => {
-  const res = await api.put(`/salesmen/${id}`, data);
+  const res = await api.patch(`/salesmen/${id}`, data);
   return res.data.data;
 };
 

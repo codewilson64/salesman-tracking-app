@@ -21,6 +21,8 @@ const Home = () => {
     { name: "Products", route: "/products", roles: ["owner"] },
     { name: "Areas", route: "/areas", roles: ["owner", "salesman"] },
     { name: "Customers", route: "/customers", roles: ["owner", "salesman"] },
+    { name: "Visits", route: "/visits", roles: ["salesman"] },
+    { name: "Sales visits", route: "/sales-visits", roles: ["owner"] },
   ];
 
   const filteredMenu = menuItems.filter((item) =>

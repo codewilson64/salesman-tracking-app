@@ -340,3 +340,70 @@ export const deleteArea = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getCustomersByArea = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (!user?.companyId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Area ID is required",
+      });
+    }
+
+    const customers = await db
+      .select({
+        // customer info
+        id: customersTable.id,
+        customerName: customersTable.customerName,
+        shopName: customersTable.shopName,
+        phone: customersTable.phone,
+        address: customersTable.address,
+        description: customersTable.description,
+        createdAt: customersTable.createdAt,
+
+        // area info
+        areaId: areasTable.id,
+        areaName: areasTable.name,
+        city: areasTable.city,
+
+        // salesman info
+        salesmanId: salesmenTable.id,
+        salesmanName: salesmenTable.name,
+      })
+      .from(customersTable)
+      .leftJoin(areasTable, eq(customersTable.areaId, areasTable.id))
+      .leftJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))
+      .where(
+        and(
+          eq(customersTable.companyId, user.companyId),
+          eq(customersTable.areaId, id)
+        )
+      );
+
+    return res.status(200).json({
+      message: "Customers fetched successfully",
+      data: customers,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to fetch customers",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};

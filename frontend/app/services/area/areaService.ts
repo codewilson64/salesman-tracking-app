@@ -20,11 +20,16 @@ export const getAreaById = async (id: string) => {
 }
 
 export const updateAreaById = async (id: string, data: FormData) => {
-  const res = await api.put(`/areas/${id}`, data);
+  const res = await api.patch(`/areas/${id}`, data);
   return res.data.data;
 };
 
 export const deleteAreaById = async (id: string) => {
   const res = await api.delete(`/areas/${id}`)
   return res.data
+}
+
+export const getCustomersByArea = async (id: string) => {
+  const res = await api.get(`/areas/${id}/customers`);
+  return res.data.data
 }

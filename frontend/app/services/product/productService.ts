@@ -24,7 +24,7 @@ export const getProductById = async (id: string) => {
 
 // UPDATE
 export const updateProductById = async (id: string, data: FormData) => {
-  const res = await api.put(`/products/${id}`, data);
+  const res = await api.patch(`/products/${id}`, data);
   return res.data.data;
 };
 

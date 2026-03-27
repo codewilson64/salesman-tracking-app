@@ -12,46 +12,58 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { z } from "zod";
-import { customerSchema } from "../libs/customer.schema";
-import { useCreateCustomer } from "../hooks/customer/useCreateCustomer";
+import { visitSchema } from "../libs/visit.schema";
+import { useCreateVisit } from "../hooks/visit/useCreateVisit";
 import { useGetAllArea } from "../hooks/area/useGetAllAreas";
+import { useGetCustomersByArea } from "../hooks/area/useGetCustomersByArea";
 
-import { FormInput } from "../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 
 /* ================= TYPES ================= */
 
-type FormData = z.infer<typeof customerSchema>;
+type FormData = z.infer<typeof visitSchema>;
 
 type Area = {
   id: string;
   areaName: string;
-  salesmanName: string;
+};
+
+type Customer = {
+  id: string;
+  shopName: string;
+  address: string;
 };
 
 /* ================= SCREEN ================= */
 
-export default function CreateCustomerScreen() {
+export default function CreateVisitScreen() {
   const {
     control,
     handleSubmit,
     setError,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(customerSchema),
+    resolver: zodResolver(visitSchema),
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateCustomer();
+  const { mutateAsync, isPending } = useCreateVisit();
   const { data: areas } = useGetAllArea();
 
-  /* ================= WATCH AREA ================= */
+  /* ================= WATCH ================= */
 
   const selectedAreaId = watch("areaId");
+  const selectedCustomerId = watch("customerId");
 
-  const selectedArea: Area | undefined = areas?.find(
-    (a: Area) => a.id === selectedAreaId
+  /* ================= FETCH CUSTOMERS ================= */
+
+  const { data: customers = [] } = useGetCustomersByArea(selectedAreaId);
+  console.log("customers by area:", customers);
+
+  const selectedCustomer: Customer | undefined = customers.find(
+    (c: Customer) => c.id === selectedCustomerId
   );
 
   /* ================= SUBMIT ================= */
@@ -61,7 +73,7 @@ export default function CreateCustomerScreen() {
       await mutateAsync(data);
       router.back();
     } catch (err: any) {
-      setError("root", { message: "Create failed" });
+      setError("root", { message: "Create visit failed" });
     }
   };
 
@@ -80,7 +92,7 @@ export default function CreateCustomerScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Text className="text-3xl font-bold mb-8 text-center">
-            Create Customer
+            Create Visit
           </Text>
 
           <View className="gap-y-6">
@@ -97,53 +109,37 @@ export default function CreateCustomerScreen() {
               }
               getLabel={(item: any) => item.name}
               errors={errors}
+              onChangeExtra={() => {
+                // reset customer when area changes
+                setValue("customerId", "");
+              }}
             />
 
-            {/* AUTO-DERIVED SALESMAN */}
+            {/* CUSTOMER SELECT */}
+            <FormSelectModal
+              control={control}
+              name="customerId"
+              label="Customer"
+              options={
+                customers?.map((c: Customer) => ({
+                  value: c.id,
+                  name: c.shopName,
+                })) || []
+              }
+              getLabel={(item: any) => item.name}
+              errors={errors}
+              disabled={!selectedAreaId}
+            />
+
+            {/* AUTO-FILL ADDRESS */}
             <View>
-              <Text className="mb-2">Salesman</Text>
+              <Text className="mb-2">Address</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
-                <Text className="text-gray-700 capitalize">
-                  {selectedArea?.salesmanName || "Select area first"}
+                <Text className="text-gray-700">
+                  {selectedCustomer?.address || "Select customer first"}
                 </Text>
               </View>
             </View>
-
-            {/* INPUTS */}
-            <FormInput
-              control={control}
-              name="customerName"
-              label="Customer Name"
-              errors={errors}
-            />
-
-            <FormInput
-              control={control}
-              name="shopName"
-              label="Shop Name"
-              errors={errors}
-            />
-
-            <FormInput
-              control={control}
-              name="phone"
-              label="Phone"
-              errors={errors}
-            />
-
-            <FormInput
-              control={control}
-              name="address"
-              label="Address"
-              errors={errors}
-            />
-
-            <FormInput
-              control={control}
-              name="description"
-              label="Description"
-              errors={errors}
-            />
           </View>
 
           {/* SUBMIT */}
@@ -153,7 +149,7 @@ export default function CreateCustomerScreen() {
             className="bg-black rounded-lg p-4 mt-8"
           >
             <Text className="text-white text-center font-semibold">
-              {isPending ? "Creating..." : "Create Customer"}
+              {isPending ? "Checking in..." : "Check In"}
             </Text>
           </Pressable>
 

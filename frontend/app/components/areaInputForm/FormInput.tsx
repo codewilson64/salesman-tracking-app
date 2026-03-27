@@ -4,7 +4,7 @@ import { Controller } from "react-hook-form";
 export const FormInput = ({ control, name, label, errors }: any) => {
   return (
     <View>
-      <Text className="mb-3 text-gray-700">{label}</Text>
+      <Text className="mb-3">{label}</Text>
 
       <Controller
         control={control}

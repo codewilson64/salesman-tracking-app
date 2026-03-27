@@ -35,7 +35,7 @@ export const FormSelectModal = ({
 
         return (
           <View>
-            <Text className="mb-3 text-gray-700">{label}</Text>
+            <Text className="mb-3">{label}</Text>
 
             <Pressable
               onPress={() => setVisible(true)}
