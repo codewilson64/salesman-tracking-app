@@ -11,6 +11,7 @@ export const salesmanSchema = z.object({
   address: z.string().optional(),
   phone: z.string().optional(),
   profileImage: z.url().optional(),
+  profileImageId: z.string().optional(),
 });
 
 export type TSalesmanInput = z.infer<typeof salesmanSchema>;

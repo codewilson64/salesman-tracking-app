@@ -57,9 +57,11 @@ const SalesmanDetail = () => {
       <View className="items-center mb-6">
         <Image
           source={{
-            uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              salesman.name
-            )}&size=128`,
+            uri: salesman.profileImage
+              ? salesman.profileImage
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  salesman.name
+                )}&size=128`,
           }}
           className="w-32 h-32 rounded-full mb-4"
         />

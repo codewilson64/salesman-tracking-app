@@ -92,6 +92,8 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
         name: salesmenTable.name,
         address: salesmenTable.address,
         phone: salesmenTable.phone,
+        profileImage: salesmenTable.profileImage,
+
         userId: usersTable.id,
         email: usersTable.email,
         role: usersTable.role,
@@ -130,6 +132,9 @@ export const getSalesmenById = async (req: Request, res: Response) => {
         name: salesmenTable.name,
         address: salesmenTable.address,
         phone: salesmenTable.phone,
+        profileImage: salesmenTable.profileImage,
+        profileImageId: salesmenTable.profileImageId,
+
         email: usersTable.email,
         role: usersTable.role,
       })
@@ -166,7 +171,7 @@ export const getSalesmenById = async (req: Request, res: Response) => {
 export const updateSalesmen = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, address, phone } = req.body;
+    const { name, address, phone, profileImage, profileImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -180,6 +185,8 @@ export const updateSalesmen = async (req: Request, res: Response) => {
         name,
         address,
         phone,
+        profileImage,
+        profileImageId,
       })
       .where(
         and(

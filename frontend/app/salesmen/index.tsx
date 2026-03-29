@@ -39,9 +39,11 @@ const SalesmanScreen = () => {
           >
             <Image
               source={{
-                uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  item.name
-                )}&background=random&size=64`,
+                uri: item.profileImage
+                  ? item.profileImage
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      item.name
+                    )}&background=random&size=64`,
               }}
               className="w-16 h-16 rounded-full mr-4"
             />

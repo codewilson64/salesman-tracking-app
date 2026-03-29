@@ -1,22 +1,21 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUpdateSalesman } from "../../hooks/salesman/useUpdateSalesman";
 import { useGetSalesmanById } from "../../hooks/salesman/useGetSalesmanById";
+import { salesmanSchema } from "../../libs/salesmen.schema";
+import z from "zod";
+import { pickImageFromLibrary } from "../../utils/pickImage";
 
-type FormData = {
-  name: string;
-  address?: string;
-  phone?: string;
-};
+type FormData = z.infer<typeof salesmanSchema>;
 
 export default function EditSalesmanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { mutateAsync, isPending } = useUpdateSalesman();
-  const { data, isLoading } = useGetSalesmanById(id);
-
+  const { data: salesman, isLoading } = useGetSalesmanById(id);
+  
   const {
     control,
     handleSubmit,
@@ -24,20 +23,28 @@ export default function EditSalesmanScreen() {
     formState: { isDirty, errors },
     reset,
   } = useForm<FormData>();
+  
+  const [image, setImage] = useState<string | null>(null);
+  const isDisabled = (!isDirty && !image) || isPending;
+
+  const pickImage = async () => {
+      const uri = await pickImageFromLibrary();
+      if (uri) setImage(uri);
+    };
 
   useEffect(() => {
-    if (data) {
+    if (salesman) {
       reset({
-        name: data.name ?? "",
-        address: data.address ?? "",
-        phone: data.phone ?? "",
+        name: salesman.name ?? "",
+        address: salesman.address ?? "",
+        phone: salesman.phone ?? "",
       });
     }
-  }, [data, reset]);
+  }, [salesman, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync({ id, data });
+      await mutateAsync({ id, data, image, oldImageId: salesman?.profileImageId });
       router.back();
     } catch (err: any) {
       setError("root", { message: "Update failed" });
@@ -61,6 +68,24 @@ export default function EditSalesmanScreen() {
       <Text className="text-3xl font-bold mb-8 text-center">
         Edit Salesman
       </Text>
+
+      <View className="items-center mb-6">
+        <Pressable onPress={pickImage}>
+          <Image
+            source={{
+              uri:
+                image ||
+                salesman?.profileImage ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  salesman?.name || "User"
+                )}`,
+            }}
+            className="w-32 h-32 rounded-full"
+          />
+        </Pressable>
+
+        <Text className="text-gray-500 mt-2">Tap to change photo</Text>
+      </View>
 
       <View className="gap-y-6">
         {/* NAME */}
@@ -115,10 +140,10 @@ export default function EditSalesmanScreen() {
 
       {/* BUTTON */}
       <Pressable
-        disabled={!isDirty || isPending}
+        disabled={isDisabled}
         onPress={handleSubmit(onSubmit)}
         className={`rounded-lg p-4 mt-8 ${
-          !isDirty ? "bg-gray-400" : "bg-black"
+          isDisabled ? "bg-gray-400" : "bg-black"
         }`}
       >
         <Text className="text-white text-center font-semibold">

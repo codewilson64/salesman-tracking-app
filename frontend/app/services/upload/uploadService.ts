@@ -21,3 +21,9 @@ export const uploadImage = async (uri: string): Promise<{
     public_id: res.data.data.public_id,
   };
 };
+
+export const deleteImage = async (publicId: string) => {
+  await api.delete("/upload", {
+    params: { publicId },
+  });
+};
