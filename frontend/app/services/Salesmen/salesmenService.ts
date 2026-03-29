@@ -4,7 +4,7 @@ import z from "zod";
 
 type FormData = Partial<z.infer<typeof salesmanSchema>>;
 
-export const createSalesman = async (data: TSalesmanInput) => {
+export const createSalesman = async (data: TSalesmanInput & { profileImage?: string }) => {
   const res = await api.post("/salesmen", data)
   return res.data.data
 }

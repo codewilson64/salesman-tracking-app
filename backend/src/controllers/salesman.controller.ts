@@ -6,10 +6,9 @@ import { and, eq } from "drizzle-orm";
 import { usersTable } from "../db/schemas/users.js";
 import { salesmenTable } from "../db/schemas/salesmen.js";
 
-
 export const createSalesmen = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, address, phone } = req.body;
+    const { email, password, name, address, phone, profileImage, profileImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -56,6 +55,8 @@ export const createSalesmen = async (req: Request, res: Response) => {
           address,
           phone,
           companyId,
+          profileImage,
+          profileImageId,
         })
         .returning();
 

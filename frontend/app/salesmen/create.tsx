@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,6 +6,9 @@ import { useRouter } from "expo-router";
 import { salesmanSchema, TSalesmanInput } from "../libs/salesmen.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateSalesman } from "../hooks/salesman/useCreateSalesmen";
+import { Image } from "react-native";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import { pickImageFromLibrary } from "../utils/pickImage";
 
 export default function CreateSalesmanScreen() {
   const {
@@ -18,13 +22,21 @@ export default function CreateSalesmanScreen() {
 
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateSalesman();
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    const uri = await pickImageFromLibrary();
+    if (uri) setImage(uri);
+  };
 
   const onSubmit = async (data: TSalesmanInput) => {
     try {
-      await mutateAsync(data);
+      await mutateAsync({ data, image });
       router.back();
     } catch (err: any) {
-      setError("root", { message: "Create failed" });
+      setError("root", {
+        message: err?.response?.data?.message || "Create failed",
+      });
     }
   };
 
@@ -143,7 +155,43 @@ export default function CreateSalesmanScreen() {
                 )}
               />
             </View>
-          </View>
+            
+            {/* IMAGE */}
+            <View>
+              <Text className="mb-3 text-gray-700">Photo</Text>
+                <Pressable
+                  onPress={pickImage}
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                >
+                  {image ? (
+                    <>
+                      {/* IMAGE */}
+                      <Image
+                        source={{ uri: image }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+
+                      {/* ❌ REMOVE BUTTON */}
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setImage(null);
+                        }}
+                        className="absolute top-2 right-2"
+                      >
+                        <FontAwesome6 name="xmark" size={18} color="white" />
+                      </Pressable>
+                    </>
+                  ) : (
+                    <View className="items-center gap-y-2">
+                      <FontAwesome6 name="image-portrait" size={32} color="gray" />
+                      <Text className="text-gray-500">Pick Profile Image</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
+            </View>
 
             <Pressable
               onPress={handleSubmit(onSubmit)}
