@@ -17,8 +17,13 @@ export const useCreateSalesman = () => {
       let imageData: { url: string; public_id: string } | undefined;
 
       if (image) {
-        console.log("Uploading image...");
-        imageData = await uploadImage(image);
+        try {
+          console.log("Uploading image...");
+          imageData = await uploadImage(image, "salesmen/profile");
+        } catch (err) {
+          console.error("UPLOAD ERROR:", err);
+          throw new Error("Image upload failed");
+        }
       }
 
       return createSalesman({

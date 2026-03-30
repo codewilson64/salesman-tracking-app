@@ -1,10 +1,13 @@
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { productSchema, TProductInput } from "../libs/product.schema";
 import { useCreateProduct } from "../hooks/product/useCreateProduct";
+import { useState } from "react";
+import { pickImageFromLibrary } from "../utils/pickImage";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function CreateProductScreen() {
   const {
@@ -18,13 +21,21 @@ export default function CreateProductScreen() {
 
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateProduct();
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+      const uri = await pickImageFromLibrary();
+      if (uri) setImage(uri);
+    };
 
   const onSubmit = async (data: TProductInput) => {
     try {
-      await mutateAsync(data);
+      await mutateAsync({ data, image });
       router.back();
     } catch (err: any) {
-      setError("root", { message: "Create failed" });
+      setError("root", {
+        message: err?.response?.data?.message || "Create failed",
+      });
     }
   };
 
@@ -108,6 +119,42 @@ export default function CreateProductScreen() {
                 </Text>
               )}
             </View>
+
+            {/* IMAGE */}
+              <View>
+              <Text className="mb-3 text-gray-700">Photo</Text>
+                <Pressable
+                  onPress={pickImage}
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                >
+                  {image ? (
+                    <>
+                      {/* IMAGE */}
+                      <Image
+                        source={{ uri: image }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+
+                      {/* ❌ REMOVE BUTTON */}
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setImage(null);
+                        }}
+                        className="absolute top-2 right-2"
+                      >
+                        <FontAwesome6 name="xmark" size={18} color="white" />
+                      </Pressable>
+                    </>
+                  ) : (
+                    <View className="items-center gap-y-2">
+                      <FontAwesome6 name="image-portrait" size={32} color="gray" />
+                      <Text className="text-gray-500">Pick Product Image</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
           </View>
 
             <Pressable

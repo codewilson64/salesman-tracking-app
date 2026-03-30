@@ -1,11 +1,12 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUpdateProduct } from "../../hooks/product/useUpdateProduct";
 import { useGetProductById } from "../../hooks/product/useGetProductById";
 import { productSchema } from "../../libs/product.schema";
 import z from "zod";
+import { pickImageFromLibrary } from "../../utils/pickImage";
 
 type FormData = z.infer<typeof productSchema>;
 
@@ -13,7 +14,7 @@ export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { mutateAsync, isPending } = useUpdateProduct();
-  const { data, isLoading } = useGetProductById(id);
+  const { data: product, isLoading } = useGetProductById(id);
 
   const {
     control,
@@ -23,19 +24,27 @@ export default function EditProductScreen() {
     reset,
   } = useForm<FormData>();
 
+  const [image, setImage] = useState<string | null>(null);
+  const isDisabled = (!isDirty && !image) || isPending;
+
+  const pickImage = async () => {
+    const uri = await pickImageFromLibrary();
+    if (uri) setImage(uri);
+  };
+
   useEffect(() => {
-    if (data) {
+    if (product) {
       reset({
-        name: data.name ?? "",
-        description: data.description ?? "",
-        price: data.price ?? "",
+        name: product.name ?? "",
+        description: product.description ?? "",
+        price: product.price ?? "",
       });
     }
-  }, [data, reset]);
+  }, [product, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync({ id, data });
+      await mutateAsync({ id, data, image, oldImageId: product?.productImageId });
       router.back();
     } catch (err: any) {
       setError("root", { message: "Update failed" });
@@ -59,6 +68,24 @@ export default function EditProductScreen() {
       <Text className="text-3xl font-bold mb-8 text-center">
         Edit Product
       </Text>
+
+      <View className="items-center mb-6">
+          <Pressable onPress={pickImage}>
+            <Image
+              source={{
+                uri:
+                  image ||
+                  product?.productImage ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  product?.name || "User"
+                )}&background=random&size=64`,
+              }}
+                className="w-32 h-32 rounded-full"
+            />
+          </Pressable>
+      
+        <Text className="text-gray-500 mt-2">Tap to change photo</Text>
+      </View>
 
       <View className="gap-y-6">
         {/* NAME */}
@@ -113,10 +140,10 @@ export default function EditProductScreen() {
 
       {/* BUTTON */}
       <Pressable
-        disabled={!isDirty || isPending}
+        disabled={isDisabled}
         onPress={handleSubmit(onSubmit)}
         className={`rounded-lg p-4 mt-8 ${
-          !isDirty ? "bg-gray-400" : "bg-black"
+          isDisabled ? "bg-gray-400" : "bg-black"
         }`}
       >
         <Text className="text-white text-center font-semibold">

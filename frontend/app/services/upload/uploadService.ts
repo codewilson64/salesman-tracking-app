@@ -1,19 +1,20 @@
 import { api } from "../../libs/axios";
 
-export const uploadImage = async (uri: string): Promise<{
+export const uploadImage = async (image: string, folder: string): Promise<{
   url: string;
   public_id: string;
 }> => {
   const formData = new FormData();
 
   formData.append("image", {
-    uri,
+    uri: image,
     type: "image/jpeg",
     name: "photo.jpg",
   } as any);
 
   const res = await api.post("/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },
+    params: { folder },
   });
 
   return {

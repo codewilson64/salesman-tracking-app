@@ -157,7 +157,7 @@ export default function CreateSalesmanScreen() {
             </View>
             
             {/* IMAGE */}
-            <View>
+              <View>
               <Text className="mb-3 text-gray-700">Photo</Text>
                 <Pressable
                   onPress={pickImage}

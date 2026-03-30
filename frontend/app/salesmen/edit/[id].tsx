@@ -78,7 +78,7 @@ export default function EditSalesmanScreen() {
                 salesman?.profileImage ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
                   salesman?.name || "User"
-                )}`,
+                )}&background=random&size=64`,
             }}
             className="w-32 h-32 rounded-full"
           />

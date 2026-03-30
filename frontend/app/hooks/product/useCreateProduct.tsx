@@ -1,13 +1,37 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct } from "../../services/product/productService";
+import { TProductInput } from "../../libs/product.schema";
+import { uploadImage } from "../../services/upload/uploadService";
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createProduct,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-    },
-  });
+      mutationFn: async ({
+        data,
+        image,
+      }: {
+        data: TProductInput;
+        image?: string | null;
+      }) => {
+        let imageData: { url: string; public_id: string } | undefined;
+  
+        if (image) {
+          console.log("Uploading image...");
+          imageData = await uploadImage(image, "products");
+        }
+  
+        return createProduct({
+          ...data,
+          ...(imageData && {
+            productImage: imageData.url,
+            productImageId: imageData.public_id,
+          }),
+        });
+      },
+  
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+      },
+    });
 };

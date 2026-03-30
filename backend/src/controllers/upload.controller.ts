@@ -4,12 +4,18 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const uploadSingleImage = async (req: Request, res: Response) => {
   try {
+    const user = req.user as {
+      companyId: string;
+    };
+
     if (!req.file) {
-      res.status(400).json({ message: 'No file uploaded' });
-      return;
+      return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const result = await uploadToCloudinary(req.file.buffer, 'salesmen/profile');
+    const baseFolder = (req.query.folder as string) || "general";
+    const folder = `companies/${user.companyId}/${baseFolder}`;
+
+    const result = await uploadToCloudinary(req.file.buffer, folder);
 
     res.status(200).json({
       message: 'Image uploaded successfully',

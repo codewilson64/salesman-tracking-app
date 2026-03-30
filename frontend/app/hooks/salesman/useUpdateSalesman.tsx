@@ -24,7 +24,7 @@ export const useUpdateSalesman = () => {
       let imageData;
 
       if (image) {
-        imageData = await uploadImage(image);
+        imageData = await uploadImage(image, "salesmen/profile");
 
         if (oldImageId) {
           await deleteImage(oldImageId);

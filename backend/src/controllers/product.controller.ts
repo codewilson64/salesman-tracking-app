@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, description, price } = req.body;
+    const { name, description, price, productImage, productImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -37,6 +37,8 @@ export const createProduct = async (req: Request, res: Response) => {
         description,
         price,
         companyId,
+        productImage,
+        productImageId,
       })
       .returning();
 
@@ -75,7 +77,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
         name: productsTable.name,
         description: productsTable.description,
         price: productsTable.price,
-        createdAt: productsTable.createdAt,
+        productImage: productsTable.productImage,
       })
       .from(productsTable)
       .where(eq(productsTable.companyId, user.companyId));
@@ -111,7 +113,8 @@ export const getProductById = async (req: Request, res: Response) => {
         name: productsTable.name,
         description: productsTable.description,
         price: productsTable.price,
-        createdAt: productsTable.createdAt,
+        productImage: productsTable.productImage,
+        productImageId: productsTable.productImageId,
       })
       .from(productsTable)
       .where(
@@ -145,7 +148,7 @@ export const getProductById = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, description, price } = req.body;
+    const { name, description, price, productImage, productImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -159,6 +162,8 @@ export const updateProduct = async (req: Request, res: Response) => {
         name,
         description,
         price,
+        productImage,
+        productImageId,
       })
       .where(
         and(

@@ -57,9 +57,11 @@ const ProductDetail = () => {
       <View className="items-center mb-6">
         <Image
           source={{
-            uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              product.name
-            )}&size=128`,
+            uri: product.productImage
+              ? product.productImage
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  product.name
+                )}&size=128`,
           }}
           className="w-32 h-32 rounded-full mb-4"
         />
