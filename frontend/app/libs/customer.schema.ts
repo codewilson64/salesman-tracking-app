@@ -7,6 +7,8 @@ export const customerSchema = z.object({
   phone: z.string(),
   address: z.string(),
   description: z.string().optional(),
+  customerImage: z.url().optional(),
+  customerImageId: z.string().optional(),
 });
 
 export type TCustomerInput = z.infer<typeof customerSchema>;

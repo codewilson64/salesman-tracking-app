@@ -17,9 +17,14 @@ export const useCreateProduct = () => {
         let imageData: { url: string; public_id: string } | undefined;
   
         if (image) {
+        try {
           console.log("Uploading image...");
           imageData = await uploadImage(image, "products");
+        } catch (err) {
+          console.error("UPLOAD ERROR:", err);
+          throw new Error("Image upload failed");
         }
+      }
   
         return createProduct({
           ...data,

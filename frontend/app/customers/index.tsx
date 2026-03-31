@@ -10,36 +10,22 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetAllCustomer } from "../hooks/customer/useGetAllCustomer";
-
-
-/* ================= TYPES ================= */
-
-type Customer = {
-  id: string;
-  shopName: string;
-  address: string;
-  salesmanName: string | null;
-};
-
-type GroupedCustomer = {
-  salesmanName: string;
-  customers: Customer[];
-};
+import { Customer, GroupedCustomer } from "../types/customer";
 
 const CustomerScreen = () => {
   const router = useRouter();
   const { data: customers = [], isLoading, isError } = useGetAllCustomer();
 
-  /* ================= GROUPING ================= */
-
   const groupedCustomers: GroupedCustomer[] = Object.values(
     (customers as Customer[]).reduce<Record<string, GroupedCustomer>>(
       (acc, customer) => {
-        const key = customer.salesmanName || "No Salesman";
+        const key = customer.salesmanId
 
         if (!acc[key]) {
           acc[key] = {
-            salesmanName: key,
+            salesmanId: key,
+            salesmanName: customer.salesmanName,
+            salesmanImage: customer.salesmanImage,
             customers: [],
           };
         }
@@ -83,9 +69,11 @@ const CustomerScreen = () => {
             <View className="flex-row items-center mb-2">
               <Image
                 source={{
-                  uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    item.salesmanName
-                  )}&background=random&size=64`,
+                  uri:
+                    item.salesmanImage ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      item.salesmanName
+                    )}&background=random&size=64`,
                 }}
                 className="w-12 h-12 rounded-full mr-3"
               />

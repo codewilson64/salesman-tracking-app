@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,9 @@ import { useGetAllArea } from "../hooks/area/useGetAllAreas";
 
 import { FormInput } from "../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
+import { useState } from "react";
+import { pickImageFromLibrary } from "../utils/pickImage";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 /* ================= TYPES ================= */
 
@@ -45,6 +49,12 @@ export default function CreateCustomerScreen() {
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateCustomer();
   const { data: areas } = useGetAllArea();
+  const [image, setImage] = useState<string | null>(null);
+  
+  const pickImage = async () => {
+    const uri = await pickImageFromLibrary();
+    if (uri) setImage(uri);
+  };
 
   /* ================= WATCH AREA ================= */
 
@@ -58,10 +68,12 @@ export default function CreateCustomerScreen() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync(data);
+      await mutateAsync({ data, image });
       router.back();
     } catch (err: any) {
-      setError("root", { message: "Create failed" });
+      setError("root", {
+        message: err?.response?.data?.message || "Create failed",
+      });
     }
   };
 
@@ -144,6 +156,42 @@ export default function CreateCustomerScreen() {
               label="Description"
               errors={errors}
             />
+
+            {/* IMAGE */}
+            <View>
+              <Text className="mb-3 text-gray-700">Photo</Text>
+                <Pressable
+                  onPress={pickImage}
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                >
+                  {image ? (
+                    <>
+                      {/* IMAGE */}
+                      <Image
+                        source={{ uri: image }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+            
+                      {/* ❌ REMOVE BUTTON */}
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setImage(null);
+                        }}
+                        className="absolute top-2 right-2"
+                      >
+                        <FontAwesome6 name="xmark" size={18} color="white" />
+                      </Pressable>
+                    </>
+                  ) : (
+                    <View className="items-center gap-y-2">
+                      <FontAwesome6 name="image-portrait" size={32} color="gray" />
+                      <Text className="text-gray-500">Pick Customer Image</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
           </View>
 
           {/* SUBMIT */}

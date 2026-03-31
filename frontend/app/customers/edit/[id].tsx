@@ -1,14 +1,6 @@
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
+import { View, Text, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -20,25 +12,16 @@ import { useGetAllArea } from "../../hooks/area/useGetAllAreas";
 
 import { FormInput } from "../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
-
-/* ================= TYPES ================= */
+import { pickImageFromLibrary } from "../../utils/pickImage";
+import { Area } from "../../types/area";
 
 type FormData = z.infer<typeof customerSchema>;
-
-type Area = {
-  id: string;
-  areaName: string;
-  salesmanName: string;
-};
-
-/* ================= SCREEN ================= */
 
 export default function EditCustomerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
   const { mutateAsync, isPending } = useUpdateCustomer();
-  const { data, isLoading } = useGetCustomerById(id);
+  const { data: customer, isLoading } = useGetCustomerById(id);
   const { data: areas } = useGetAllArea();
 
   const {
@@ -50,22 +33,26 @@ export default function EditCustomerScreen() {
     formState: { isDirty, errors },
   } = useForm<FormData>();
 
-  /* ================= PREFILL ================= */
+  const [image, setImage] = useState<string | null>(null);
+  const isDisabled = (!isDirty && !image) || isPending;
+
+  const pickImage = async () => {
+    const uri = await pickImageFromLibrary();
+      if (uri) setImage(uri);
+  };
 
   useEffect(() => {
-    if (data) {
+    if (customer) {
       reset({
-        areaId: data.areaId,
-        customerName: data.customerName,
-        shopName: data.shopName,
-        phone: data.phone,
-        address: data.address,
-        description: data.description,
+        areaId: customer.areaId,
+        customerName: customer.customerName,
+        shopName: customer.shopName,
+        phone: customer.phone,
+        address: customer.address,
+        description: customer.description,
       });
     }
-  }, [data]);
-
-  /* ================= WATCH AREA ================= */
+  }, [customer]);
 
   const selectedAreaId = watch("areaId");
 
@@ -73,18 +60,14 @@ export default function EditCustomerScreen() {
     (a: Area) => a.id === selectedAreaId
   );
 
-  /* ================= SUBMIT ================= */
-
-  const onSubmit = async (form: FormData) => {
+  const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync({ id, data: form });
+      await mutateAsync({ id, data, image, oldImageId: customer?.customerImageId });
       router.back();
     } catch {
       setError("root", { message: "Update failed" });
     }
   };
-
-  /* ================= STATES ================= */
 
   if (isLoading) {
     return (
@@ -93,8 +76,6 @@ export default function EditCustomerScreen() {
       </View>
     );
   }
-
-  /* ================= RENDER ================= */
 
   return (
     <KeyboardAvoidingView
@@ -107,6 +88,24 @@ export default function EditCustomerScreen() {
           <Text className="text-3xl font-bold mb-8 text-center">
             Edit Customer
           </Text>
+
+          <View className="items-center mb-6">
+            <Pressable onPress={pickImage}>
+              <Image
+                source={{
+                  uri:
+                    image ||
+                    customer?.customerImage ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      customer?.shopName || "User"
+                    )}&background=random&size=64`,
+                }}
+                className="w-32 h-32 rounded-full"
+              />
+            </Pressable>
+          
+            <Text className="text-gray-500 mt-2">Tap to change photo</Text>
+          </View>
 
           <View className="gap-y-6">
             {/* AREA */}
@@ -126,7 +125,7 @@ export default function EditCustomerScreen() {
 
             {/* AUTO SALESMAN */}
             <View>
-              <Text className="mb-2 font-semibold">Salesman</Text>
+              <Text className="mb-2">Salesman</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
                 <Text className="text-gray-700 capitalize">
                   {selectedArea?.salesmanName || "Select area first"}
@@ -173,13 +172,13 @@ export default function EditCustomerScreen() {
 
           {/* BUTTON */}
           <Pressable
-            disabled={!isDirty || isPending}
+            disabled={isDisabled}
             onPress={handleSubmit(onSubmit)}
-            className={`mt-8 p-4 rounded-lg ${
-              !isDirty ? "bg-gray-400" : "bg-black"
-            }`}
+            className={`rounded-lg p-4 mt-8 ${
+            isDisabled ? "bg-gray-400" : "bg-black"
+          }`}
           >
-            <Text className="text-white text-center">
+            <Text className="text-white text-center font-semibold">
               {isPending ? "Updating..." : "Update Customer"}
             </Text>
           </Pressable>

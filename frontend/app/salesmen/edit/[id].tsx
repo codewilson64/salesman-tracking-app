@@ -28,9 +28,9 @@ export default function EditSalesmanScreen() {
   const isDisabled = (!isDirty && !image) || isPending;
 
   const pickImage = async () => {
-      const uri = await pickImageFromLibrary();
+    const uri = await pickImageFromLibrary();
       if (uri) setImage(uri);
-    };
+  };
 
   useEffect(() => {
     if (salesman) {

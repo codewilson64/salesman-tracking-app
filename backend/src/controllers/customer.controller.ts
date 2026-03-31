@@ -7,7 +7,7 @@ import { salesmenTable } from "../db/schemas";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {
-    const { areaId, customerName, shopName, phone, address, description } = req.body;
+    const { areaId, customerName, shopName, phone, address, description, customerImage, customerImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -56,6 +56,8 @@ export const createCustomer = async (req: Request, res: Response) => {
         phone,
         address,
         description,
+        customerImage,
+        customerImageId
       })
       .returning();
 
@@ -131,6 +133,8 @@ export const getAllCustomers = async (req: Request, res: Response) => {
         // salesman info
         salesmanId: salesmenTable.id,
         salesmanName: salesmenTable.name,
+        salesmanImage: salesmenTable.profileImage,
+        salesmanImageId: salesmenTable.profileImageId,
       })
       .from(customersTable)
       .leftJoin(areasTable, eq(customersTable.areaId, areasTable.id))
@@ -182,7 +186,8 @@ export const getCustomerById = async (req: Request, res: Response) => {
         phone: customersTable.phone,
         address: customersTable.address,
         description: customersTable.description,
-        createdAt: customersTable.createdAt,
+        customerImage: customersTable.customerImage,
+        customerImageId: customersTable.customerImageId,
 
         // area info
         areaId: areasTable.id,
@@ -231,14 +236,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const {
-      areaId,
-      customerName,
-      shopName,
-      phone,
-      address,
-      description,
-    } = req.body;
+    const { areaId, customerName, shopName, phone, address, description, customerImage, customerImageId} = req.body;
 
     const user = req.user as {
       userId: string;
@@ -280,6 +278,8 @@ export const updateCustomer = async (req: Request, res: Response) => {
         phone,
         address,
         description,
+        customerImage,
+        customerImageId,
       })
       .where(
         and(

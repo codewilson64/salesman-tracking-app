@@ -43,7 +43,7 @@ const ProductDetail = () => {
     );
   }
 
-  if (isError) {
+  if (isError || !product) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-red-500">Error loading product</Text>

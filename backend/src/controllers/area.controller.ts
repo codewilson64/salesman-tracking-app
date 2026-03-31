@@ -133,8 +133,11 @@ export const getAllAreas = async (req: Request, res: Response) => {
         id: areasTable.id,
         areaName: areasTable.name,
         day: areasTable.day,
+        
         salesmanId: salesmenTable.id,
         salesmanName: salesmenTable.name,
+        salesmanImage: salesmenTable.profileImage,
+        salesmanImageId: salesmenTable.profileImageId,
       })
       .from(areasTable)
       .innerJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))

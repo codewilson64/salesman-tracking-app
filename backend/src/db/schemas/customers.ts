@@ -21,5 +21,7 @@ export const customersTable = pgTable("customers", {
   phone: varchar("phone", { length: 20 }).notNull(),
   address: varchar("address", { length: 255 }),
   description: varchar("description", { length: 500 }),
+  customerImage: varchar("customer_image", { length: 500 }),
+  customerImageId: varchar("customer_image_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

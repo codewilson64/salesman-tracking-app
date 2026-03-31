@@ -43,7 +43,7 @@ const SalesmanDetail = () => {
     );
   }
 
-  if (isError) {
+  if (isError || !salesman) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-red-500">Error loading salesman</Text>

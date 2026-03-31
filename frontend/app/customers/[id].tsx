@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Pressable, Alert } from "react-native";
+import { View, Text, ActivityIndicator, Pressable, Alert, Image } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetCustomerById } from "../hooks/customer/useGetCustomerById";
@@ -7,11 +7,8 @@ import { useDeleteCustomer } from "../hooks/customer/useDeleteCustomer";
 const CustomerDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
   const { data: customer, isLoading, isError } = useGetCustomerById(id);
   const { mutateAsync: deleteCustomer, isPending } = useDeleteCustomer();
-
-  /* ================= DELETE ================= */
 
   const handleDelete = () => {
     Alert.alert(
@@ -40,8 +37,6 @@ const CustomerDetail = () => {
     );
   };
 
-  /* ================= STATES ================= */
-
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -58,11 +53,22 @@ const CustomerDetail = () => {
     );
   }
 
-  /* ================= RENDER ================= */
-
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
       {/* INFO */}
+      <View className="items-center mb-6">
+        <Image
+          source={{
+            uri: customer.customerImage
+              ? customer.customerImage
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  customer.shopName
+                )}&background=random&size=128`,
+          }}
+          className="w-32 h-32 rounded-full mb-4"
+        /> 
+      </View>
+
       <View className="mt-4">
         {/* SALESMAN */}
         <View className="p-4 border-b border-gray-200">

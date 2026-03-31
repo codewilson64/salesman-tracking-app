@@ -10,36 +10,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetAllArea } from "../hooks/area/useGetAllAreas";
-
-/* ================= TYPES ================= */
-
-type Area = {
-  id: string;
-  areaName: string;
-  day: string;
-  salesmanName: string;
-};
-
-type GroupedArea = {
-  salesmanName: string;
-  areas: Area[];
-};
-
-/* ================= SCREEN ================= */
+import { Area, GroupedArea } from "../types/area";
 
 const AreaScreen = () => {
   const router = useRouter();
   const { data: areas = [], isLoading, isError } = useGetAllArea();
 
-  /* ================= GROUPING ================= */
-
   const groupedAreas: GroupedArea[] = Object.values(
     (areas as Area[]).reduce<Record<string, GroupedArea>>((acc, area) => {
-      const key = area.salesmanName;
+      const key = area.salesmanId;
 
       if (!acc[key]) {
         acc[key] = {
-          salesmanName: key,
+          salesmanId: key,
+          salesmanName: area.salesmanName,
+          salesmanImage: area.salesmanImage,
           areas: [],
         };
       }
@@ -49,8 +34,6 @@ const AreaScreen = () => {
       return acc;
     }, {})
   );
-
-  /* ================= STATES ================= */
 
   if (isLoading) {
     return (
@@ -70,8 +53,6 @@ const AreaScreen = () => {
     );
   }
 
-  /* ================= RENDER ================= */
-
   return (
     <SafeAreaView className="flex-1 p-4">
       <Text className="text-2xl font-bold mb-4">List of Areas</Text>
@@ -85,9 +66,11 @@ const AreaScreen = () => {
             <View className="flex-row items-center mb-2">
               <Image
                 source={{
-                  uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    item.salesmanName
-                  )}&background=random&size=64`,
+                  uri:
+                    item.salesmanImage ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      item.salesmanName
+                    )}&background=random&size=64`,
                 }}
                 className="w-12 h-12 rounded-full mr-3"
               />
