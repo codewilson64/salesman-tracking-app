@@ -28,7 +28,13 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+          {
+            "locationAlwaysAndWhenInUsePermission": "Allow Salesman Tracker App to use your location for better experience."
+          }
+      ]
     ]
   }
 }

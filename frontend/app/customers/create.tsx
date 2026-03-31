@@ -6,6 +6,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,17 +24,11 @@ import { useState } from "react";
 import { pickImageFromLibrary } from "../utils/pickImage";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-/* ================= TYPES ================= */
+import { useGetLocation } from "../hooks/location/useGetLocation";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Area } from "../types/area";
 
 type FormData = z.infer<typeof customerSchema>;
-
-type Area = {
-  id: string;
-  areaName: string;
-  salesmanName: string;
-};
-
-/* ================= SCREEN ================= */
 
 export default function CreateCustomerScreen() {
   const {
@@ -41,6 +36,7 @@ export default function CreateCustomerScreen() {
     handleSubmit,
     setError,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(customerSchema),
@@ -50,6 +46,7 @@ export default function CreateCustomerScreen() {
   const { mutateAsync, isPending } = useCreateCustomer();
   const { data: areas } = useGetAllArea();
   const [image, setImage] = useState<string | null>(null);
+  const { getLocation, loading: locationLoading } = useGetLocation();
   
   const pickImage = async () => {
     const uri = await pickImageFromLibrary();
@@ -77,7 +74,16 @@ export default function CreateCustomerScreen() {
     }
   };
 
-  /* ================= RENDER ================= */
+  const handleGetCoordinate = async () => {
+    const coordinate = await getLocation();
+
+    if (coordinate) {
+      const [lat, lng] = coordinate.split(",").map(Number);
+
+      setValue("latitude", lat);
+      setValue("longitude", lng);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -157,6 +163,38 @@ export default function CreateCustomerScreen() {
               errors={errors}
             />
 
+            {/* LOCATION */}
+            <View>
+              <Text className="mb-3">Location pin</Text>
+
+              <Pressable
+                onPress={handleGetCoordinate}
+                className="border border-gray-300 rounded-lg p-4 bg-gray-100 flex-row justify-between items-center"
+              >
+                <Text>
+                  {watch("latitude") && watch("longitude")
+                    ? `${watch("latitude")}, ${watch("longitude")}`
+                    : "Pick location"}
+                </Text>
+
+                {locationLoading ? (
+                  <ActivityIndicator size={22} color="gray" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={22}
+                    color="gray"
+                  />
+                )}
+              </Pressable>
+
+              {(errors.latitude || errors.longitude) && (
+                <Text className="text-red-500 mt-1">
+                  Location is required
+                </Text>
+              )}
+            </View>
+
             {/* IMAGE */}
             <View>
               <Text className="mb-3 text-gray-700">Photo</Text>
@@ -166,14 +204,12 @@ export default function CreateCustomerScreen() {
                 >
                   {image ? (
                     <>
-                      {/* IMAGE */}
                       <Image
                         source={{ uri: image }}
                         className="w-full h-full"
                         resizeMode="cover"
                       />
             
-                      {/* ❌ REMOVE BUTTON */}
                       <Pressable
                         onPress={(e) => {
                           e.stopPropagation();
@@ -191,7 +227,7 @@ export default function CreateCustomerScreen() {
                     </View>
                   )}
                 </Pressable>
-              </View>
+            </View>
           </View>
 
           {/* SUBMIT */}

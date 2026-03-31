@@ -7,7 +7,18 @@ import { salesmenTable } from "../db/schemas";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {
-    const { areaId, customerName, shopName, phone, address, description, customerImage, customerImageId } = req.body;
+    const {
+      areaId,
+      customerName,
+      shopName,
+      phone,
+      address,
+      description,
+      customerImage,
+      customerImageId,
+      latitude,      
+      longitude       
+    } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -57,7 +68,9 @@ export const createCustomer = async (req: Request, res: Response) => {
         address,
         description,
         customerImage,
-        customerImageId
+        customerImageId,
+        latitude,
+        longitude,
       })
       .returning();
 

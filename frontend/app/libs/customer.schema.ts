@@ -7,6 +7,8 @@ export const customerSchema = z.object({
   phone: z.string(),
   address: z.string(),
   description: z.string().optional(),
+  latitude: z.number(),
+  longitude: z.number(), 
   customerImage: z.url().optional(),
   customerImageId: z.string().optional(),
 });
