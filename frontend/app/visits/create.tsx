@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,23 +19,13 @@ import { useGetAllArea } from "../hooks/area/useGetAllAreas";
 import { useGetCustomersByArea } from "../hooks/area/useGetCustomersByArea";
 
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
-
-/* ================= TYPES ================= */
+import { useState } from "react";
+import { takePhoto } from "../utils/takePhoto";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Customer } from "../types/customer";
+import { Area } from "../types/area";
 
 type FormData = z.infer<typeof visitSchema>;
-
-type Area = {
-  id: string;
-  areaName: string;
-};
-
-type Customer = {
-  id: string;
-  shopName: string;
-  address: string;
-};
-
-/* ================= SCREEN ================= */
 
 export default function CreateVisitScreen() {
   const {
@@ -51,6 +42,12 @@ export default function CreateVisitScreen() {
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateVisit();
   const { data: areas } = useGetAllArea();
+  const [image, setImage] = useState<string | null>(null);
+  
+  const pickImage = async () => {
+    const uri = await takePhoto();
+    if (uri) setImage(uri);
+  };
 
   /* ================= WATCH ================= */
 
@@ -60,7 +57,6 @@ export default function CreateVisitScreen() {
   /* ================= FETCH CUSTOMERS ================= */
 
   const { data: customers = [] } = useGetCustomersByArea(selectedAreaId);
-  console.log("customers by area:", customers);
 
   const selectedCustomer: Customer | undefined = customers.find(
     (c: Customer) => c.id === selectedCustomerId
@@ -70,10 +66,12 @@ export default function CreateVisitScreen() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync(data);
+      await mutateAsync({ data, image });
       router.back();
     } catch (err: any) {
-      setError("root", { message: "Create visit failed" });
+      setError("root", {
+        message: err?.response?.data?.message || "Create failed",
+      });
     }
   };
 
@@ -94,6 +92,42 @@ export default function CreateVisitScreen() {
           <Text className="text-3xl font-bold mb-8 text-center">
             Create Visit
           </Text>
+
+          {/* IMAGE */}
+          <View>
+              <Text className="mb-3 text-gray-700">Check in photo</Text>
+                <Pressable
+                  onPress={pickImage}
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                >
+                  {image ? (
+                    <>
+                      {/* IMAGE */}
+                      <Image
+                        source={{ uri: image }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+
+                      {/* ❌ REMOVE BUTTON */}
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setImage(null);
+                        }}
+                        className="absolute top-2 right-2"
+                      >
+                        <FontAwesome6 name="xmark" size={18} color="white" />
+                      </Pressable>
+                    </>
+                  ) : (
+                    <View className="items-center gap-y-2">
+                      <FontAwesome6 name="image-portrait" size={32} color="gray" />
+                      <Text className="text-gray-500">Take photo</Text>
+                    </View>
+                  )}
+                </Pressable>
+          </View>
 
           <View className="gap-y-6">
             {/* AREA SELECT */}
@@ -136,10 +170,25 @@ export default function CreateVisitScreen() {
               <Text className="mb-2">Address</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
                 <Text className="text-gray-700">
-                  {selectedCustomer?.address || "Select customer first"}
+                  {selectedCustomer?.address || ""}
                 </Text>
               </View>
             </View>
+            
+            {/* AUTO-FILL COORDINATE */}
+            <View>
+              <Text className="mb-2">Location pin</Text>
+              <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
+                <Text className="text-gray-700">
+                  {selectedCustomer?.latitude != null &&
+                  selectedCustomer?.longitude != null
+                    ? `${selectedCustomer.latitude}, ${selectedCustomer.longitude}`
+                    : ""}
+                </Text>
+              </View>
+            </View>
+
+            
           </View>
 
           {/* SUBMIT */}

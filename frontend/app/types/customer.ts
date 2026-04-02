@@ -7,6 +7,8 @@ export type Customer = {
   phone: string;
   address: string;
   description?: string;
+  latitude: number;
+  longitude: number;
   salesmanId: string;
   salesmanName: string;
   salesmanImage?: string;   

@@ -199,6 +199,8 @@ export const getCustomerById = async (req: Request, res: Response) => {
         phone: customersTable.phone,
         address: customersTable.address,
         description: customersTable.description,
+        latitude: customersTable.latitude,
+        longitude: customersTable.longitude,
         customerImage: customersTable.customerImage,
         customerImageId: customersTable.customerImageId,
 

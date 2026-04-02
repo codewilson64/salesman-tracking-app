@@ -5,10 +5,14 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Platform,
+  Linking,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetVisitById } from "../hooks/visit/useGetVisitById";
+import MapView, { Marker } from "react-native-maps";
+import { formatDuration } from "../helper/formatDuration";
 
 
 const formatTime = (dateString?: string) => {
@@ -72,21 +76,41 @@ const VisitDetail = () => {
     );
   }
 
+  const lat = visit.latitude;
+  const lng = visit.longitude;
+
+  const hasLocation = lat != null && lng != null;
+
+  const openMap = () => {
+    if (!hasLocation) return;
+
+    const url = Platform.select({
+      ios: `maps:0,0?q=${lat},${lng}`,
+      android: `geo:0,0?q=${lat},${lng}`,
+      default: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+    });
+
+    Linking.openURL(url!);
+  };
+
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* IMAGE */}
       <View className="items-center mb-6">
         <Image
           source={{
-            uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              visit.shopName || "Visit"
-            )}&size=128`,
+           uri:
+            visit.checkInImage ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              visit.shopName
+            )}&background=random&size=128`
           }}
           className="w-32 h-32 rounded-full mb-4"
-        />
+        /> 
       </View>
 
       {/* Info */}
@@ -171,6 +195,16 @@ const VisitDetail = () => {
           </View>
         </View>
 
+        {/* Duration */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Duration</Text>
+            <Text className="text-lg font-medium">
+              {formatDuration(visit.duration)}
+            </Text>
+          </View>
+        </View>
+
         {/* Result */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
@@ -191,6 +225,38 @@ const VisitDetail = () => {
           </View>
         </View>
       </View>
+
+      {/* MAP */}
+        {hasLocation && (
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm mb-2">Check-in location</Text>
+
+            <Pressable onPress={openMap}>
+              <MapView
+                style={{ width: "100%", height: 200, borderRadius: 12 }}
+                initialRegion={{
+                  latitude: lat,
+                  longitude: lng,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: lat,
+                    longitude: lng,
+                  }}
+                  title={visit.shopName}
+                  description={visit.address}
+                />
+              </MapView>
+            </Pressable>
+          </View>
+        )}
 
         {/* Button */}
         <View className="mt-6">

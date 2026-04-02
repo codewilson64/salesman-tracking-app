@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, text, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, text, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { companiesTable } from "./companies";
 import { areasTable } from "./areas";
 import { customersTable } from "./customers";
@@ -29,10 +29,15 @@ export const visitsTable = pgTable("visits", {
   customerId: uuid("customer_id")
     .references(() => customersTable.id)
     .notNull(),
+
   status: visitStatusEnum("status").default("check-in").notNull(),
   checkInAt: timestamp("check_in_at").defaultNow().notNull(),
   checkOutAt: timestamp("check_out_at"),
   visitResult: visitResultEnum("visit_result"),
   notes: text("notes"),
+  
+  checkInImage: varchar("check_in_image", { length: 500 }),
+  checkInImageId: varchar("check_in_image_id", { length: 255 }),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

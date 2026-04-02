@@ -400,7 +400,10 @@ export const getCustomersByArea = async (req: Request, res: Response) => {
         phone: customersTable.phone,
         address: customersTable.address,
         description: customersTable.description,
-        createdAt: customersTable.createdAt,
+        latitude: customersTable.latitude,
+        longitude: customersTable.longitude,
+        customerImage: customersTable.customerImage,
+        customerImageId: customersTable.customerImageId,
 
         // area info
         areaId: areasTable.id,

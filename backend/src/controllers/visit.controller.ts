@@ -5,7 +5,7 @@ import { and, eq, isNull } from "drizzle-orm";
 
 export const createVisit = async (req: Request, res: Response) => {
   try {
-    const { areaId, customerId } = req.body;
+    const { areaId, customerId, checkInImage, checkInImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -85,6 +85,8 @@ export const createVisit = async (req: Request, res: Response) => {
         areaId,
         customerId,
         status: "check-in",
+        checkInImage,
+        checkInImageId,
       })
       .returning();
 
@@ -242,11 +244,13 @@ export const getAllVisits = async (req: Request, res: Response) => {
         // salesman info
         salesmanId: salesmenTable.id,
         salesmanName: salesmenTable.name,
+        salesmanImage: salesmenTable.profileImage,
+        salesmanImageId: salesmenTable.profileImageId,
       })
       .from(visitsTable)
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
       .leftJoin(areasTable, eq(visitsTable.areaId, areasTable.id))
-      .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.id))
+      .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
       .where(condition);
 
     return res.status(200).json({
@@ -289,13 +293,16 @@ export const getVisitById = async (req: Request, res: Response) => {
         status: visitsTable.status,
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
-        createdAt: visitsTable.createdAt,
+        checkInImage: visitsTable.checkInImage,
+        checkInImageId: visitsTable.checkInImageId,
 
         // customer info
         customerId: customersTable.id,
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
         address: customersTable.address,
+        latitude: customersTable.latitude,
+        longitude: customersTable.longitude,
 
         // area info
         areaId: areasTable.id,
@@ -319,9 +326,24 @@ export const getVisitById = async (req: Request, res: Response) => {
       });
     }
 
+    const data = visit[0]!;
+
+    // compute duration (in seconds)
+    let duration = null;
+
+    if (data.checkInAt && data.checkOutAt) {
+      const checkIn = new Date(data.checkInAt).getTime();
+      const checkOut = new Date(data.checkOutAt).getTime();
+
+      duration = Math.floor((checkOut - checkIn) / 1000); // seconds
+    }
+
     return res.status(200).json({
       message: "Visit fetched successfully",
-      data: visit[0],
+      data: {
+        ...data,
+        duration, // 👈 add this
+      },
     });
 
   } catch (error) {

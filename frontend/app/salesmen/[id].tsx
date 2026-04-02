@@ -24,7 +24,7 @@ const SalesmanDetail = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteSalesman(id);
+              await deleteSalesman({id, imageId: salesman?.profileImageId});
               router.back();
             } catch (err) {
               console.error(err);

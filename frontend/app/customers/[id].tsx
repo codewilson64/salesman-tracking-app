@@ -24,7 +24,7 @@ const CustomerDetail = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteCustomer(id);
+              await deleteCustomer({ id, imageId:customer?.customerImageId });
               router.back();
             } catch (err: any) {
               const message =

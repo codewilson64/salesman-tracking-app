@@ -24,7 +24,7 @@ const ProductDetail = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteProduct(id);
+              await deleteProduct({id, imageId: product?.productImageId });
               router.back();
             } catch (err) {
               console.error(err);

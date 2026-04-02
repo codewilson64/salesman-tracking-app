@@ -12,3 +12,4 @@ export const pickImageFromLibrary = async (): Promise<string | null> => {
 
   return null;
 };
+

@@ -29,7 +29,7 @@ export const updateCustomerById = async ( id: string, data: FormData) => {
 };
 
 // DELETE
-export const deleteCustomersById = async (id: string) => {
+export const deleteCustomerById = async (id: string) => {
   const res = await api.delete(`/customers/${id}`);
   return res.data;
 };

@@ -4,10 +4,12 @@ import {
   FlatList,
   ActivityIndicator,
   Pressable,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useGetAllVisits } from "../hooks/visit/useGetAllVisits";
+import { GroupedVisit, Visit } from "../types/visit";
 
 /* ================= HELPERS ================= */
 
@@ -42,6 +44,28 @@ const OwnerVisitScreen = () => {
   const router = useRouter();
   const { data: visits = [], isLoading, isError } = useGetAllVisits();
 
+  const groupedVisits: GroupedVisit[] = Object.values(
+      (visits as Visit[]).reduce<Record<string, GroupedVisit>>(
+        (acc, visit) => {
+          const key = visit.salesmanId
+  
+          if (!acc[key]) {
+            acc[key] = {
+              salesmanId: key,
+              salesmanName: visit.salesmanName,
+              salesmanImage: visit.salesmanImage,
+              visits: [],
+            };
+          }
+  
+          acc[key].visits.push(visit);
+  
+          return acc;
+        },
+        {}
+      )
+    );
+
   /* ================= STATES ================= */
 
   if (isLoading) {
@@ -71,70 +95,77 @@ const OwnerVisitScreen = () => {
       </Text>
 
       <FlatList
-        data={visits}
-        keyExtractor={(item: any) => item.id}
+        data={groupedVisits}
+        keyExtractor={(item) => item.salesmanName}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
-        renderItem={({ item, index }) => (
-          <Pressable
-            onPress={() => router.push(`/sales-visits/${item.id}`)}
-            className="flex-row items-start p-3 border-b border-gray-300"
-          >
-            {/* NUMBER */}
-            <Text className="w-6 font-bold">
-              {index + 1}.
-            </Text>
-
-            {/* VISIT INFO */}
-            <View className="flex-1">
-              {/* Shop */}
-              <Text className="font-semibold capitalize mb-1">
-                {item.shopName}
+        renderItem={({ item }) => (
+          <View className="mb-6">
+            {/* SALESMAN HEADER */}
+            <View className="flex-row items-center mb-2">
+              <Image
+                source={{
+                  uri:
+                    item.salesmanImage ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      item.salesmanName
+                    )}&background=random&size=64`,
+                }}
+                className="w-12 h-12 rounded-full mr-3"
+              />
+              <Text className="text-xl font-bold capitalize">
+                {item.salesmanName}
               </Text>
-
-              {/* Time */}
-              <Text className="text-sm">
-                In: {formatTime(item.checkInAt)}
-              </Text>
-
-              {item.checkOutAt && (
-                <Text className="text-sm">
-                  Out: {formatTime(item.checkOutAt)}
-                </Text>
-              )}
-
-              {/* Notes */}
-              {item.notes && (
-                <Text
-                  className="text-sm mt-2"
-                  numberOfLines={2}
-                >
-                  Notes: {item.notes}
-                </Text>
-              )}
             </View>
 
-            {/* RESULT BADGE */}
-            {item.visitResult ? (
-              <View
-                className={`mt-1 self-start px-2 py-1 rounded ${getResultStyle(
-                  item.visitResult
-                )}`}
+            {/* VISIT LIST */}
+            {item.visits.map((visit, index) => (
+              <Pressable
+                key={visit.id}
+                onPress={() => router.push(`/sales-visits/${visit.id}`)}
+                className="flex-row items-start p-3 border-b border-gray-300"
               >
-                <Text className="text-xs font-semibold capitalize">
-                  {item.visitResult}
+                {/* NUMBER */}
+                <Text className="w-6 font-bold">
+                  {index + 1}.
                 </Text>
-              </View>
-            ): <View
-                className={`mt-1 self-start px-2 py-1 rounded ${getResultStyle(
-                  item.visitResult
-                )}`}
-              >
-                <Text className="text-xs font-semibold capitalize">
-                  Checking in...
-                </Text>
-              </View>}
-          </Pressable>
+
+                {/* VISIT INFO */}
+                <View className="flex-1">
+                  <Text className="font-semibold capitalize mb-1">
+                    {visit.shopName}
+                  </Text>
+
+                  <Text className="text-sm">
+                    In: {formatTime(visit.checkInAt ?? "")}
+                  </Text>
+
+                  {visit.checkOutAt && (
+                    <Text className="text-sm">
+                      Out: {formatTime(visit.checkOutAt)}
+                    </Text>
+                  )}
+
+                  {visit.notes && (
+                    <Text className="text-sm mt-2" numberOfLines={2}>
+                      Notes: {visit.notes}
+                    </Text>
+                  )}
+                </View>
+
+                {/* RESULT BADGE */}
+                <View
+                  className={`mt-1 self-start px-2 py-1 rounded ${getResultStyle(
+                    visit.visitResult
+                  )}`}
+                >
+                  <Text className="text-xs font-semibold capitalize">
+                    {visit.visitResult || "Checking in..."}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
         )}
       />
     </SafeAreaView>

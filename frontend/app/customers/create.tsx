@@ -21,7 +21,7 @@ import { useGetAllArea } from "../hooks/area/useGetAllAreas";
 import { FormInput } from "../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { useState } from "react";
-import { pickImageFromLibrary } from "../utils/pickImage";
+import { takePhoto } from "../utils/takePhoto";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 import { useGetLocation } from "../hooks/location/useGetLocation";
@@ -49,7 +49,7 @@ export default function CreateCustomerScreen() {
   const { getLocation, loading: locationLoading } = useGetLocation();
   
   const pickImage = async () => {
-    const uri = await pickImageFromLibrary();
+    const uri = await takePhoto();
     if (uri) setImage(uri);
   };
 
@@ -223,7 +223,7 @@ export default function CreateCustomerScreen() {
                   ) : (
                     <View className="items-center gap-y-2">
                       <FontAwesome6 name="image-portrait" size={32} color="gray" />
-                      <Text className="text-gray-500">Pick Customer Image</Text>
+                      <Text className="text-gray-500">Take photo</Text>
                     </View>
                   )}
                 </Pressable>
