@@ -1,10 +1,7 @@
-import z from "zod";
-import { TVisitInput, visitSchema } from "../../libs/visit.schema";
+import { TVisitInput } from "../../libs/visit.schema";
 import { api } from "../../libs/axios";
+import { TCheckoutVisit } from "../../libs/checkout.schema";
 
-type FormData = Partial<z.infer<typeof visitSchema>>;
-
-// CREATE
 export const createVisit = async (data: TVisitInput) => {
   const res = await api.post("/visits", data);
   return res.data.data;
@@ -15,10 +12,7 @@ export const getAllVisits = async () => {
   return res.data.data;
 };
 
-export const checkoutVisit = async (data: {
-  result: "new order" | "follow-up" | "shop closed";
-  notes: string;
-}) => {
+export const checkoutVisit = async (data: TCheckoutVisit) => {
   const res = await api.patch("/visits/checkout", data);
   return res.data.data;
 };

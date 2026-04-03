@@ -13,20 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetVisitById } from "../hooks/visit/useGetVisitById";
 import MapView, { Marker } from "react-native-maps";
 import { formatDuration } from "../helper/formatDuration";
-
-
-const formatTime = (dateString?: string) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
+import { formatTime } from "../helper/formatTime";
 
 const VisitDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();

@@ -7,33 +7,64 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../components/areaInputForm/FormInput";
 import { useCheckoutVisit } from "../hooks/visit/useCheckoutVisit";
 import { checkoutVisitSchema, TCheckoutVisit } from "../libs/checkout.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { useGetAllProduct } from "../hooks/product/useGetAllProduct";
+import { Product } from "../types/product";
 
 const results = ["new order", "follow-up", "shop closed"];
+const transactionTypes = ["cash", "credit"];
 
 const CheckoutVisit = () => {
   const router = useRouter();
   const { mutateAsync, isPending } = useCheckoutVisit();
+  const { data: products } = useGetAllProduct()
 
   const {
     control,
     handleSubmit,
     setError,
+    watch,
     formState: { errors },
   } = useForm<TCheckoutVisit>({
     resolver: zodResolver(checkoutVisitSchema),
+    defaultValues: {
+      products: [],
+    },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "products",
+  });
+
+   /* ================= WATCH AREA ================= */
+
+  const selectedResult = watch("result");
+
+   /* ================= SUBMIT ================= */
 
   const onSubmit = async (data: TCheckoutVisit) => {
     try {
-      await mutateAsync(data);
+      const payload = {
+        ...data,
+        products: data.products?.map((p) => {
+          const product = products?.find((prod) => prod.id === p.productId);
+
+          return {
+            ...p,
+            price: product?.price || 0,
+          };
+        }),
+      };
+
+      await mutateAsync(payload);
       router.back();
     } catch (err: any) {
       setError("root", { message: "Create failed" });
@@ -62,13 +93,104 @@ const CheckoutVisit = () => {
                 errors={errors}
             />
 
+            {selectedResult === "new order" && (
+              <>
+                <FormSelectModal
+                  control={control}
+                  name="transactionType"
+                  label="Transaction Type"
+                  options={transactionTypes.map((t) => ({ value: t }))}
+                  getLabel={(item: any) => item.value}
+                  errors={errors}
+                />
+
+                {/* ADD PRODUCT BUTTON */}
+                <Pressable
+                  onPress={() =>
+                    append({
+                      productId: "",
+                      quantity: 1,
+                      price: 0,
+                    })
+                  }
+                  className="bg-green-600 p-3 rounded-lg"
+                >
+                  <Text className="text-white text-center">Add Product</Text>
+                </Pressable>
+
+                {/* PRODUCT LIST */}
+                {fields.map((field, index) => {
+                  const productId = watch(`products.${index}.productId`);
+                  const quantity = watch(`products.${index}.quantity`) || 0;
+
+                  const selectedProduct = products?.find(
+                    (p: Product) => p.id === productId
+                  );
+
+                  const price = selectedProduct?.price || 0;
+                  const total = price * quantity;
+
+                  return (
+                    <View key={field.id} className="border border-gray-300 p-3 rounded-lg mt-4 gap-3">
+                      {/* PRODUCT SELECT */}
+                      <FormSelectModal
+                        control={control}
+                        name={`products.${index}.productId`}
+                        label="Product"
+                        options={
+                          products?.map((p: Product) => ({
+                            value: p.id,
+                            name: p.name,
+                          })) || []
+                        }
+                        getLabel={(item: any) => item.name}
+                        errors={errors}
+                      />
+
+                      {/* QUANTITY */}
+                      <FormInput
+                        control={control}
+                        name={`products.${index}.quantity`}
+                        label="Quantity"
+                        keyboardType="numeric"
+                      />
+
+                      {/* PRICE */}
+                      <View>
+                        <Text className="mb-2">Price</Text>
+                        <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
+                          <Text>{price || "-"}</Text>
+                        </View>
+                      </View>
+
+                      {/* TOTAL */}
+                      <View>
+                        <Text className="mb-2">Total</Text>
+                        <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
+                          <Text>{total || "-"}</Text>
+                        </View>
+                      </View>
+
+                      {/* REMOVE */}
+                      <Pressable
+                        onPress={() => remove(index)}
+                        className="bg-red-500 p-2 rounded"
+                      >
+                        <Text className="text-white text-center">Remove</Text>
+                      </Pressable>
+                    </View>
+                  );
+                })}
+              </>
+            )}
+
             {/* NOTES */}
             <FormInput
-                control={control}
-                name="notes"
-                label="Notes"
-                placeholder="Enter visit notes..."
-                multiline
+              control={control}
+              name="notes"
+              label="Notes"
+              placeholder="Enter visit notes..."
+              multiline
             />
           </View>
 

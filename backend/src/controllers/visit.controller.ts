@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { areasTable, customersTable, salesmenTable, visitsTable } from "../db/schemas";
 import { db } from "..";
 import { and, eq, isNull } from "drizzle-orm";
+import { transactionsTable } from "../db/schemas/transactions";
+import { transactionItemsTable } from "../db/schemas/transaction_items";
 
 export const createVisit = async (req: Request, res: Response) => {
   try {
@@ -110,7 +112,7 @@ export const createVisit = async (req: Request, res: Response) => {
 
 export const checkoutVisit = async (req: Request, res: Response) => {
   try {
-    const { result, notes } = req.body;
+    const { result, notes, transactionType, products } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -122,53 +124,104 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // validation
     const validResults = ["new order", "follow-up", "shop closed"];
 
     if (!result || !validResults.includes(result)) {
-      return res.status(400).json({
-        message: "Invalid visit result",
-      });
+      return res.status(400).json({ message: "Invalid visit result" });
     }
 
-    if(!notes) {  
-      return res.status(400).json({
-        message: "Please provide notes",
-      })
+    if (!notes) {
+      return res.status(400).json({ message: "Please provide notes" });
     }
 
-    // find active visit
-    const [activeVisit] = await db
-      .select()
-      .from(visitsTable)
-      .where(
-        and(
-          eq(visitsTable.salesmanId, user.userId),
-          eq(visitsTable.status, "check-in")
-        )
-      );
+    if (result === "new order") {
+      if (!transactionType) {
+        return res.status(400).json({
+          message: "Transaction type is required for new order",
+        });
+      }
 
-    if (!activeVisit) {
-      return res.status(400).json({
-        message: "No active visit found",
-      });
+      if (!products || !Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({
+          message: "Products are required for new order",
+        });
+      }
     }
 
-    // update visit (checkout)
-    const [updatedVisit] = await db
-      .update(visitsTable)
-      .set({
-        visitResult: result,
-        notes: notes,
-        checkOutAt: new Date(),
-        status: "check-out",
-      })
-      .where(eq(visitsTable.id, activeVisit.id))
-      .returning();
+    const data = await db.transaction(async (tx) => {
+      // find active visit
+      const [activeVisit] = await tx
+        .select()
+        .from(visitsTable)
+        .where(
+          and(
+            eq(visitsTable.salesmanId, user.userId),
+            eq(visitsTable.status, "check-in")
+          )
+        );
+
+      if (!activeVisit) {
+        throw new Error("No active visit found");
+      }
+
+      // update visit
+      const [updatedVisit] = await tx
+        .update(visitsTable)
+        .set({
+          visitResult: result,
+          notes,
+          checkOutAt: new Date(),
+          status: "check-out",
+        })
+        .where(eq(visitsTable.id, activeVisit.id))
+        .returning();
+
+      let transaction = null;
+
+      if (result === "new order") {
+        // calculate total
+        const totalAmount = products.reduce(
+          (sum: number, p: any) =>
+            sum + Number(p.quantity) * Number(p.price),
+          0
+        );
+
+        const [newTransaction] = await tx
+          .insert(transactionsTable)
+          .values({
+            companyId: user.companyId,
+            visitId: activeVisit.id,
+            transactionType,
+            totalAmount: totalAmount.toString(),
+          })
+          .returning();
+
+        if (!newTransaction) {
+          throw new Error("Failed to create transaction");
+        }
+        
+        await tx.insert(transactionItemsTable).values(
+          products.map((p: any) => ({
+            transactionId: newTransaction.id,
+            productId: p.productId,
+            quantity: p.quantity,
+            price: p.price.toString(),
+            total: (p.quantity * p.price).toString(),
+          }))
+        );
+
+        transaction = newTransaction;
+      }
+
+      return {
+        visit: updatedVisit,
+        transaction,
+      };
+    });
 
     return res.status(200).json({
       message: "Check-out successful",
-      data: updatedVisit,
+      data,
     });
 
   } catch (error) {
