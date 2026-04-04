@@ -93,7 +93,7 @@ const VisitScreen = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => (
           <Pressable
-            // onPress={() => router.push(`/visits/${item.id}`)}
+            onPress={() => router.push(`/visits/${item.id}`)}
             className="flex-row items-start p-3 border-b border-gray-300"
           >
             {/* NUMBER */}

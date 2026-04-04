@@ -15,6 +15,7 @@ const transactionItemSchema = z.object({
   productId: z.uuid("Invalid product ID"),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
   price: z.coerce.number().min(0, "Price must be >= 0"),
+  discount: z.coerce.number().min(0).default(0),
 });
 
 export const checkoutVisitSchema = z.object({
@@ -44,4 +45,4 @@ export const checkoutVisitSchema = z.object({
 });
   
 
-export type TCheckoutVisit = z.infer<typeof checkoutVisitSchema>;
+export type TCheckoutVisit = z.input<typeof checkoutVisitSchema>;

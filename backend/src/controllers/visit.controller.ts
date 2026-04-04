@@ -1,9 +1,7 @@
 import type { Request, Response } from "express";
-import { areasTable, customersTable, salesmenTable, visitsTable } from "../db/schemas";
+import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, transactionsTable, transactionItemsTable } from "../db/schemas";
 import { db } from "..";
 import { and, eq, isNull } from "drizzle-orm";
-import { transactionsTable } from "../db/schemas/transactions";
-import { transactionItemsTable } from "../db/schemas/transaction_items";
 
 export const createVisit = async (req: Request, res: Response) => {
   try {
@@ -179,35 +177,65 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       let transaction = null;
 
       if (result === "new order") {
-        // calculate total
-        const totalAmount = products.reduce(
-          (sum: number, p: any) =>
-            sum + Number(p.quantity) * Number(p.price),
-          0
+        // ✅ calculate totals
+        const totals = products.reduce(
+          (acc: any, p: any) => {
+            const price = Number(p.price);
+            const quantity = Number(p.quantity);
+            const discount = Number(p.discount || 0);
+
+            const subtotal = price * quantity;
+            const totalAfterDiscount = Math.max(subtotal - discount, 0);
+
+            acc.totalAmount += subtotal;
+            acc.totalDiscount += discount;
+            acc.finalAmount += totalAfterDiscount;
+
+            return acc;
+          },
+          {
+            totalAmount: 0,
+            totalDiscount: 0,
+            finalAmount: 0,
+          }
         );
 
+        // ✅ create transaction
         const [newTransaction] = await tx
           .insert(transactionsTable)
           .values({
             companyId: user.companyId,
             visitId: activeVisit.id,
             transactionType,
-            totalAmount: totalAmount.toString(),
+            totalAmount: totals.totalAmount.toString(),
+            totalDiscount: totals.totalDiscount.toString(), 
+            finalAmount: totals.finalAmount.toString(),     
           })
           .returning();
 
         if (!newTransaction) {
           throw new Error("Failed to create transaction");
         }
-        
+
+        // ✅ insert items with discount
         await tx.insert(transactionItemsTable).values(
-          products.map((p: any) => ({
-            transactionId: newTransaction.id,
-            productId: p.productId,
-            quantity: p.quantity,
-            price: p.price.toString(),
-            total: (p.quantity * p.price).toString(),
-          }))
+          products.map((p: any) => {
+            const price = Number(p.price);
+            const quantity = Number(p.quantity);
+            const discount = Number(p.discount || 0);
+
+            const subtotal = price * quantity;
+            const totalAfterDiscount = Math.max(subtotal - discount, 0);
+
+            return {
+              transactionId: newTransaction.id,
+              productId: p.productId,
+              quantity,
+              price: price.toString(),
+              discount: discount.toString(),
+              totalAfterDiscount: totalAfterDiscount.toString(), 
+            };
+          })
         );
 
         transaction = newTransaction;
@@ -320,7 +348,7 @@ export const getAllVisits = async (req: Request, res: Response) => {
     });
   }
 };
-
+ 
 export const getVisitById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
@@ -387,16 +415,59 @@ export const getVisitById = async (req: Request, res: Response) => {
     if (data.checkInAt && data.checkOutAt) {
       const checkIn = new Date(data.checkInAt).getTime();
       const checkOut = new Date(data.checkOutAt).getTime();
-
-      duration = Math.floor((checkOut - checkIn) / 1000); // seconds
+      duration = Math.floor((checkOut - checkIn) / 1000);
     }
+
+    const transactions = await db
+      .select({
+        transactionId: transactionsTable.id,
+        transactionType: transactionsTable.transactionType,
+        totalAmount: transactionsTable.totalAmount,
+        totalDiscount: transactionsTable.totalDiscount,  
+        finalAmount: transactionsTable.finalAmount, 
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          eq(transactionsTable.visitId, id),
+          eq(transactionsTable.companyId, user.companyId)
+        )
+      );
+
+    const transactionItems = await db
+      .select({
+        transactionId: transactionItemsTable.transactionId,
+        productId: productsTable.id,
+        productName: productsTable.name,
+        quantity: transactionItemsTable.quantity,
+        price: transactionItemsTable.price,
+        discount: transactionItemsTable.discount,
+        totalAfterDiscount: transactionItemsTable.totalAfterDiscount,
+      })
+      .from(transactionItemsTable)
+      .leftJoin(productsTable, eq(transactionItemsTable.productId, productsTable.id))
+      .leftJoin(transactionsTable, eq(transactionItemsTable.transactionId, transactionsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.visitId, id),
+          eq(transactionsTable.companyId, user.companyId)
+        )
+      );
+
+      const formattedTransactions = transactions.map((t) => ({
+        ...t,
+        items: transactionItems.filter(
+          (item) => item.transactionId === t.transactionId
+        ),
+      }));
 
     return res.status(200).json({
       message: "Visit fetched successfully",
       data: {
         ...data,
-        duration, // 👈 add this
-      },
+        duration,
+        transactions: formattedTransactions, 
+      }
     });
 
   } catch (error) {
@@ -404,6 +475,63 @@ export const getVisitById = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       message: "Failed to fetch visit",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const deleteVisit = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (!user?.companyId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // check if visit has transactions
+    const [transaction] = await db
+      .select()
+      .from(transactionsTable)
+      .where(eq(transactionsTable.visitId, id));
+
+    if (transaction) {
+      return res.status(400).json({
+        message: "Cannot delete visit that already has transactions",
+      });
+    }
+
+    // delete visit (scoped by company)
+    const deleted = await db
+      .delete(visitsTable)
+      .where(
+        and(
+          eq(visitsTable.id, id),
+          eq(visitsTable.companyId, user.companyId)
+        )
+      )
+      .returning();
+
+    if (deleted.length === 0) {
+      return res.status(404).json({
+        message: "Visit not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Visit deleted successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to delete visit",
       error: error instanceof Error ? error.message : error,
     });
   }

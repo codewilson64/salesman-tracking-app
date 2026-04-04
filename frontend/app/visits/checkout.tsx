@@ -9,7 +9,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../components/areaInputForm/FormInput";
 import { useCheckoutVisit } from "../hooks/visit/useCheckoutVisit";
@@ -17,6 +16,7 @@ import { checkoutVisitSchema, TCheckoutVisit } from "../libs/checkout.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetAllProduct } from "../hooks/product/useGetAllProduct";
 import { Product } from "../types/product";
+import { Visit } from "../types/visit";
 
 const results = ["new order", "follow-up", "shop closed"];
 const transactionTypes = ["cash", "credit"];
@@ -55,7 +55,7 @@ const CheckoutVisit = () => {
       const payload = {
         ...data,
         products: data.products?.map((p) => {
-          const product = products?.find((prod) => prod.id === p.productId);
+          const product = products?.find((prod: Product) => prod.id === p.productId);
 
           return {
             ...p,
@@ -66,7 +66,7 @@ const CheckoutVisit = () => {
 
       await mutateAsync(payload);
       router.back();
-    } catch (err: any) {
+    } catch (err) {
       setError("root", { message: "Create failed" });
     }
   };
@@ -89,7 +89,7 @@ const CheckoutVisit = () => {
                 name="result"
                 label="Visit Result"
                 options={results.map((r) => ({ value: r }))}
-                getLabel={(item: any) => item.value}
+                getLabel={(item: { value: string }) => item.value}
                 errors={errors}
             />
 
@@ -100,7 +100,7 @@ const CheckoutVisit = () => {
                   name="transactionType"
                   label="Transaction Type"
                   options={transactionTypes.map((t) => ({ value: t }))}
-                  getLabel={(item: any) => item.value}
+                  getLabel={(item: { value: string }) => item.value}
                   errors={errors}
                 />
 
@@ -111,6 +111,7 @@ const CheckoutVisit = () => {
                       productId: "",
                       quantity: 1,
                       price: 0,
+                      discount: 0,
                     })
                   }
                   className="bg-green-600 p-3 rounded-lg"
@@ -121,14 +122,17 @@ const CheckoutVisit = () => {
                 {/* PRODUCT LIST */}
                 {fields.map((field, index) => {
                   const productId = watch(`products.${index}.productId`);
-                  const quantity = watch(`products.${index}.quantity`) || 0;
+                  const quantity = Number(watch(`products.${index}.quantity`) || 0);
 
                   const selectedProduct = products?.find(
                     (p: Product) => p.id === productId
                   );
 
                   const price = selectedProduct?.price || 0;
-                  const total = price * quantity;
+                  const discount = Number(watch(`products.${index}.discount`) || 0);
+
+                  const subtotal = price * quantity;
+                  const total = subtotal - discount;
 
                   return (
                     <View key={field.id} className="border border-gray-300 p-3 rounded-lg mt-4 gap-3">
@@ -143,7 +147,7 @@ const CheckoutVisit = () => {
                             name: p.name,
                           })) || []
                         }
-                        getLabel={(item: any) => item.name}
+                        getLabel={(item: Product) => item.name}
                         errors={errors}
                       />
 
@@ -152,6 +156,14 @@ const CheckoutVisit = () => {
                         control={control}
                         name={`products.${index}.quantity`}
                         label="Quantity"
+                        keyboardType="numeric"
+                      />
+                      
+                      {/* DISCOUNT */}
+                      <FormInput
+                        control={control}
+                        name={`products.${index}.discount`}
+                        label="Discount"
                         keyboardType="numeric"
                       />
 

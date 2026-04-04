@@ -1,5 +1,5 @@
 import { pgTable, uuid, numeric, integer } from "drizzle-orm/pg-core";
-import { productsTable } from "./products"; // assuming you have this
+import { productsTable } from "./products"; 
 import { transactionsTable } from "./transactions";
 
 export const transactionItemsTable = pgTable("transaction_items", {
@@ -13,5 +13,6 @@ export const transactionItemsTable = pgTable("transaction_items", {
 
   quantity: integer("quantity").notNull(),
   price: numeric("price", { precision: 12, scale: 2 }).notNull(),
-  total: numeric("total", { precision: 12, scale: 2 }).notNull(),
+  discount: numeric("discount", { precision: 12, scale: 2 }).default("0") .notNull(),
+  totalAfterDiscount: numeric("total_after_discount", { precision: 12, scale: 2 }).notNull(),
 });

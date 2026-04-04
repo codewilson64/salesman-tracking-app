@@ -6,3 +6,5 @@ export * from "./areas";
 export * from "./products";
 export * from "./customers";
 export * from "./visit";
+export * from "./transactions";
+export * from "./transaction_items";

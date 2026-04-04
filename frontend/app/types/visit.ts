@@ -1,3 +1,22 @@
+type Transaction = {
+  transactionId: string;
+  transactionType: "cash" | "credit";
+  totalAmount: string;
+  totalDiscount: string;
+  finalAmount: string;
+  items: TransactionItem[]
+};
+
+type TransactionItem = {
+  transactionId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: string;
+  discount: number;
+  totalAfterDiscount: string;
+};
+
 export type Visit = {
   id: string;
 
@@ -22,8 +41,12 @@ export type Visit = {
 
   // status
   status: string;
-  visitResult?: string;
+  visitResult?: "string";
   duration: number;
+  transactions: Transaction[];
+  transactionItems: TransactionItem[];
+  transactionType?: string;
+  totalAmount?: number;
 
   // images
   checkInImage?: string;

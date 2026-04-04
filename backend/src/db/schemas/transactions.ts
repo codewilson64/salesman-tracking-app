@@ -18,6 +18,8 @@ export const transactionsTable = pgTable("transactions", {
 
   transactionType: transactionTypeEnum("transaction_type"),
   totalAmount: numeric("total_amount", { precision: 12, scale: 2 }),
+  totalDiscount: numeric("total_discount", { precision: 12, scale: 2 }).default("0").notNull(),
+  finalAmount: numeric("final_amount", { precision: 12, scale: 2 }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
