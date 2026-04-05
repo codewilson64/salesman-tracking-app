@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetProductById } from "../hooks/product/useGetProductById";
 import { useDeleteProduct } from "../hooks/product/useDeleteProduct";
+import back from '../assets/globalIcons/back.png'
 
 const ProductDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,21 +55,35 @@ const ProductDetail = () => {
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
       {/* Avatar */}
-      <View className="items-center mb-6">
-        <Image
-          source={{
-            uri: product.productImage
-              ? product.productImage
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  product.name
-                )}&size=128`,
-          }}
-          className="w-32 h-32 rounded-full mb-4"
-        />
+      <View className="mb-6">
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-0 top-0 p-2 z-10"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        {/* Centered content */}
+        <View className="items-center">
+          <Image
+            source={{
+              uri: product.productImage
+                ? product.productImage
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    product.name
+                  )}&size=128`,
+            }}
+            className="w-32 h-32 rounded-full mb-4"
+          />
+        </View>
       </View>
 
       {/* Info */}
-      <View className="mt-4">
+      <View>
         {/* Name */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>

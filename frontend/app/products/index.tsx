@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import back from '../assets/globalIcons/back.png'
 import { useGetAllProduct } from "../hooks/product/useGetAllProduct";
 
 const ProductScreen = () => {
@@ -27,7 +28,20 @@ const ProductScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-2xl font-bold mb-4">List of Products</Text>
+      <View className="flex-row items-center mb-4">
+      <Pressable
+        onPress={() => router.back()}
+        className="mr-3 p-2"
+      >
+        <Image
+          source={back}
+          className="w-6 h-6"
+          resizeMode="contain"
+        />
+      </Pressable>
+
+      <Text className="text-2xl font-bold">List of products</Text>
+    </View>
 
       <FlatList
         data={products}
@@ -35,7 +49,7 @@ const ProductScreen = () => {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`products/${item.id}`)}
-            className="flex-row items-center p-3 border-b border-gray-300"
+            className="flex-row items-center py-4 border-b border-gray-300"
           >
             <Image
               source={{
@@ -45,7 +59,7 @@ const ProductScreen = () => {
                       item.name
                     )}&background=random&size=64`,
               }}
-              className="w-16 h-16 rounded-full mr-4"
+              className="w-14 h-14 rounded-full mr-4"
             />
 
             {/* Salesman info */}

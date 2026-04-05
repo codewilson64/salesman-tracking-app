@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,7 @@ import { useGetAllSalesmen } from "../hooks/salesman/useGetAllSalesmen";
 import { FormInput } from "../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { FormMultiSelectModal } from "../components/areaInputForm/FormMultiSelectModal";
+import back from '../assets/globalIcons/back.png'
 
 type FormData = z.infer<typeof areaSchema>;
 
@@ -66,9 +68,20 @@ export default function CreateAreaScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-3xl font-bold mb-8 text-center">
-            Create Area
-          </Text>
+          <View className="flex-row items-center mb-8">
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3"
+            >
+              <Image
+                source={back}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text className="text-2xl font-bold">Create area</Text>
+          </View>
 
           <View className="gap-y-6">
             <FormInput control={control} name="name" label="Area Name" errors={errors} />

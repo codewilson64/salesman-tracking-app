@@ -16,6 +16,7 @@ import MapView, { Marker } from "react-native-maps";
 import { formatDuration } from "../helper/formatDuration";
 import { formatTime } from "../helper/formatTime";
 import { useDeleteVisit } from "../hooks/visit/useDeleteVisit";
+import back from '../assets/globalIcons/back.png'
 
 const VisitDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -89,22 +90,34 @@ const VisitDetail = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* IMAGE */}
-      <View className="items-center mb-6">
-        <Image
-          source={{
-           uri:
-            visit.checkInImage ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              visit.shopName
-            )}&background=random&size=128`
-          }}
-          className="w-32 h-32 rounded-full mb-4"
-        /> 
+      <View className="mb-6">
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-0 top-0 p-2 z-10"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+        
+        <View className="items-center">
+          <Image
+            source={{
+            uri:
+              visit.checkInImage ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                visit.shopName
+              )}&background=random&size=128`
+            }}
+            className="w-32 h-32 rounded-full mb-4"
+          /> 
+        </View>
       </View>
 
       {/* Info */}
-      <View className="mt-4">
+      <View>
         {/* Status */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>

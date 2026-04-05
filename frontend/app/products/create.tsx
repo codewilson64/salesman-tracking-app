@@ -8,6 +8,7 @@ import { useCreateProduct } from "../hooks/product/useCreateProduct";
 import { useState } from "react";
 import { pickImageFromLibrary } from "../utils/pickImage";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import back from '../assets/globalIcons/back.png'
 
 export default function CreateProductScreen() {
   const {
@@ -51,9 +52,20 @@ export default function CreateProductScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-3xl font-bold mb-8 text-center">
-            Create Product
-          </Text>
+          <View className="flex-row items-center mb-8">
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3"
+            >
+              <Image
+                source={back}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text className="text-2xl font-bold">Create product</Text>
+          </View>
 
           <View className="gap-y-6">
             {/* NAME */}

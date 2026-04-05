@@ -7,8 +7,9 @@ import { salesmanSchema, TSalesmanInput } from "../libs/salesmen.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateSalesman } from "../hooks/salesman/useCreateSalesmen";
 import { Image } from "react-native";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { pickImageFromLibrary } from "../utils/pickImage";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import back from '../assets/globalIcons/back.png'
 
 export default function CreateSalesmanScreen() {
   const {
@@ -52,9 +53,20 @@ export default function CreateSalesmanScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-3xl font-bold mb-8 text-center">
-            Create Salesman
-          </Text>
+          <View className="flex-row items-center mb-8">
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3"
+            >
+              <Image
+                source={back}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text className="text-2xl font-bold">Create salesmen</Text>
+          </View>
 
           <View className="gap-y-6">
             {/* NAME */}

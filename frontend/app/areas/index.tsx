@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import back from '../assets/globalIcons/back.png'
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetAllArea } from "../hooks/area/useGetAllAreas";
 import { Area, GroupedArea } from "../types/area";
@@ -55,13 +56,27 @@ const AreaScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-2xl font-bold mb-4">List of Areas</Text>
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">List of areas</Text>
+      </View>
 
       <FlatList
         data={groupedAreas}
         keyExtractor={(item) => item.salesmanName}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <View className="mb-6">
+          <View className="p-2 mb-6">
             {/* SALES MAN HEADER */}
             <View className="flex-row items-center mb-2">
               <Image
@@ -84,7 +99,7 @@ const AreaScreen = () => {
               <Pressable
                 key={area.id}
                 onPress={() => router.push(`areas/${area.id}`)}
-                className="flex-row items-center p-3 border-b border-gray-300"
+                className="flex-row items-center py-4 border-b border-gray-300"
               >
                 {/* NUMBER */}
                 <Text className="w-6 font-bold">

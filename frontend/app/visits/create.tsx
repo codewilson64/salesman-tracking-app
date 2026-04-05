@@ -21,9 +21,11 @@ import { useGetCustomersByArea } from "../hooks/area/useGetCustomersByArea";
 import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { useState } from "react";
 import { takePhoto } from "../utils/takePhoto";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Customer } from "../types/customer";
 import { Area } from "../types/area";
+
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import back from '../assets/globalIcons/back.png'
 
 type FormData = z.infer<typeof visitSchema>;
 
@@ -89,9 +91,20 @@ export default function CreateVisitScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-3xl font-bold mb-8 text-center">
-            Create Visit
-          </Text>
+          <View className="flex-row items-center mb-8">
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3"
+            >
+              <Image
+                source={back}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text className="text-2xl font-bold">Create visit</Text>
+          </View>
 
           {/* IMAGE */}
           <View>

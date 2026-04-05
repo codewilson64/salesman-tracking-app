@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import back from '../assets/globalIcons/back.png'
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetAllCustomer } from "../hooks/customer/useGetAllCustomer";
 import { Customer, GroupedCustomer } from "../types/customer";
@@ -58,13 +59,27 @@ const CustomerScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-2xl font-bold mb-4">List of Customers</Text>
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">List of customers</Text>
+      </View>
 
       <FlatList
         data={groupedCustomers}
         keyExtractor={(item) => item.salesmanName}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <View className="mb-6">
+          <View className="p-2 mb-6">
             {/* SALESMAN HEADER */}
             <View className="flex-row items-center mb-2">
               <Image
@@ -87,7 +102,7 @@ const CustomerScreen = () => {
               <Pressable
                 key={customer.id}
                 onPress={() => router.push(`customers/${customer.id}`)}
-                className="flex-row items-start p-3 border-b border-gray-300"
+                className="flex-row items-start py-4 border-b border-gray-300"
               >
                 {/* NUMBER */}
                 <Text className="w-6 font-bold">

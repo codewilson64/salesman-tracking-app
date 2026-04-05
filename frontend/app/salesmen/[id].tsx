@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetSalesmanById } from "../hooks/salesman/useGetSalesmanById";
 import { useDeleteSalesman } from "../hooks/salesman/useDeleteSalesman";
+import back from '../assets/globalIcons/back.png'
 
 const SalesmanDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,29 +55,43 @@ const SalesmanDetail = () => {
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
       {/* Avatar */}
-      <View className="items-center mb-6">
-        <Image
-          source={{
-            uri: salesman.profileImage
-              ? salesman.profileImage
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  salesman.name
-                )}&size=128`,
-          }}
-          className="w-32 h-32 rounded-full mb-4"
-        />
-        <Text className="text-2xl font-bold">{salesman.name}</Text>
-        <Text className="text-gray-500">{salesman.role}</Text>
+      <View className="mb-6">
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-0 top-0 p-2 z-10"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        {/* Avatar + info */}
+        <View className="items-center">
+          <Image
+            source={{
+              uri: salesman.profileImage
+                ? salesman.profileImage
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    salesman.name
+                  )}&size=128`,
+            }}
+            className="w-32 h-32 rounded-full mb-4"
+          />
+          <Text className="text-2xl font-bold">{salesman.name}</Text>
+          <Text className="text-gray-500">{salesman.role}</Text>
+        </View>
       </View>
 
       {/* Info */}
       <View className="mt-4">
         {/* Phone */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <View>
+          <View>
             <Text className="text-gray-500 text-sm">Phone</Text>
             <Text className="text-lg font-medium">{salesman.phone}</Text>
-            </View>
+          </View>
         </View>
 
         {/* Email */}

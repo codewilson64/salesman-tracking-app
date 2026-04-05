@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetCustomerById } from "../hooks/customer/useGetCustomerById";
 import { useDeleteCustomer } from "../hooks/customer/useDeleteCustomer";
 import MapView, { Marker } from "react-native-maps";
+import back from '../assets/globalIcons/back.png'
 
 const CustomerDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -78,20 +79,33 @@ const CustomerDetail = () => {
         showsVerticalScrollIndicator={false}
       >
       {/* INFO */}
-      <View className="items-center mb-6">
-        <Image
-          source={{
-            uri: customer.customerImage
-              ? customer.customerImage
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  customer.shopName
-                )}&background=random&size=128`,
-          }}
-          className="w-32 h-32 rounded-full mb-4"
-        /> 
+      <View className="mb-6">
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-0 top-0 p-2 z-10"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+        
+        <View className="items-center">
+          <Image
+            source={{
+              uri: customer.customerImage
+                ? customer.customerImage
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    customer.shopName
+                  )}&background=random&size=128`,
+            }}
+            className="w-32 h-32 rounded-full mb-4"
+          /> 
+        </View>
       </View>
 
-      <View className="mt-4">
+      <View>
         {/* SALESMAN */}
         <View className="p-4 border-b border-gray-200">
           <Text className="text-gray-500 text-sm">Salesman</Text>

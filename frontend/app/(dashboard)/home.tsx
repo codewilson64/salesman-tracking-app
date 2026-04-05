@@ -1,31 +1,23 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
 import Navbar from "../components/Navbar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
+import { Menus } from "../constants/menu";
 
 const Home = () => {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
-  const logout = useAuthStore((state) => state.logout)
+  const logout = useAuthStore((state) => state.logout);
 
-  const handleLogout =  () => {
-    logout()
+  const handleLogout = () => {
+    logout();
     router.replace("/login");
   };
 
-  const menuItems = [
-    { name: "Salesmen Staff", route: "/salesmen", roles: ["owner"] },
-    { name: "Products", route: "/products", roles: ["owner"] },
-    { name: "Areas", route: "/areas", roles: ["owner", "salesman"] },
-    { name: "Customers", route: "/customers", roles: ["owner", "salesman"] },
-    { name: "Visits", route: "/visits", roles: ["salesman"] },
-    { name: "Sales visits", route: "/sales-visits", roles: ["owner"] },
-  ];
-
-  const filteredMenu = menuItems.filter((item) =>
+  const filteredMenu = Menus.filter((item) =>
     item.roles.includes(user?.role || "")
   );
 
@@ -33,23 +25,26 @@ const Home = () => {
     <SafeAreaView className="flex-1 bg-white">
       <Navbar onLogout={handleLogout} />
 
-      <View className="p-4">
+      <View className="p-2">
         {filteredMenu.map((item) => (
-           <TouchableOpacity
-            key={item.name}
+          <TouchableOpacity
+            key={item.id}
             onPress={() => router.push(item.route)}
             className="flex-row items-center p-3 border-b border-gray-300 rounded-md mb-2 justify-between"
           >
-            {/* Left: icon/letter */}
+            {/* Left: icon + label */}
             <View className="flex-row items-center">
-              <View className="w-14 h-14 bg-black rounded-full justify-center items-center mr-4">
-                <Text className="text-white font-bold text-lg">
-                  {item.name[0]}
-                </Text>
+              <View className="w-16 h-16 rounded-full justify-center items-center mr-4 overflow-hidden">
+                <Image
+                  source={item.icon}
+                  className="w-12 h-12"
+                  resizeMode="contain"
+                />
               </View>
 
-              {/* Menu text */}
-              <Text className="font-semibold text-lg">{item.name}</Text>
+              <Text className="font-semibold text-lg">
+                {item.label}
+              </Text>
             </View>
           </TouchableOpacity>
         ))}

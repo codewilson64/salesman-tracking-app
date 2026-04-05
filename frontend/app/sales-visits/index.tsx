@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useGetAllVisits } from "../hooks/visit/useGetAllVisits";
 import { GroupedVisit, Visit } from "../types/visit";
+import back from '../assets/globalIcons/back.png'
 
 /* ================= HELPERS ================= */
 
@@ -90,9 +91,20 @@ const OwnerVisitScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-2xl font-bold mb-4">
-        Sales Visits Overview
-      </Text>
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">Sales visits overview</Text>
+      </View>
 
       <FlatList
         data={groupedVisits}
@@ -100,7 +112,7 @@ const OwnerVisitScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
-          <View className="mb-6">
+          <View className="p-2 mb-6">
             {/* SALESMAN HEADER */}
             <View className="flex-row items-center mb-2">
               <Image
@@ -123,7 +135,7 @@ const OwnerVisitScreen = () => {
               <Pressable
                 key={visit.id}
                 onPress={() => router.push(`/sales-visits/${visit.id}`)}
-                className="flex-row items-start p-3 border-b border-gray-300"
+                className="flex-row items-start py-3 border-b border-gray-300"
               >
                 {/* NUMBER */}
                 <Text className="w-6 font-bold">

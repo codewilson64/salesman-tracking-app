@@ -5,10 +5,12 @@ import {
   ActivityIndicator,
   Pressable,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useGetAllVisits } from "../hooks/visit/useGetAllVisits";
+import back from '../assets/globalIcons/back.png'
 
 /* ================= HELPERS ================= */
 
@@ -84,7 +86,20 @@ const VisitScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4">
-      <Text className="text-2xl font-bold mb-4">Visit History</Text>
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">Your visit</Text>
+      </View>
 
       <FlatList
         data={visits}

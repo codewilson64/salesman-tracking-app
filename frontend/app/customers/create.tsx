@@ -23,6 +23,7 @@ import { FormSelectModal } from "../components/areaInputForm/FormSelectModal";
 import { useState } from "react";
 import { takePhoto } from "../utils/takePhoto";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import back from '../assets/globalIcons/back.png'
 
 import { useGetLocation } from "../hooks/location/useGetLocation";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -97,9 +98,20 @@ export default function CreateCustomerScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-3xl font-bold mb-8 text-center">
-            Create Customer
-          </Text>
+          <View className="flex-row items-center mb-8">
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3"
+            >
+              <Image
+                source={back}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text className="text-2xl font-bold">Create customer</Text>
+          </View>
 
           <View className="gap-y-6">
             {/* AREA SELECT */}

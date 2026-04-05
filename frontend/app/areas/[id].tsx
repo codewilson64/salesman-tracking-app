@@ -1,8 +1,9 @@
-import { View, Text, ActivityIndicator, Pressable, Alert } from "react-native";
+import { View, Text, ActivityIndicator, Pressable, Alert, Image } from "react-native";
 import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetAreaById } from "../hooks/area/useGetAreaById";
 import { useDeleteArea } from "../hooks/area/useDeleteArea";
+import back from '../assets/globalIcons/back.png'
 
 const AreaDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,6 +55,21 @@ const AreaDetail = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">Area Detail</Text>
+      </View>
+      
       {/* Info */}
       <View className="mt-4">
         {/* Name */}
