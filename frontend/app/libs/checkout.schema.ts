@@ -1,15 +1,7 @@
 import { z } from "zod";
 
-const resultEnum = z.enum([
-  "new order",
-  "follow-up",
-  "shop closed",
-]);
-
-const transactionTypeEnum = z.enum([
-  "cash", 
-  "credit"
-]);
+export const results = ["new order", "follow-up", "shop closed"] as const;
+export const transactionTypes = ["cash", "credit"] as const;
 
 const transactionItemSchema = z.object({
   productId: z.uuid("Invalid product ID"),
@@ -19,9 +11,9 @@ const transactionItemSchema = z.object({
 });
 
 export const checkoutVisitSchema = z.object({
-  result: resultEnum,
+  result: z.enum(results),
   notes: z.string().min(1, "Notes is required"),
-  transactionType: transactionTypeEnum.optional(),
+  transactionType: z.enum(transactionTypes).optional(),
   products: z.array(transactionItemSchema).optional(),
 })
 .superRefine((data, ctx) => {
@@ -46,3 +38,4 @@ export const checkoutVisitSchema = z.object({
   
 
 export type TCheckoutVisit = z.input<typeof checkoutVisitSchema>;
+export type TCheckoutVisitParsed = z.output<typeof checkoutVisitSchema>;

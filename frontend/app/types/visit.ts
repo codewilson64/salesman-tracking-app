@@ -41,7 +41,7 @@ export type Visit = {
 
   // status
   status: string;
-  visitResult?: "string";
+  visitResult?: string;
   duration: number;
   transactions: Transaction[];
   transactionItems: TransactionItem[];
