@@ -23,10 +23,8 @@ export type Visit = {
   // relations
   areaId: string;
   areaName: string;
-
   customerId: string;
   customerName: string;
-
   salesmanId: string;
   salesmanName: string;
   salesmanImage?: string;
@@ -54,7 +52,7 @@ export type Visit = {
 
   // timestamps
   checkInAt?: string;
-  checkOutAt?: string;
+  checkOutAt?: string | null;
 
   // notes
   notes?: string;

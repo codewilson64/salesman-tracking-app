@@ -10,7 +10,7 @@ const Navbar = ({ onLogout }: NavbarProps) => {
   const user = useAuthStore((state) => state.user);
 
   return (
-    <View className="h-14 bg-white flex-row items-center justify-between px-4">
+    <View className="h-14 bg-gray-100 flex-row items-center justify-between px-4">
       <Text className="text-lg font-bold">{user?.email} ({user?.role})</Text>
 
       <Pressable

@@ -6,6 +6,8 @@ import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
 import { Menus } from "../constants/menu";
 
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 const Home = () => {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
@@ -22,31 +24,44 @@ const Home = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-gray-100">
       <Navbar onLogout={handleLogout} />
 
-      <View className="p-2">
+      <View className="p-4">
         {filteredMenu.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => router.push(item.route)}
-            className="flex-row items-center p-3 border-b border-gray-300 rounded-md mb-2 justify-between"
+          <View 
+            key={item.id} 
+            className="mb-3 bg-white rounded-xl shadow-sm overflow-hidden"
           >
-            {/* Left: icon + label */}
-            <View className="flex-row items-center">
-              <View className="w-16 h-16 rounded-full justify-center items-center mr-4 overflow-hidden">
-                <Image
-                  source={item.icon}
-                  className="w-12 h-12"
-                  resizeMode="contain"
-                />
+            <TouchableOpacity
+              onPress={() => router.push(item.route)}
+              className="flex-row items-center p-4 active:opacity-70"
+            >
+              {/* Left: Icon + Label */}
+              <View className="flex-row items-center flex-1">
+                <View className="w-16 h-16 justify-center items-center mr-4 overflow-hidden">
+                  <Image
+                    source={item.icon}
+                    className="w-12 h-12"
+                    resizeMode="contain"
+                  />
+                </View>
+
+                <Text className="font-semibold text-lg capitalize">
+                  {item.label}
+                </Text>
               </View>
 
-              <Text className="font-semibold text-lg">
-                {item.label}
-              </Text>
-            </View>
-          </TouchableOpacity>
+              {/* Right: Chevron Arrow */}
+              <View>
+                <MaterialIcons 
+                  name="keyboard-arrow-right" 
+                  size={24} 
+                  color="#9CA3AF" 
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </SafeAreaView>

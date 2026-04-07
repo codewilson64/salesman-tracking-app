@@ -28,7 +28,7 @@ const ProductScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 p-4">
+    <SafeAreaView className="flex-1 p-4 bg-gray-100">
       <View className="flex-row items-center mb-4">
       <Pressable
         onPress={() => router.back()}
@@ -47,39 +47,53 @@ const ProductScreen = () => {
       <FlatList
         data={products}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push(`screens/products/${item.id}`)}
-            className="flex-row items-center py-4 border-b border-gray-300"
-          >
-            <Image
-              source={{
-                uri: item.productImage
-                  ? item.productImage
-                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      item.name
-                    )}&background=random&size=64`,
-              }}
-              className="w-14 h-14 rounded-full mr-4"
-            />
-
-            {/* Salesman info */}
-            <View className="flex-1">
-              <Text className="font-bold text-lg">{item.name}</Text>
-              <Text className="text-gray-700">{item.price}</Text>
-              <Text className="text-gray-500">{item.description}</Text>
-            </View>
-            
+          <View className="mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
             <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                router.push(`screens/products/edit/${item.id}`);
-              }}
-              className="absolute bottom-3 right-3 bg-gray-200 p-2 rounded-full"
+              onPress={() => router.push(`screens/products/${item.id}`)}
+              className="flex-row items-center p-4"
             >
-              <FontAwesome6 name="edit" size={16} color="black" />
+              {/* Product Image */}
+              <Image
+                source={{
+                  uri: item.productImage
+                    ? item.productImage
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        item.name
+                      )}&background=random&size=64`,
+                }}
+                className="w-14 h-14 rounded-full mr-4"   // Changed to rounded-xl for consistency
+              />
+
+              {/* Product Info */}
+              <View className="flex-1 pr-2">
+                <Text className="font-bold text-lg capitalize">
+                  {item.name}
+                </Text>
+                {item.description && (
+                  <Text 
+                    className="text-gray-500 text-sm" 
+                    numberOfLines={2}
+                  >
+                    {item.description}
+                  </Text>
+                )}
+              </View>
+
+              {/* Edit Button */}
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  router.push(`screens/products/edit/${item.id}`);
+                }}
+                className="self-end"
+              >
+                <FontAwesome6 name="edit" size={16} color="black" />
+              </Pressable>
             </Pressable>
-          </Pressable>
+          </View>
         )}
       />
 

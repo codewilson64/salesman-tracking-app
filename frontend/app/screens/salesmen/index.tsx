@@ -47,37 +47,45 @@ const SalesmanScreen = () => {
       <FlatList
         data={salesmen}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push(`screens/salesmen/${item.id}`)}
-            className="flex-row items-center py-4 border-b border-gray-300"
-          >
-            <Image
-              source={{
-                uri: item.profileImage
-                  ? item.profileImage
-                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      item.name
-                    )}&background=random&size=64`,
-              }}
-              className="w-14 h-14 rounded-full mr-4"
-            />
-
-            {/* Salesman info */}
-            <View className="flex-1">
-              <Text className="font-bold text-lg">{item.name}</Text>
-            </View>
-            
+          <View className="mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
             <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                router.push(`screens/salesmen/edit/${item.id}`);
-              }}
-              className="absolute bottom-3 right-3 bg-gray-200 p-2 rounded-full"
+              onPress={() => router.push(`screens/salesmen/${item.id}`)}
+              className="flex-row items-center p-4"
             >
-              <FontAwesome6 name="edit" size={16} color="black" />
+              {/* Salesman Image */}
+              <Image
+                source={{
+                  uri: item.profileImage
+                    ? item.profileImage
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        item.name
+                      )}&background=random&size=64`,
+                }}
+                className="w-14 h-14 rounded-full mr-4"   // Consistent rounded-xl
+              />
+
+              {/* Salesman Info */}
+              <View className="flex-1 pr-2">
+                <Text className="font-bold text-lg capitalize">
+                  {item.name}
+                </Text>
+              </View>
+
+              {/* Edit Button */}
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  router.push(`screens/salesmen/edit/${item.id}`);
+                }}
+                className="self-end"
+              >
+                <FontAwesome6 name="edit" size={16} color="black" />
+              </Pressable>
             </Pressable>
-          </Pressable>
+          </View>
         )}
       />
 

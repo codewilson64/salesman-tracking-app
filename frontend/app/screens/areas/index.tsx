@@ -8,11 +8,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import back from '../../assets/globalIcons/back.png'
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetAllArea } from "../../hooks/area/useGetAllAreas";
 import { Area, GroupedArea } from "../../types/area";
+import { useState } from "react";
 
+import back from '../../assets/globalIcons/back.png'
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const AreaScreen = () => {
   const router = useRouter();
@@ -37,6 +39,15 @@ const AreaScreen = () => {
     }, {})
   );
 
+  const [expandedSalesmen, setExpandedSalesmen] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (salesmanId: string) => {
+    setExpandedSalesmen((prev) => ({
+      ...prev,
+      [salesmanId]: !prev[salesmanId],
+    }));
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -56,7 +67,7 @@ const AreaScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 p-4">
+    <SafeAreaView className="flex-1 p-4 bg-gray-100">
       <View className="flex-row items-center mb-4">
         <Pressable
           onPress={() => router.back()}
@@ -74,60 +85,88 @@ const AreaScreen = () => {
 
       <FlatList
         data={groupedAreas}
-        keyExtractor={(item) => item.salesmanName}
+        keyExtractor={(item) => item.salesmanId} // Better to use salesmanId if available
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View className="p-2 mb-6">
-            {/* SALES MAN HEADER */}
-            <View className="flex-row items-center mb-2">
-              <Image
-                source={{
-                  uri:
-                    item.salesmanImage ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      item.salesmanName
-                    )}&background=random&size=64`,
-                }}
-                className="w-12 h-12 rounded-full mr-3"
-              />
-              <Text className="text-xl font-bold capitalize">
-                {item.salesmanName}
-              </Text>
-            </View>
+        contentContainerStyle={{ paddingBottom: 100 }}
+        renderItem={({ item }) => {
+          const isExpanded = expandedSalesmen[item.salesmanId] ?? false
 
-            {/* AREAS LIST */}
-            {item.areas.map((area, index) => (
+          return (
+            <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
+              {/* SALESMAN HEADER - COLLAPSIBLE */}
               <Pressable
-                key={area.id}
-                onPress={() => router.push(`screens/areas/${area.id}`)}
-                className="flex-row items-center py-4 border-b border-gray-300"
+                onPress={() => toggleExpand(item.salesmanId)}
+                className="flex-row items-center justify-between py-3 px-1 active:opacity-70"
               >
-                {/* NUMBER */}
-                <Text className="w-6 font-bold">
-                  {index + 1}.
-                </Text>
-
-                {/* AREA INFO */}
-                <View className="flex-1">
-                  <Text className="font-semibold capitalize">
-                    {area.areaName} | {area.day}
-                  </Text>
+                <View className="flex-row items-center flex-1">
+                  <Image
+                    source={{
+                      uri:
+                        item.salesmanImage ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          item.salesmanName
+                        )}&background=random&size=64`,
+                    }}
+                    className="w-12 h-12 rounded-full mr-3"
+                  />
+                  <View>
+                    <Text className="text-xl font-bold capitalize">
+                      {item.salesmanName}
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      {item.areas.length} area{item.areas.length !== 1 ? 's' : ''}
+                    </Text>
+                  </View>
                 </View>
 
-                {/* EDIT BUTTON */}
-                <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    router.push(`screens/areas/edit/${area.id}`);
-                  }}
-                  className="bg-gray-200 p-2 rounded-full"
-                >
-                  <FontAwesome6 name="edit" size={16} color="black" />
-                </Pressable>
+                {/* Chevron Icon */}
+                <View className="ml-2">
+                  <MaterialIcons 
+                    name={isExpanded ? "keyboard-arrow-down" : "keyboard-arrow-right"} 
+                    size={24} 
+                    color="black" 
+                  />
+                </View>
               </Pressable>
-            ))}
-          </View>
-        )}
+
+              {/* AREAS LIST - Only shown when expanded */}
+              {isExpanded && (
+                <View className="pl-1">
+                  {item.areas.map((area, index) => (
+                    <Pressable
+                      key={area.id}
+                      onPress={() => router.push(`screens/areas/${area.id}`)}
+                      className="flex-row items-center py-4 border-b border-gray-200 last:border-b-0"
+                    >
+                      {/* NUMBER */}
+                      <Text className="w-6 font-bold text-black mt-0.5">
+                        {index + 1}.
+                      </Text>
+
+                      {/* AREA INFO */}
+                      <View className="flex-1">
+                        <Text className="font-semibold capitalize">
+                          {area.areaName} | {area.day}
+                        </Text>
+                      </View>
+
+                      {/* EDIT BUTTON */}
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          router.push(`screens/areas/edit/${area.id}`);
+                        }}
+                        className="p-2 rounded-full self-start mt-1"
+                      >
+                        <FontAwesome6 name="edit" size={16} color="black" />
+                      </Pressable>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        }}
       />
 
       {/* CREATE BUTTON */}

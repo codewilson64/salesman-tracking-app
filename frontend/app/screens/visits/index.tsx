@@ -19,6 +19,7 @@ import { getResultStyle } from "../../helper/resultStyle";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useCheckoutVisit } from "../../hooks/visit/useCheckoutVisit";
 import { useVisitDraftStore } from "../../stores/visitStore";
+import { Visit } from "../../types/visit";
 
 const VisitScreen = () => {
   const router = useRouter();
@@ -27,9 +28,7 @@ const VisitScreen = () => {
 
   const { result, transactionType, notes, products, reset } = useVisitDraftStore();
 
-  const hasActiveVisit = visits?.some(
-    (v: any) => v.checkOutAt === null
-  );
+  const hasActiveVisit = visits?.some((v: Visit) => v.checkOutAt === null);
 
   const handleCheckout = async () => {
     try {
@@ -86,7 +85,7 @@ const VisitScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 p-4">
+    <SafeAreaView className="flex-1 p-4 bg-gray-100">
       <View className="flex-row items-center mb-4">
         <Pressable
           onPress={() => router.back()}
