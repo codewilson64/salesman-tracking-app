@@ -23,7 +23,7 @@ import { Visit } from "../../types/visit";
 
 const VisitScreen = () => {
   const router = useRouter();
-  const { data: visits = [], isLoading, isError } = useGetAllVisits();
+  const { data: visits = [], isLoading, isError } = useGetAllVisits({});
   const { mutateAsync, isPending } = useCheckoutVisit();
 
   const { result, transactionType, notes, products, reset } = useVisitDraftStore();
@@ -31,27 +31,43 @@ const VisitScreen = () => {
   const hasActiveVisit = visits?.some((v: Visit) => v.checkOutAt === null);
 
   const handleCheckout = async () => {
-    try {
-      const mappedProducts = products.map((p) => ({
-        productId: p.productId,
-        quantity: Number(p.quantity),
-        price: Number(p.price),
-        discount: Number(p.discount || 0),
-      }));
+    Alert.alert(
+      "Confirm Checkout",
+      "Are you sure you want to checkout this visit?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes, Checkout",
+          style: "destructive",   // Makes the button red on iOS
+          onPress: async () => {
+            try {
+              const mappedProducts = products.map((p) => ({
+                productId: p.productId,
+                quantity: Number(p.quantity),
+                price: Number(p.price),
+                discount: Number(p.discount || 0),
+              }));
 
-      await mutateAsync({
-        result: result as "new order" | "follow-up" | "shop closed",
-        transactionType: transactionType as "cash" | "credit",
-        notes,
-        products: mappedProducts,
-      });
+              await mutateAsync({
+                result: result as "new order" | "follow-up" | "shop closed",
+                transactionType: transactionType as "cash" | "credit",
+                notes,
+                products: mappedProducts,
+              });
 
-      reset();
+              reset();
 
-      Alert.alert("Success", "Visit checked out successfully");
-    } catch (err) {
-      Alert.alert("Error", "Checkout failed");
-    }
+              Alert.alert("Success", "Visit checked out successfully");
+            } catch (err) {
+              Alert.alert("Error", "Checkout failed");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleCreateVisit = () => {
@@ -162,19 +178,21 @@ const VisitScreen = () => {
                     e.stopPropagation();
                     router.push(`/screens/visits/edit/${item.id}`);
                   }}
-                  className="bg-gray-200 p-2 rounded-full mr-3"
+                  className="bg-gray-200 p-2 rounded-full"
                 >
                   <FontAwesome6 name="edit" size={16} color="black" />
                 </Pressable>
 
                 {/* CHECKOUT */}
-                 <Pressable
+                {result && (
+                  <Pressable
                     onPress={handleCheckout}
                     disabled={isPending}
-                    className="bg-gray-200 p-2 rounded-full"
+                    className="bg-gray-200 p-2 rounded-full ml-3"
                   >
-                  <MaterialCommunityIcons name="logout" size={16} color="black" />
-                </Pressable>
+                    <MaterialCommunityIcons name="logout" size={16} color="black" />
+                  </Pressable>
+                )}
               </View>
             )}
             

@@ -7,8 +7,10 @@ export const createVisit = async (data: TVisitInput) => {
   return res.data.data;
 };
 
-export const getAllVisits = async () => {
-  const res = await api.get("/visits");
+export const getAllVisits = async ({ startDate, endDate, }: { startDate?: string; endDate?: string; }) => {
+  const res = await api.get("/visits", {
+    params: { startDate, endDate },
+  })
   return res.data.data;
 };
 

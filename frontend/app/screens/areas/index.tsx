@@ -9,44 +9,25 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useGetAllArea } from "../../hooks/area/useGetAllAreas";
-import { Area, GroupedArea } from "../../types/area";
-import { useState } from "react";
+import { Area } from "../../types/area";
+import { useMemo } from "react";
 
 import back from '../../assets/globalIcons/back.png'
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useExpand } from "../../hooks/useExpand";
+import { groupAreasBySalesman } from "../../utils/groupBy/sales";
 
 const AreaScreen = () => {
   const router = useRouter();
+
   const { data: areas = [], isLoading, isError } = useGetAllArea();
 
-  const groupedAreas: GroupedArea[] = Object.values(
-    (areas as Area[]).reduce<Record<string, GroupedArea>>((acc, area) => {
-      const key = area.salesmanId;
+  const { expanded, toggle } = useExpand();
 
-      if (!acc[key]) {
-        acc[key] = {
-          salesmanId: key,
-          salesmanName: area.salesmanName,
-          salesmanImage: area.salesmanImage,
-          areas: [],
-        };
-      }
-
-      acc[key].areas.push(area);
-
-      return acc;
-    }, {})
-  );
-
-  const [expandedSalesmen, setExpandedSalesmen] = useState<Record<string, boolean>>({});
-
-  const toggleExpand = (salesmanId: string) => {
-    setExpandedSalesmen((prev) => ({
-      ...prev,
-      [salesmanId]: !prev[salesmanId],
-    }));
-  };
+  const groupedAreas = useMemo(() => {
+    return groupAreasBySalesman(areas as Area[]);
+  }, [areas]);
 
   if (isLoading) {
     return (
@@ -89,13 +70,13 @@ const AreaScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => {
-          const isExpanded = expandedSalesmen[item.salesmanId] ?? false
+          const isExpanded = expanded[item.salesmanId] ?? false
 
           return (
             <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
               {/* SALESMAN HEADER - COLLAPSIBLE */}
               <Pressable
-                onPress={() => toggleExpand(item.salesmanId)}
+                onPress={() => toggle(item.salesmanId)}
                 className="flex-row items-center justify-between py-3 px-1 active:opacity-70"
               >
                 <View className="flex-row items-center flex-1">

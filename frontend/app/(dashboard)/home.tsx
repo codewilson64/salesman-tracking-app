@@ -57,7 +57,7 @@ const Home = () => {
                 <MaterialIcons 
                   name="keyboard-arrow-right" 
                   size={24} 
-                  color="#9CA3AF" 
+                  color="black" 
                 />
               </View>
             </TouchableOpacity>

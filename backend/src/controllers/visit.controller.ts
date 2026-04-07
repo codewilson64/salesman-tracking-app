@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, transactionsTable, transactionItemsTable } from "../db/schemas";
 import { db } from "..";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull, lte } from "drizzle-orm";
 
 export const createVisit = async (req: Request, res: Response) => {
   try {
@@ -270,18 +270,19 @@ export const getAllVisits = async (req: Request, res: Response) => {
       role: string;
     };
 
+    const { startDate, endDate } = req.query;
+
     if (!user?.companyId) {
       return res.status(401).json({
         message: "Unauthorized",
       });
     }
 
-    let condition;
+    let conditions = [];
 
-    /* ================= CONDITION ================= */
+    /* ================= BASE CONDITION ================= */
 
     if (user.role === "salesman") {
-      // 🔥 map userId → salesmanId
       const [salesman] = await db
         .select()
         .from(salesmenTable)
@@ -291,12 +292,19 @@ export const getAllVisits = async (req: Request, res: Response) => {
         return res.status(400).json({ message: "Salesman not found" });
       }
 
-      condition = and(
-        eq(visitsTable.companyId, user.companyId),
-        eq(visitsTable.salesmanId, user.userId) // ✅ direct filter
-      );
-    } else {
-      condition = eq(visitsTable.companyId, user.companyId);
+      conditions.push(eq(visitsTable.salesmanId, user.userId));
+    }
+
+    conditions.push(eq(visitsTable.companyId, user.companyId));
+
+    /* ================= DATE FILTER ================= */
+
+    if (startDate) {
+      conditions.push(gte(visitsTable.checkInAt, new Date(startDate as string)));
+    }
+
+    if (endDate) {
+      conditions.push(lte(visitsTable.checkInAt, new Date(endDate as string)));
     }
 
     /* ================= QUERY ================= */
@@ -332,7 +340,7 @@ export const getAllVisits = async (req: Request, res: Response) => {
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
       .leftJoin(areasTable, eq(visitsTable.areaId, areasTable.id))
       .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
-      .where(condition);
+      .where(and(...conditions));
 
     return res.status(200).json({
       message: "Visits fetched successfully",
