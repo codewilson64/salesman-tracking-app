@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, numeric, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { companiesTable } from "./companies";
 import { visitsTable } from "./visit";
 
@@ -15,7 +15,7 @@ export const transactionsTable = pgTable("transactions", {
   visitId: uuid("visit_id")
     .references(() => visitsTable.id)
     .notNull(),
-
+  
   transactionType: transactionTypeEnum("transaction_type"),
   totalAmount: numeric("total_amount", { precision: 12, scale: 2 }),
   totalDiscount: numeric("total_discount", { precision: 12, scale: 2 }).default("0").notNull(),

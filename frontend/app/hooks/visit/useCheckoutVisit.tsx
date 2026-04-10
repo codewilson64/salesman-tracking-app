@@ -8,10 +8,7 @@ export const useCheckoutVisit = () => {
     mutationFn: checkoutVisit,
 
     onSuccess: () => {
-      // refresh visit list
       queryClient.invalidateQueries({ queryKey: ["visits"] });
-
-      // optional (if you have active visit query)
       queryClient.invalidateQueries({ queryKey: ["active-visit"] });
     },
   });

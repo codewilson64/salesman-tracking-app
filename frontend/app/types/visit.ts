@@ -7,7 +7,7 @@ type Transaction = {
   items: TransactionItem[]
 };
 
-type TransactionItem = {
+export type TransactionItem = {
   transactionId: string;
   productId: string;
   productName: string;
@@ -19,8 +19,6 @@ type TransactionItem = {
 
 export type Visit = {
   id: string;
-
-  // relations
   areaId: string;
   areaName: string;
   customerId: string;
@@ -30,14 +28,12 @@ export type Visit = {
   salesmanImage?: string;
   salesmanImageId?: string;
 
-  // shop info
   shopName: string;
   address: string;
   city: string;
   latitude: number;
   longitude: number;
 
-  // status
   status: string;
   visitResult?: string;
   duration: number;
@@ -46,16 +42,19 @@ export type Visit = {
   transactionType?: string;
   totalAmount?: number;
 
-  // images
   checkInImage?: string;
   checkInImageId?: string;
 
-  // timestamps
   checkInAt?: string;
   checkOutAt?: string | null;
 
-  // notes
   notes?: string;
+  orderBy: string;
+
+  approvalStatus: string;
+  approveBy: string;
+  rejectionReason: string;
+  adminNote: string;
 };
 
 export type GroupedVisit = {

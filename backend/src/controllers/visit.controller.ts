@@ -110,7 +110,8 @@ export const createVisit = async (req: Request, res: Response) => {
 
 export const checkoutVisit = async (req: Request, res: Response) => {
   try {
-    const { result, notes, transactionType, products } = req.body;
+    const id = req.params.id as string;
+    const { result, notes, transactionType, products, orderBy } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -148,18 +149,22 @@ export const checkoutVisit = async (req: Request, res: Response) => {
 
     const data = await db.transaction(async (tx) => {
       // find active visit
-      const [activeVisit] = await tx
+      const [visit] = await tx
         .select()
         .from(visitsTable)
         .where(
           and(
-            eq(visitsTable.salesmanId, user.userId),
-            eq(visitsTable.status, "check-in")
+            eq(visitsTable.id, id),
+            eq(visitsTable.salesmanId, user.userId)
           )
         );
 
-      if (!activeVisit) {
-        throw new Error("No active visit found");
+      if (!visit) {
+        throw new Error("Visit not found");
+      }
+
+      if (visit.status !== "check-in") {
+        throw new Error("Visit is not active");
       }
 
       // update visit
@@ -168,10 +173,11 @@ export const checkoutVisit = async (req: Request, res: Response) => {
         .set({
           visitResult: result,
           notes,
+          orderBy,
           checkOutAt: new Date(),
           status: "check-out",
         })
-        .where(eq(visitsTable.id, activeVisit.id))
+        .where(eq(visitsTable.id, visit.id))
         .returning();
 
       let transaction = null;
@@ -205,7 +211,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           .insert(transactionsTable)
           .values({
             companyId: user.companyId,
-            visitId: activeVisit.id,
+            visitId: visit.id,
             transactionType,
             totalAmount: totals.totalAmount.toString(),
             totalDiscount: totals.totalDiscount.toString(), 
@@ -317,6 +323,7 @@ export const getAllVisits = async (req: Request, res: Response) => {
         checkOutAt: visitsTable.checkOutAt,
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
+        approvalStatus: visitsTable.approvalStatus,
         createdAt: visitsTable.createdAt,
 
         // customer info
@@ -382,6 +389,7 @@ export const getVisitById = async (req: Request, res: Response) => {
         status: visitsTable.status,
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
+        orderBy: visitsTable.orderBy,
         checkInImage: visitsTable.checkInImage,
         checkInImageId: visitsTable.checkInImageId,
 
@@ -540,6 +548,58 @@ export const deleteVisit = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       message: "Failed to delete visit",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const reviewVisit = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const { status, adminNote, rejectionReason } = req.body;
+
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (user.role !== "admin" && user.role !== "owner") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const data = await db.transaction(async (tx) => {
+      // 1. update visit approval
+      const [visit] = await tx
+        .update(visitsTable)
+        .set({
+          approvalStatus: status,
+          approvedBy: user.userId,
+          approvedAt: new Date(),
+          adminNote,
+          rejectionReason: status === "rejected" ? rejectionReason : null,
+        })
+        .where(eq(visitsTable.id, id))
+        .returning();
+
+      if (!visit) throw new Error("Visit not found");
+
+      return visit;
+    });
+
+    return res.json({
+      message: `Visit ${status}`,
+      data,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to review visit",
       error: error instanceof Error ? error.message : error,
     });
   }

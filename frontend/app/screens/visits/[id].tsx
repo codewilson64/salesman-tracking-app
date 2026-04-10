@@ -5,8 +5,6 @@ import {
   Image,
   Pressable,
   ScrollView,
-  Platform,
-  Linking,
   Alert,
   RefreshControl,
 } from "react-native";
@@ -24,6 +22,8 @@ import { useGetAllProduct } from "../../hooks/product/useGetAllProduct";
 import { Product } from "../../types/product";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { openMap } from "../../utils/openMap";
+import { useVisitTransaction } from "../../hooks/useVisitTransaction";
 
 const VisitDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,17 +32,20 @@ const VisitDetail = () => {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<"basic" | "transaction">("basic");
+  
+  const draft = useVisitDraftStore((state) => id ? state.drafts[id] : undefined);
+
+  const { data: visit, isLoading, isError } = useGetVisitById(id);
+  const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
+  const { data: products } = useGetAllProduct();
+  const { mappedItems, subtotal, totalDiscount, finalAmount, transactionType } = useVisitTransaction(visit, draft);
+  
   const onRefresh = async () => {
     setRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["visit", id] });
     setRefreshing(false);
   };
-
-  const { data: visit, isLoading, isError } = useGetVisitById(id);
-  const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
-  const { data: products } = useGetAllProduct();
-
-  const { products: draftProducts, result, transactionType, notes } = useVisitDraftStore();
 
   const handleDelete = () => {
     Alert.alert(
@@ -65,7 +68,7 @@ const VisitDetail = () => {
         },
       ]
     );
-  };
+  }
 
   if (isLoading) {
     return (
@@ -87,62 +90,6 @@ const VisitDetail = () => {
   const lng = visit.longitude;
 
   const hasLocation = lat != null && lng != null;
-
-  const openMap = () => {
-    if (!hasLocation) return;
-
-    const url = Platform.select({
-      ios: `maps:0,0?q=${lat},${lng}`,
-      android: `geo:0,0?q=${lat},${lng}`,
-      default: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-    });
-
-    Linking.openURL(url!);
-  };
-
-  /* ================= ✅ FIXED LOGIC ================= */
-
-  const isCheckedOut = !!visit.checkOutAt;
-
-  const dbItems = visit.transactions?.flatMap((t) => t.items) ?? [];
-
-  const displayItems = isCheckedOut ? dbItems : draftProducts;
-
-  const mappedDraftItems = displayItems.map((item: any) => {
-    const quantity = Number(item.quantity);
-    const price = Number(item.price);
-    const discount = Number(item.discount || 0);
-
-    const subtotal = price * quantity;
-
-    return {
-      ...item,
-      productName: item.productName ?? item.productId,
-      quantity,
-      price,
-      discount,
-      totalAfterDiscount:
-        Number(item.totalAfterDiscount) || subtotal - discount,
-    };
-  });
-
-  const subtotal = mappedDraftItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const totalDiscount = mappedDraftItems.reduce(
-    (sum, item) => sum + item.discount,
-    0
-  );
-
-  const finalAmount = subtotal - totalDiscount;
-
-  const displayTransactionType = isCheckedOut
-    ? visit.transactions?.[0]?.transactionType
-    : transactionType;
-
-  /* ================================================= */
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
@@ -184,14 +131,87 @@ const VisitDetail = () => {
         </View>
       </View>
 
-      {/* Info */}
-      <View>
+      {/* Tabs */}
+      <View className="flex-row mb-4 border-b border-gray-200">
+        <Pressable
+          onPress={() => setActiveTab("basic")}
+          className={`flex-1 py-3 ${
+            activeTab === "basic" ? "border-b-2 border-blue-500" : ""
+          }`}
+        >
+          <Text
+            className={`text-center font-medium ${
+              activeTab === "basic" ? "text-blue-500" : "text-gray-400"
+            }`}
+          >
+            Visit Info
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => setActiveTab("transaction")}
+          className={`flex-1 py-3 ${
+            activeTab === "transaction" ? "border-b-2 border-blue-500" : ""
+          }`}
+        >
+          <Text
+            className={`text-center font-medium ${
+              activeTab === "transaction" ? "text-blue-500" : "text-gray-400"
+            }`}
+          >
+            Visit Result
+          </Text>
+        </Pressable>
+      </View>
+
+      {activeTab === "basic" && (
+        <>
         {/* Status */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
             <Text className="text-gray-500 text-sm">Status</Text>
             <Text className="text-lg font-medium">
               {visit.status}
+            </Text>
+          </View>
+        </View>
+
+        {/* Result */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Result</Text>
+            <Text className="text-lg font-medium capitalize">
+              {visit.visitResult || draft?.result || "-"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Check In */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Check In</Text>
+            <Text className="text-lg font-medium">
+              {formatTime(visit.checkInAt)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Check Out */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Check Out</Text>
+            <Text className="text-lg font-medium">
+              {formatTime(visit.checkOutAt)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Duration */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Duration</Text>
+            <Text className="text-lg font-medium">
+              {formatDuration(visit.duration)}
             </Text>
           </View>
         </View>
@@ -246,52 +266,48 @@ const VisitDetail = () => {
           </View>
         </View>
 
-        {/* Check In */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Check In</Text>
-            <Text className="text-lg font-medium">
-              {formatTime(visit.checkInAt)}
-            </Text>
-          </View>
-        </View>
+        {/* MAP */}
+        {hasLocation && (
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm mb-2">Check-in location</Text>
 
-        {/* Check Out */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Check Out</Text>
-            <Text className="text-lg font-medium">
-              {formatTime(visit.checkOutAt)}
-            </Text>
+            <Pressable onPress={() => openMap(lat, lng)}>
+              <MapView
+                style={{ width: "100%", height: 200, borderRadius: 12 }}
+                initialRegion={{
+                  latitude: lat,
+                  longitude: lng,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: lat,
+                    longitude: lng,
+                  }}
+                  title={visit.shopName}
+                  description={visit.address}
+                />
+              </MapView>
+            </Pressable>
           </View>
-        </View>
+        )}
+        </>
+      )}   
 
-        {/* Duration */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Duration</Text>
-            <Text className="text-lg font-medium">
-              {formatDuration(visit.duration)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Result */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Result</Text>
-            <Text className="text-lg font-medium capitalize">
-              {visit.visitResult || result || "-"}
-            </Text>
-          </View>
-        </View>
-
+      {activeTab === "transaction" && (
+        <>
         {/* Transaction type */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
             <Text className="text-gray-500 text-sm">Transaction type</Text>
             <Text className="text-lg font-medium">
-              {displayTransactionType || "-"}
+              {transactionType || "-"}
             </Text>
           </View>
         </View>
@@ -300,7 +316,7 @@ const VisitDetail = () => {
         <View className="p-4 border-b border-gray-200">
           <Text className="text-gray-500 text-sm mb-3">Products</Text>
 
-          {mappedDraftItems.length ? (
+          {mappedItems.length ? (
             <View className="bg-gray-50 overflow-hidden">
               {/* Header */}
               <View className="flex-row justify-between px-3 py-2 bg-gray-100">
@@ -319,7 +335,7 @@ const VisitDetail = () => {
               </View>
 
               {/* Items */}
-              {mappedDraftItems.map((item, index) => {
+              {mappedItems.map((item: any, index: any) => {
                 const product = products?.find((p: Product) => p.id === item.productId);
 
                 return (
@@ -384,51 +400,30 @@ const VisitDetail = () => {
             <Text className="text-gray-400 text-sm">No products</Text>
           )}
         </View>
+        
+        {/* Order by */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Order by</Text>
+            <Text className="text-lg font-medium">
+              {visit.orderBy || draft?.orderBy || "-"}
+            </Text>
+          </View>
+        </View>
 
         {/* Notes */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
             <Text className="text-gray-500 text-sm">Notes</Text>
             <Text className="text-lg font-medium">
-              {visit.notes || notes || "-"}
+              {visit.notes || draft?.notes || "-"}
             </Text>
           </View>
         </View>
-      </View>
+        </>
+      )}
 
-      {/* MAP */}
-        {hasLocation && (
-          <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm mb-2">Check-in location</Text>
-
-            <Pressable onPress={openMap}>
-              <MapView
-                style={{ width: "100%", height: 200, borderRadius: 12 }}
-                initialRegion={{
-                  latitude: lat,
-                  longitude: lng,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: lat,
-                    longitude: lng,
-                  }}
-                  title={visit.shopName}
-                  description={visit.address}
-                />
-              </MapView>
-            </Pressable>
-          </View>
-        )}
-
-        {/* Button */}
+      {/* Button */}
         <View className="mt-6">
             <Pressable
               onPress={handleDelete}

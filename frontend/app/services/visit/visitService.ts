@@ -15,7 +15,9 @@ export const getAllVisits = async ({ startDate, endDate, }: { startDate?: string
 };
 
 export const checkoutVisit = async (data: TCheckoutVisit) => {
-  const res = await api.patch("/visits/checkout", data);
+  const { id, ...payload } = data;
+
+  const res = await api.patch(`/visits/${id}/checkout`, payload);
   return res.data.data;
 };
 

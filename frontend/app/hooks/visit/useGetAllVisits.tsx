@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getAllVisits } from "../../services/visit/visitService"
 import { useAuthStore } from "../../stores/authStore";
+import { Visit } from "../../types/visit";
 
 export const useGetAllVisits = (filters: {
   startDate?: string; 
@@ -8,7 +9,7 @@ export const useGetAllVisits = (filters: {
 }) => {
   const user = useAuthStore((state) => state.user);
 
-  return useQuery({
+  return useQuery<Visit[]>({
     queryKey: ["visits", user?.id, filters],
     queryFn: () => getAllVisits(filters),
     staleTime: 1000 * 60 * 5,

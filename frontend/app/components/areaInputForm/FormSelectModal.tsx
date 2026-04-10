@@ -15,21 +15,21 @@ export const FormSelectModal = ({
   label,
   options,
   getLabel,
-  errors,
 }: any) => {
   const [visible, setVisible] = useState(false);
-  const [tempValue, setTempValue] = useState<any>();
+  const [tempValue, setTempValue] = useState();
 
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { value, onChange } }) => {
+      render={({ field: { value, onChange }, fieldState: { error } }) => {
+        // ✅ Safe usage (not conditional)
         useEffect(() => {
           if (visible) {
             setTempValue(value);
           }
-        }, [visible]);
+        }, [visible, value]);
 
         const selected = options.find((o: any) => o.value === value);
 
@@ -37,6 +37,7 @@ export const FormSelectModal = ({
           <View>
             <Text className="mb-3">{label}</Text>
 
+            {/* SELECT BUTTON */}
             <Pressable
               onPress={() => setVisible(true)}
               className="border border-gray-300 rounded-lg p-4"
@@ -46,6 +47,7 @@ export const FormSelectModal = ({
               </Text>
             </Pressable>
 
+            {/* MODAL */}
             <Modal visible={visible} transparent animationType="fade">
               <View className="flex-1 justify-center items-center bg-black/40">
                 <View className="bg-white w-[90%] max-h-[75%] rounded-2xl py-7">
@@ -76,6 +78,7 @@ export const FormSelectModal = ({
                     })}
                   </ScrollView>
 
+                  {/* ACTIONS */}
                   <View className="flex-row justify-between px-5 mt-4">
                     <Pressable onPress={() => setTempValue(undefined)}>
                       <Text className="text-gray-500">Clear</Text>
@@ -94,9 +97,10 @@ export const FormSelectModal = ({
               </View>
             </Modal>
 
-            {errors?.[name] && (
+            {/* ✅ CORRECT ERROR HANDLING */}
+            {error && (
               <Text className="text-red-500 mt-1">
-                {errors[name].message}
+                {error.message}
               </Text>
             )}
           </View>

@@ -1,4 +1,4 @@
-export const formatTime = (dateString?: string) => {
+export const formatTime = (dateString?: string | null) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
   return date.toLocaleString(undefined, {

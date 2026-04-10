@@ -10,7 +10,7 @@ import {
 import back from '../../../assets/globalIcons/back.png'
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCheckoutVisit } from "../../../hooks/visit/useCheckoutVisit";
 import { useGetAllProduct } from "../../../hooks/product/useGetAllProduct";
@@ -19,34 +19,64 @@ import { Product } from "../../../types/product";
 import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../../components/areaInputForm/FormInput";
 import { useVisitDraftStore } from "../../../stores/visitStore";
+import { useEffect } from "react";
+import { DraftProduct } from "../../../types/visitDraft";
 
 const results = ["new order", "follow-up", "shop closed"];
 const transactionTypes = ["cash", "credit"];
 
 const CheckoutVisit = () => {
   const router = useRouter();
-  const { mutateAsync, isPending } = useCheckoutVisit();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const {isPending } = useCheckoutVisit();
   const { data: products } = useGetAllProduct()
 
-  const { setAll } = useVisitDraftStore();
+  const { setDraft, getDraft } = useVisitDraftStore();
 
   const {
     control,
     handleSubmit,
     setError,
     watch,
+    reset,
     formState: { errors },
   } = useForm<TCheckoutVisit>({
     resolver: zodResolver(checkoutVisitSchema),
     defaultValues: {
+      id: id,
+      notes: "",
       products: [],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "products",
   });
+
+  /* ================= PREFILL FORM ================= */
+
+  useEffect(() => {
+    if (!id) return;
+
+    const draft = getDraft(id);
+
+    if (draft) {
+      reset({
+        result: draft.result as any,
+        transactionType: draft.transactionType ?? undefined,
+        products: draft.products.map((p) => ({
+          productId: p.productId,
+          quantity: p.quantity,
+          discount: p.discount,
+        })),
+        orderBy: draft.orderBy || "",
+        notes: draft.notes || "",
+      });
+
+      replace(draft.products);
+    }
+  }, [id]);
 
    /* ================= WATCH AREA ================= */
 
@@ -56,12 +86,14 @@ const CheckoutVisit = () => {
 
   const onSubmit = async (data: TCheckoutVisit) => {
     try {
-      const mappedProducts =
-        data.products?.map((p) => {
-          const product = products?.find(
-            (prod: Product) => prod.id === p.productId
-          );
+      let mappedProducts: DraftProduct[] = [];
+      let finalTransactionType = data.transactionType || null;
+      let finalOrderBy = data.orderBy || "";
 
+      // Only keep products if result is "new order"
+      if (data.result === "new order") {
+        mappedProducts = data.products?.map((p) => {
+          const product = products?.find((prod: Product) => prod.id === p.productId);
           return {
             productId: p.productId,
             quantity: Number(p.quantity),
@@ -69,12 +101,18 @@ const CheckoutVisit = () => {
             discount: Number(p.discount || 0),
           };
         }) || [];
+      } else {
+        // Clear product-related fields for other results
+        finalTransactionType = null;
+        finalOrderBy = "";
+      }
 
-      setAll({
+      setDraft(id, {
         result: data.result || null,
-        transactionType: data.transactionType || null,
-        notes: data.notes || "",
+        transactionType: finalTransactionType,
         products: mappedProducts,
+        orderBy: finalOrderBy,
+        notes: data.notes || "",
       });
 
       router.back();
@@ -142,7 +180,6 @@ const CheckoutVisit = () => {
                       append({
                         productId: "",
                         quantity: 1,
-                        price: 0,
                         discount: 0,
                       })
                     }
@@ -150,6 +187,12 @@ const CheckoutVisit = () => {
                   >
                     <Text className="text-white text-center">Add Product</Text>
                   </Pressable>
+
+                  {errors.products && (
+                    <Text className="text-red-500">
+                      {errors.products.message}
+                    </Text>
+                  )}
 
                   {/* PRODUCT LIST */}
                   {fields.map((field, index) => {
@@ -225,6 +268,13 @@ const CheckoutVisit = () => {
                       </View>
                     );
                   })}
+
+                  {/* ORDER BY */}
+                  <FormInput
+                    control={control}
+                    name="orderBy"
+                    label="Order by"
+                  />
                 </>
               )}
 

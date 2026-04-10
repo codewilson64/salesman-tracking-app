@@ -1,46 +1,44 @@
+// stores/visitStore.ts
+
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type DraftProduct = {
-  productId: string;
-  quantity: number;
-  price: number;
-  discount: number;
-};
+import { VisitDraft, VisitDraftState } from "../types/visitDraft";
 
-type VisitDraftState = {
-  visitId: string | null;
-  result: string | null;
-  transactionType: string | null;
-  notes: string;
-  products: DraftProduct[];
-
-  setAll: (data: Partial<VisitDraftState>) => void;
-  reset: () => void;
+const defaultDraft: VisitDraft = {
+  result: null,
+  transactionType: null,
+  products: [],
+  orderBy: "",
+  notes: "",
 };
 
 export const useVisitDraftStore = create<VisitDraftState>()(
   persist(
-    (set) => ({
-      visitId: null,
-      result: null,
-      transactionType: null,
-      notes: "",
-      products: [],
+    (set, get) => ({
+      drafts: {},
 
-      setAll: (data) =>
+      setDraft: (visitId, data) =>
         set((state) => ({
-          ...state,
-          ...data,
+          drafts: {
+            ...state.drafts,
+            [visitId]: {
+              ...(state.drafts[visitId] || defaultDraft),
+              ...data,
+            },
+          },
         })),
 
-      reset: () =>
-        set({
-          result: null,
-          transactionType: null,
-          notes: "",
-          products: [],
+      getDraft: (visitId) => {
+        return get().drafts[visitId];
+      },
+
+      resetDraft: (visitId) =>
+        set((state) => {
+          const newDrafts = { ...state.drafts };
+          delete newDrafts[visitId];
+          return { drafts: newDrafts };
         }),
     }),
     {
