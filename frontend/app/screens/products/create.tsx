@@ -1,5 +1,5 @@
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
-import { Controller, useForm } from "react-hook-form";
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,6 +11,7 @@ import back from '../../assets/globalIcons/back.png'
 import { productSchema, TProductInput } from "../../libs/product.schema";
 import { useCreateProduct } from "../../hooks/product/useCreateProduct";
 import { pickImageFromLibrary } from "../../utils/pickImage";
+import { FormInput } from "../../components/areaInputForm/FormInput";
 
 export default function CreateProductScreen() {
   const {
@@ -20,11 +21,16 @@ export default function CreateProductScreen() {
     formState: { errors },
   } = useForm<TProductInput>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+    }
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateProduct();
   const [image, setImage] = useState<string | null>(null);
+
+  const { mutateAsync, isPending } = useCreateProduct();
 
   const pickImage = async () => {
       const uri = await pickImageFromLibrary();
@@ -71,71 +77,31 @@ export default function CreateProductScreen() {
 
           <View className="gap-y-6">
             {/* NAME */}
-            <View>
-              <Text className="mb-3 text-gray-700">Name</Text>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.name && (
-                <Text className="text-red-500 mt-1">
-                  {errors.name.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="name" 
+              label="Name" 
+              errors={errors} 
+            />
 
             {/* DESC */}
-            <View>
-              <Text className="mb-3 text-gray-700">Description</Text>
-              <Controller
-                control={control}
-                name="description"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.description && (
-                <Text className="text-red-500 mt-1">
-                  {errors.description.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="description" 
+              label="Description" 
+              errors={errors} 
+            />
 
             {/* PRICE */}
-            <View>
-              <Text className="mb-3 text-gray-700">Price</Text>
-              <Controller
-                control={control}
-                name="price"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value?.toString() ?? ""}
-                    onChangeText={(text) => onChange(Number(text))}
-                    keyboardType="numeric"
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.price && (
-                <Text className="text-red-500 mt-1">
-                  {errors.price.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="price" 
+              label="Price" 
+              errors={errors} 
+            />
 
             {/* IMAGE */}
-              <View>
+            <View>
               <Text className="mb-3 text-gray-700">Photo</Text>
                 <Pressable
                   onPress={pickImage}
@@ -168,7 +134,7 @@ export default function CreateProductScreen() {
                     </View>
                   )}
                 </Pressable>
-              </View>
+            </View>
           </View>
 
             <Pressable

@@ -27,8 +27,6 @@ import { Area } from "../../types/area";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../components/areaInputForm/FormInput";
 
-
-
 type FormData = z.infer<typeof customerSchema>;
 
 export default function CreateCustomerScreen() {
@@ -41,17 +39,27 @@ export default function CreateCustomerScreen() {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(customerSchema),
+    defaultValues: {
+      customerName: "",
+      shopName: "",
+      phone: "",
+      address: "",
+    }
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateCustomer();
-  const { data: areas } = useGetAllArea();
   const [image, setImage] = useState<string | null>(null);
+
+  const { data: areas } = useGetAllArea();
+  const { mutateAsync, isPending } = useCreateCustomer();
   const { getLocation, loading: locationLoading } = useGetLocation();
   
   const pickImage = async () => {
     const uri = await takePhoto();
-    if (uri) setImage(uri);
+    if (uri) {
+      setImage(uri);
+      setValue("customerImage", uri); // ✅ sync to RHF
+    }
   };
 
   /* ================= WATCH AREA ================= */
@@ -212,7 +220,7 @@ export default function CreateCustomerScreen() {
               <Text className="mb-3 text-gray-700">Photo</Text>
                 <Pressable
                   onPress={pickImage}
-                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-1 overflow-hidden"
                 >
                   {image ? (
                     <>
@@ -239,6 +247,12 @@ export default function CreateCustomerScreen() {
                     </View>
                   )}
                 </Pressable>
+
+                {errors.customerImage && (
+                  <Text className="text-red-500 mb-4">
+                    Photo is required
+                  </Text>
+                )}
             </View>
           </View>
 

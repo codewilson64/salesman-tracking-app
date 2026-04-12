@@ -20,6 +20,7 @@ import { useGetAllSalesmen } from "../../hooks/salesman/useGetAllSalesmen";
 import { FormInput } from "../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormMultiSelectModal } from "../../components/areaInputForm/FormMultiSelectModal";
+import { Salesman } from "../../types/salesman";
 
 type FormData = z.infer<typeof areaSchema>;
 
@@ -41,17 +42,23 @@ export default function CreateAreaScreen() {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(areaSchema),
+    defaultValues: {
+      name: "",
+      city: "",
+      weeks: [],
+    }
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateArea();
+
   const { data: salesmen } = useGetAllSalesmen();
+  const { mutateAsync, isPending } = useCreateArea();
 
   const onSubmit = async (data: FormData) => {
     try {
       await mutateAsync(data);
       router.back();
-    } catch (err: any) {
+    } catch (err) {
       setError("root", { message: "Create failed" });
     }
   };
@@ -84,19 +91,29 @@ export default function CreateAreaScreen() {
           </View>
 
           <View className="gap-y-6">
-            <FormInput control={control} name="name" label="Area Name" errors={errors} />
+            <FormInput 
+              control={control} 
+              name="name" 
+              label="Area Name" 
+              errors={errors} 
+            />
 
-            <FormInput control={control} name="city" label="City" errors={errors} />
+            <FormInput 
+              control={control} 
+              name="city" 
+              label="City" 
+              errors={errors} 
+            />
 
             <FormSelectModal
               control={control}
               name="salesmanId"
               label="Salesman"
-              options={salesmen?.map((s: any) => ({
+              options={salesmen?.map((s: Salesman) => ({
                 value: s.id,
                 name: s.name,
               })) || []}
-              getLabel={(item: any) => item.name}
+              getLabel={(item: Salesman) => item.name}
               errors={errors}
             />
 
@@ -105,7 +122,7 @@ export default function CreateAreaScreen() {
               name="day"
               label="Day"
               options={days.map((d) => ({ value: d }))}
-              getLabel={(item: any) => item.value}
+              getLabel={(item: { value: string }) => item.value}
               errors={errors}
             />
 

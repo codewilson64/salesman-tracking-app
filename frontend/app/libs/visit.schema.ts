@@ -1,9 +1,9 @@
 import z from "zod";
 
 export const visitSchema = z.object({
-  areaId: z.uuid("Invalid area ID"),
-  customerId: z.uuid("Invalid customer ID"),
-  checkInImage: z.url().optional(),
+  areaId: z.uuid("Area is required"),
+  customerId: z.uuid("Please select customer"),
+  checkInImage: z.string().min(1, "Photo is required"),
   checkInImageId: z.string().optional(),
 });
 

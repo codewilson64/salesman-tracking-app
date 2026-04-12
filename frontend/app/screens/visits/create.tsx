@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -42,13 +42,17 @@ export default function CreateVisitScreen() {
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateVisit();
-  const { data: areas } = useGetAllArea();
   const [image, setImage] = useState<string | null>(null);
+
+  const { data: areas } = useGetAllArea();
+  const { mutateAsync, isPending } = useCreateVisit();
   
   const pickImage = async () => {
     const uri = await takePhoto();
-    if (uri) setImage(uri);
+    if (uri) {
+      setImage(uri);
+      setValue("checkInImage", uri); // ✅ sync to RHF
+    }
   };
 
   /* ================= WATCH ================= */
@@ -111,7 +115,7 @@ export default function CreateVisitScreen() {
               <Text className="mb-3 text-gray-700">Check in photo</Text>
                 <Pressable
                   onPress={pickImage}
-                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-2 overflow-hidden"
                 >
                   {image ? (
                     <>
@@ -140,6 +144,12 @@ export default function CreateVisitScreen() {
                     </View>
                   )}
                 </Pressable>
+                
+                {errors.checkInImage && (
+                  <Text className="text-red-500 mb-4">
+                    Photo is required
+                  </Text>
+                )}
           </View>
 
           <View className="gap-y-6">

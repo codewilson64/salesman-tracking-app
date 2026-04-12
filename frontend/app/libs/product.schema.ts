@@ -3,9 +3,9 @@ import { z } from "zod";
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   description: z.string().optional(),
-  price: z.number().min(0, "Price must be at least 0"),
+  price: z.coerce.number().min(0, "Price must be at least 0"),
   productImage: z.url().optional(),
   productImageId: z.string().optional(),
 });
 
-export type TProductInput = z.infer<typeof productSchema>;
+export type TProductInput = z.input<typeof productSchema>;

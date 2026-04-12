@@ -10,24 +10,35 @@ import back from '../../assets/globalIcons/back.png'
 import { salesmanSchema, TSalesmanInput } from "../../libs/salesmen.schema";
 import { useCreateSalesman } from "../../hooks/salesman/useCreateSalesmen";
 import { pickImageFromLibrary } from "../../utils/pickImage";
+import { FormInput } from "../../components/areaInputForm/FormInput";
 
 export default function CreateSalesmanScreen() {
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<TSalesmanInput>({
     resolver: zodResolver(salesmanSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    }
   });
 
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateSalesman();
   const [image, setImage] = useState<string | null>(null);
+
+  const { mutateAsync, isPending } = useCreateSalesman();
 
   const pickImage = async () => {
     const uri = await pickImageFromLibrary();
-    if (uri) setImage(uri);
+      if (uri) {
+        setImage(uri);
+        setValue("profileImage", uri); // ✅ sync to RHF
+      }
   };
 
   const onSubmit = async (data: TSalesmanInput) => {
@@ -70,110 +81,51 @@ export default function CreateSalesmanScreen() {
 
           <View className="gap-y-6">
             {/* NAME */}
-            <View>
-              <Text className="mb-3 text-gray-700">Full Name</Text>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.name && (
-                <Text className="text-red-500 mt-1">
-                  {errors.name.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="name" 
+              label="Fullname" 
+              errors={errors} 
+            />
 
             {/* EMAIL */}
-            <View>
-              <Text className="mb-3 text-gray-700">Email</Text>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.email && (
-                <Text className="text-red-500 mt-1">
-                  {errors.email.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="email" 
+              label="Email" 
+              errors={errors} 
+            />
 
             {/* PASSWORD */}
-            <View>
-              <Text className="mb-3 text-gray-700">Password</Text>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    secureTextEntry
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.password && (
-                <Text className="text-red-500 mt-1">
-                  {errors.password.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="password" 
+              label="Password" 
+              errors={errors} 
+            />
 
             {/* ADDRESS */}
-            <View>
-              <Text className="mb-3 text-gray-700">Address (optional)</Text>
-              <Controller
-                control={control}
-                name="address"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-            </View>
+            <FormInput 
+              control={control} 
+              name="address" 
+              label="Address" 
+              errors={errors} 
+            />
 
             {/* PHONE */}
-            <View>
-              <Text className="mb-3 text-gray-700">Phone (optional)</Text>
-              <Controller
-                control={control}
-                name="phone"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    keyboardType="phone-pad"
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-            </View>
+            <FormInput 
+              control={control} 
+              name="phone" 
+              label="Phone" 
+              errors={errors} 
+            />
             
             {/* IMAGE */}
               <View>
               <Text className="mb-3 text-gray-700">Photo</Text>
                 <Pressable
                   onPress={pickImage}
-                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
+                  className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-1 overflow-hidden"
                 >
                   {image ? (
                     <>
@@ -202,6 +154,11 @@ export default function CreateSalesmanScreen() {
                     </View>
                   )}
                 </Pressable>
+                {errors.profileImage && (
+                  <Text className="text-red-500 mb-4">
+                    Photo is required
+                  </Text>
+                )}
               </View>
             </View>
 

@@ -34,11 +34,11 @@ const VisitDetail = () => {
 
   const [activeTab, setActiveTab] = useState<"basic" | "transaction">("basic");
   
-  const draft = useVisitDraftStore((state) => id ? state.drafts[id] : undefined);
-
+  const { data: products } = useGetAllProduct();
   const { data: visit, isLoading, isError } = useGetVisitById(id);
   const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
-  const { data: products } = useGetAllProduct();
+  
+  const draft = useVisitDraftStore((state) => id ? state.drafts[id] : undefined);
   const { mappedItems, subtotal, totalDiscount, finalAmount, transactionType } = useVisitTransaction(visit, draft);
   
   const onRefresh = async () => {
