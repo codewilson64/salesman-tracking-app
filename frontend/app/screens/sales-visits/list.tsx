@@ -161,15 +161,21 @@ const OwnerVisitScreen = () => {
                       </View>
 
                       {/* RESULT BADGE */}
-                      <View
-                        className={`mt-1 self-start px-3 py-1 rounded-full ${getResultStyle(
-                          visit.visitResult
-                        )}`}
-                      >
-                        <Text className="text-xs font-semibold capitalize">
-                          {visit.visitResult || "Checking in..."}
-                        </Text>
-                      </View>
+                      {(() => {
+                        const style = getResultStyle(visit.visitResult);
+
+                        return (
+                          <View
+                            className={`mt-1 self-start px-3 py-1 rounded ${style.bg}`}
+                          >
+                            <Text
+                              className={`text-xs font-semibold capitalize ${style.text}`}
+                            >
+                              {visit.visitResult || "Checking in..."}
+                            </Text>
+                          </View>
+                        );
+                      })()}
                     </Pressable>
                   ))}
                 </View>

@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+import z from "zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,16 +20,45 @@ import { formatTime } from "../../helper/formatTime";
 import { formatDuration } from "../../helper/formatDuration";
 import { openMap } from "../../utils/openMap";
 import { useState } from "react";
+import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useReviewVisit } from "../../hooks/review-visit/useReviewVisit";
+import { reviewVisitSchema } from "../../libs/reviewVisit.schema";
+import { FormInput } from "../../components/areaInputForm/FormInput";
+
+type FormData = z.infer<typeof reviewVisitSchema>;
+
+const approval_status = [
+  { label: "Accept", value: "approved" },
+  { label: "Reject", value: "rejected" },
+];
 
 const SalesVisitDetail = () => {
+  const {
+    control,
+    handleSubmit,
+    setError,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(reviewVisitSchema),
+    defaultValues: {
+      adminNote: "",
+      rejectionReason: "",
+    }
+  });
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
   const { data: visit, isLoading, isError } = useGetVisitById(id);
   const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
+  const { mutateAsync, isPending: isReviewing } = useReviewVisit()
 
-  const [activeTab, setActiveTab] = useState<"basic" | "transaction">("basic");
+  const [activeTab, setActiveTab] = useState<"info" | "result">("info");
 
+  
   const handleDelete = () => {
     Alert.alert(
       `Delete Visit?`,
@@ -62,7 +92,7 @@ const SalesVisitDetail = () => {
       </View>
     );
   }
-
+  
   if (isError || !visit) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -71,10 +101,25 @@ const SalesVisitDetail = () => {
     );
   }
   
+  const isReviewed = !!visit.approvalStatus;
+
   const lat = visit.latitude;
   const lng = visit.longitude;
   
   const hasLocation = lat != null && lng != null;
+
+  /* ================= SUBMIT ================= */
+  
+  const onSubmit = async (data: FormData) => {
+    try {
+      await mutateAsync({ id, data });
+      Alert.alert("Success", "Visit reviewed");
+    } catch (err: any) {
+      setError("root", {
+        message: err?.response?.data?.message || "Create failed",
+      });
+    }
+  };
   
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
@@ -104,14 +149,14 @@ const SalesVisitDetail = () => {
       {/* Tabs */}
       <View className="flex-row mb-4 border-b border-gray-200">
         <Pressable
-          onPress={() => setActiveTab("basic")}
+          onPress={() => setActiveTab("info")}
           className={`flex-1 py-3 ${
-            activeTab === "basic" ? "border-b-2 border-blue-500" : ""
+            activeTab === "info" ? "border-b-2 border-blue-500" : ""
           }`}
         >
           <Text
             className={`text-center font-medium ${
-              activeTab === "basic" ? "text-blue-500" : "text-gray-400"
+              activeTab === "info" ? "text-blue-500" : "text-gray-400"
             }`}
           >
             Visit Info
@@ -119,14 +164,14 @@ const SalesVisitDetail = () => {
         </Pressable>
 
         <Pressable
-          onPress={() => setActiveTab("transaction")}
+          onPress={() => setActiveTab("result")}
           className={`flex-1 py-3 ${
-            activeTab === "transaction" ? "border-b-2 border-blue-500" : ""
+            activeTab === "result" ? "border-b-2 border-blue-500" : ""
           }`}
         >
           <Text
             className={`text-center font-medium ${
-              activeTab === "transaction" ? "text-blue-500" : "text-gray-400"
+              activeTab === "result" ? "text-blue-500" : "text-gray-400"
             }`}
           >
             Visit Result
@@ -134,7 +179,7 @@ const SalesVisitDetail = () => {
         </Pressable>
       </View>
 
-      {activeTab === "basic" && (
+      {activeTab === "info" && (
         <>
         {/* Status */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
@@ -270,7 +315,7 @@ const SalesVisitDetail = () => {
         </>
       )}      
 
-      {activeTab === "transaction" && (
+      {activeTab === "result" && (
         <>
           {/* Transaction type */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
@@ -398,10 +443,100 @@ const SalesVisitDetail = () => {
               </Text>
             </View>
           </View>
+
+          {/* ================= APPROVAL RESULT ================= */}
+          {isReviewed && (
+            <>
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Approval Status</Text>
+                  <Text
+                    className={`text-lg font-medium capitalize ${
+                      visit.approvalStatus === "approved"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {visit.approvalStatus}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Admin Note */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Admin Note</Text>
+                  <Text className="text-lg font-medium">
+                    {visit.adminNote || "-"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Rejection Reason */}
+              {visit.approvalStatus === "rejected" && (
+                <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                  <View>
+                    <Text className="text-gray-500 text-sm">Rejection Reason</Text>
+                    <Text className="text-lg font-medium text-red-600">
+                      {visit.rejectionReason || "-"}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </>
+          )}
+
+          {/* ================= APPROVAL SECTION ================= */}   
+          {!isReviewed && (
+            <View className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <Text className="text-base font-semibold mb-4">
+                Review Visit
+              </Text>
+
+              <View className="gap-4">
+                <FormSelectModal
+                  control={control}
+                  name="status"
+                  label="Approval Status"
+                  options={approval_status}
+                  getLabel={(item: { label: string }) => item.label}
+                  errors={errors}
+                />
+
+                <FormInput 
+                  control={control} 
+                  name="adminNote" 
+                  label="Notes" 
+                  errors={errors} 
+                />
+                
+                {watch("status") === "rejected" && (
+                  <FormInput 
+                    control={control} 
+                    name="rejectionReason" 
+                    label="Rejection Reason" 
+                    errors={errors} 
+                  />
+                )}
+              </View>
+
+              {/* Submit */}
+              <Pressable
+                onPress={handleSubmit(onSubmit)}
+                className="bg-black rounded-lg p-4 mt-6"
+              >
+                <Text className="text-white text-center font-semibold">
+                  {isReviewing ? "Submitting..." : "Submit"}
+                </Text>
+              </Pressable>
+            </View>
+          )}
         </>
       )}
+
+  
         {/* Button */}
-        <View className="mt-6">
+        {/* <View className="mt-6">
             <Pressable
               onPress={handleDelete}
               disabled={isPending}
@@ -411,7 +546,7 @@ const SalesVisitDetail = () => {
                 Delete Visit
             </Text>
             </Pressable>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

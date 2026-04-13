@@ -48,7 +48,7 @@ export default function EditProductScreen() {
     try {
       await mutateAsync({ id, data, image, oldImageId: product?.productImageId });
       router.back();
-    } catch (err: any) {
+    } catch (err) {
       setError("root", { message: "Update failed" });
     }
   };

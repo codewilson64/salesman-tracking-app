@@ -6,12 +6,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useState } from "react";
 
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import back from '../../assets/globalIcons/back.png'
 import { productSchema, TProductInput } from "../../libs/product.schema";
 import { useCreateProduct } from "../../hooks/product/useCreateProduct";
 import { pickImageFromLibrary } from "../../utils/pickImage";
 import { FormInput } from "../../components/areaInputForm/FormInput";
+
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import back from '../../assets/globalIcons/back.png'
 
 export default function CreateProductScreen() {
   const {

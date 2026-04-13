@@ -393,6 +393,12 @@ export const getVisitById = async (req: Request, res: Response) => {
         checkInImage: visitsTable.checkInImage,
         checkInImageId: visitsTable.checkInImageId,
 
+        approvalStatus: visitsTable.approvalStatus,
+        approvedBy: visitsTable.approvedBy,
+        approvedAt: visitsTable.approvedAt,
+        adminNote: visitsTable.adminNote,
+        rejectionReason: visitsTable.rejectionReason,
+
         // customer info
         customerId: customersTable.id,
         customerName: customersTable.customerName,

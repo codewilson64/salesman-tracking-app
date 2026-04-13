@@ -1,5 +1,5 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Image, ScrollView } from "react-native";
-import { Controller, useForm } from "react-hook-form";
+import { View, Text, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Image, ScrollView } from "react-native";
+import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import z from "zod";
@@ -9,12 +9,15 @@ import { useUpdateSalesman } from "../../../hooks/salesman/useUpdateSalesman";
 import { useGetSalesmanById } from "../../../hooks/salesman/useGetSalesmanById";
 import { pickImageFromLibrary } from "../../../utils/pickImage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { FormInput } from "../../../components/areaInputForm/FormInput";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type FormData = z.infer<typeof salesmanSchema>;
 
 export default function EditSalesmanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+
   const { mutateAsync, isPending } = useUpdateSalesman();
   const { data: salesman, isLoading } = useGetSalesmanById(id);
   
@@ -24,7 +27,9 @@ export default function EditSalesmanScreen() {
     setError,
     formState: { isDirty, errors },
     reset,
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    resolver: zodResolver(salesmanSchema),
+  });
   
   const [image, setImage] = useState<string | null>(null);
   const isDisabled = (!isDirty && !image) || isPending;
@@ -48,7 +53,7 @@ export default function EditSalesmanScreen() {
     try {
       await mutateAsync({ id, data, image, oldImageId: salesman?.profileImageId });
       router.back();
-    } catch (err: any) {
+    } catch (err) {
       setError("root", { message: "Update failed" });
     }
   };
@@ -109,68 +114,28 @@ export default function EditSalesmanScreen() {
             </View>
 
             {/* NAME */}
-            <View>
-              <Text className="mb-3 text-gray-700">Full Name</Text>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.name && (
-                <Text className="text-red-500 mt-1">
-                  {errors.name.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="name" 
+              label="Name" 
+              errors={errors} 
+            />
 
             {/* ADDRESS */}
-            <View>
-              <Text className="mb-3 text-gray-700">Address</Text>
-              <Controller
-                control={control}
-                name="address"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.address && (
-                <Text className="text-red-500 mt-1">
-                  {errors.address.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="address" 
+              label="Address" 
+              errors={errors} 
+            />
 
             {/* PHONE */}
-            <View>
-              <Text className="mb-3 text-gray-700">Phone</Text>
-              <Controller
-                control={control}
-                name="phone"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    keyboardType="phone-pad"
-                    value={value}
-                    onChangeText={onChange}
-                    className="border border-gray-300 rounded-lg p-4"
-                  />
-                )}
-              />
-              {errors.phone && (
-                <Text className="text-red-500 mt-1">
-                  {errors.phone.message}
-                </Text>
-              )}
-            </View>
+            <FormInput 
+              control={control} 
+              name="phone" 
+              label="Phone" 
+              errors={errors} 
+            />
           </View>
 
           {/* BUTTON */}

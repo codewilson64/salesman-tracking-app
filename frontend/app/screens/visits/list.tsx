@@ -184,23 +184,29 @@ const VisitList = () => {
               )}
             </View>
 
-            {item.visitResult && (
-              <View className="flex-col gap-1">
-                <View
-                    className={`mt-1 self-end px-2 py-1 rounded ${getResultStyle(
-                    item.visitResult
-                    )}`}
-                >
-                    <Text className="text-xs font-semibold capitalize">
-                    {item.visitResult}
+            {item.visitResult && (() => {
+              const style = getResultStyle(item.visitResult);
+
+              return (
+                <View className="flex-col gap-1">
+                  <View
+                    className={`mt-1 self-end px-2 py-1 rounded ${style.bg}`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold capitalize ${style.text}`}
+                    >
+                      {item.visitResult}
                     </Text>
-                </View>
-                <Text className="text-lg capitalize">
-                    {item.checkOutAt && item.visitResult === "new order" && 
+                  </View>
+
+                  <Text className="text-lg capitalize">
+                    {item.checkOutAt &&
+                      item.visitResult === "new order" &&
                       `(${item.approvalStatus || "Pending"})`}
-                </Text>
-              </View>
-            )}
+                  </Text>
+                </View>
+              );
+            })()}
 
             {(!item.checkOutAt || item.approvalStatus === "rejected") && (
               <View className="absolute bottom-3 right-3 flex-row items-center">               
