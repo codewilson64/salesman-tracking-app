@@ -15,12 +15,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCheckoutVisit } from "../../../hooks/visit/useCheckoutVisit";
 import { useGetAllProduct } from "../../../hooks/product/useGetAllProduct";
 import { checkoutVisitSchema, TCheckoutVisit } from "../../../libs/checkout.schema";
-import { Product } from "../../../types/product";
 import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../../components/areaInputForm/FormInput";
 import { useVisitDraftStore } from "../../../stores/visitStore";
 import { useEffect } from "react";
-import { DraftProduct } from "../../../types/visitDraft";
+import { mapCheckoutToDraft } from "../../../utils/mapCheckoutToDraft";
+import { ProductFieldItem } from "../../../components/ProductFieldItem";
 
 const results = ["new order", "follow-up", "shop closed"];
 const transactionTypes = ["cash", "credit"];
@@ -28,6 +28,7 @@ const transactionTypes = ["cash", "credit"];
 const CheckoutVisit = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const {isPending } = useCheckoutVisit();
   const { data: products } = useGetAllProduct()
 
@@ -46,6 +47,8 @@ const CheckoutVisit = () => {
       id: id,
       notes: "",
       products: [],
+      paidAmount: 0,
+      paymentType: null,
     },
   });
 
@@ -71,6 +74,8 @@ const CheckoutVisit = () => {
           discount: p.discount,
         })),
         orderBy: draft.orderBy || "",
+        paymentType: draft.paymentType || null,
+        paidAmount: draft.paidAmount || 0,
         notes: draft.notes || "",
       });
 
@@ -81,39 +86,15 @@ const CheckoutVisit = () => {
    /* ================= WATCH AREA ================= */
 
   const selectedResult = watch("result");
+  const selectedTransactionType = watch("transactionType");
+  const paidAmount = watch("paidAmount");  
 
    /* ================= SUBMIT ================= */
 
   const onSubmit = async (data: TCheckoutVisit) => {
     try {
-      let mappedProducts: DraftProduct[] = [];
-      let finalTransactionType = data.transactionType || null;
-      let finalOrderBy = data.orderBy || "";
-
-      // Only keep products if result is "new order"
-      if (data.result === "new order") {
-        mappedProducts = data.products?.map((p) => {
-          const product = products?.find((prod: Product) => prod.id === p.productId);
-          return {
-            productId: p.productId,
-            quantity: Number(p.quantity),
-            price: product?.price || 0,
-            discount: Number(p.discount || 0),
-          };
-        }) || [];
-      } else {
-        // Clear product-related fields for other results
-        finalTransactionType = null;
-        finalOrderBy = "";
-      }
-
-      setDraft(id, {
-        result: data.result || null,
-        transactionType: finalTransactionType,
-        products: mappedProducts,
-        orderBy: finalOrderBy,
-        notes: data.notes || "",
-      });
+      const draft = mapCheckoutToDraft(data, products);
+      setDraft(id, draft);
 
       router.back();
     } catch (err) {
@@ -195,79 +176,18 @@ const CheckoutVisit = () => {
                   )}
 
                   {/* PRODUCT LIST */}
-                  {fields.map((field, index) => {
-                    const productId = watch(`products.${index}.productId`);
-                    const quantity = Number(watch(`products.${index}.quantity`) || 0);
-
-                    const selectedProduct = products?.find(
-                      (p: Product) => p.id === productId
-                    );
-
-                    const price = selectedProduct?.price || 0;
-                    const discount = Number(watch(`products.${index}.discount`) || 0);
-
-                    const subtotal = price * quantity;
-                    const total = subtotal - discount;
-
-                    return (
-                      <View key={field.id} className="border border-gray-300 p-3 rounded-lg mt-4 gap-3">
-                        {/* PRODUCT SELECT */}
-                        <FormSelectModal
-                          control={control}
-                          name={`products.${index}.productId`}
-                          label="Product"
-                          options={
-                            products?.map((p: Product) => ({
-                              value: p.id,
-                              name: p.name,
-                            })) || []
-                          }
-                          getLabel={(item: Product) => item.name}
-                          errors={errors}
-                        />
-
-                        {/* QUANTITY */}
-                        <FormInput
-                          control={control}
-                          name={`products.${index}.quantity`}
-                          label="Quantity"
-                          keyboardType="numeric"
-                        />
-                        
-                        {/* DISCOUNT */}
-                        <FormInput
-                          control={control}
-                          name={`products.${index}.discount`}
-                          label="Discount"
-                          keyboardType="numeric"
-                        />
-
-                        {/* PRICE */}
-                        <View>
-                          <Text className="mb-2">Price</Text>
-                          <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
-                            <Text>{price || "-"}</Text>
-                          </View>
-                        </View>
-
-                        {/* TOTAL */}
-                        <View>
-                          <Text className="mb-2">Total</Text>
-                          <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
-                            <Text>{total || "-"}</Text>
-                          </View>
-                        </View>
-
-                        {/* REMOVE */}
-                        <Pressable
-                          onPress={() => remove(index)}
-                          className="bg-red-500 p-2 rounded"
-                        >
-                          <Text className="text-white text-center">Remove</Text>
-                        </Pressable>
-                      </View>
-                    );
-                  })}
+                  {fields.map((field, index) => (
+                    <ProductFieldItem
+                      key={field.id}
+                      field={field}
+                      index={index}
+                      control={control}
+                      watch={watch}
+                      products={products}
+                      remove={remove}
+                      errors={errors}
+                    />
+                  ))}
 
                   {/* ORDER BY */}
                   <FormInput
@@ -275,6 +195,48 @@ const CheckoutVisit = () => {
                     name="orderBy"
                     label="Order by"
                   />
+
+                  {/* PAYMENT SECTION */}
+                  {/* CASH */}
+                  {selectedTransactionType === "cash" && (
+                    <FormSelectModal
+                      control={control}
+                      name="paymentType"
+                      label="Payment Method"
+                      options={[
+                        { value: "cash" },
+                        { value: "transfer" },
+                      ]}
+                      getLabel={(item: { value: string }) => item.value}
+                      errors={errors}
+                    />
+                  )}
+
+                  {/* CREDIT */}
+                  {selectedTransactionType === "credit" && (
+                    <>
+                      <FormInput
+                        control={control}
+                        name="paidAmount"
+                        label="Paid Amount"
+                        keyboardType="numeric"
+                      />
+
+                      {Number(paidAmount) > 0 && (
+                        <FormSelectModal
+                          control={control}
+                          name="paymentType"
+                          label="Payment Method"
+                          options={[
+                            { value: "cash" },
+                            { value: "transfer" },
+                          ]}
+                          getLabel={(item: { value: string }) => item.value}
+                          errors={errors}
+                        />
+                      )}
+                    </>
+                  )}
                 </>
               )}
 

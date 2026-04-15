@@ -5,6 +5,10 @@ type Transaction = {
   totalDiscount: string;
   finalAmount: string;
   items: TransactionItem[]
+
+  paymentStatus: "paid" | "partial" | "unpaid"
+  paidAmount: number,
+  paymentType: "cash" | "transfer"
 };
 
 export type TransactionItem = {

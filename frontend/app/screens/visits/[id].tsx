@@ -39,7 +39,7 @@ const VisitDetail = () => {
   const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
   
   const draft = useVisitDraftStore((state) => id ? state.drafts[id] : undefined);
-  const { mappedItems, subtotal, totalDiscount, finalAmount, transactionType } = useVisitTransaction(visit, draft);
+  const { mappedItems, subtotal, totalDiscount, finalAmount, transactionType, paymentStatus, paidAmount, paymentType } = useVisitTransaction(visit, draft);
   
   const onRefresh = async () => {
     setRefreshing(true);
@@ -306,7 +306,7 @@ const VisitDetail = () => {
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
             <Text className="text-gray-500 text-sm">Transaction type</Text>
-            <Text className="text-lg font-medium">
+            <Text className="text-lg font-medium capitalize">
               {transactionType || "-"}
             </Text>
           </View>
@@ -399,6 +399,44 @@ const VisitDetail = () => {
           ) : (
             <Text className="text-gray-400 text-sm">No products</Text>
           )}
+        </View>
+
+        {/* Payment Status */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Payment Status</Text>
+            <Text
+              className={`text-lg font-medium capitalize ${
+                paymentStatus === "paid"
+                  ? "text-green-600"
+                  : paymentStatus === "partial"
+                  ? "text-yellow-600"
+                  : "text-red-600"
+              }`}
+            >
+              {paymentStatus || "-"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Paid Amount */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Paid Amount</Text>
+            <Text className="text-lg font-medium">
+               Rp {Number(paidAmount).toLocaleString()}
+            </Text>
+          </View>
+        </View>
+
+        {/* Payment Type */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">Payment Type</Text>
+            <Text className="text-lg font-medium capitalize">
+               {paymentType || "-"}
+            </Text>
+          </View>
         </View>
         
         {/* Order by */}

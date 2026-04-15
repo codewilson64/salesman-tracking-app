@@ -111,7 +111,7 @@ export const createVisit = async (req: Request, res: Response) => {
 export const checkoutVisit = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { result, notes, transactionType, products, orderBy } = req.body;
+    const { result, notes, transactionType, products, orderBy, paymentType, paidAmount } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -143,6 +143,14 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       if (!products || !Array.isArray(products) || products.length === 0) {
         return res.status(400).json({
           message: "Products are required for new order",
+        });
+      }
+    }
+
+    if (transactionType === "cash") {
+      if (!paymentType) {
+        return res.status(400).json({
+          message: "Payment type is required for cash transaction",
         });
       }
     }
@@ -206,6 +214,27 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           }
         );
 
+        let paymentStatus: "paid" | "partial" | "unpaid" = "unpaid";
+        let finalPaidAmount = 0;
+        let finalPaymentType = paymentType || null;
+
+        if (transactionType === "cash") {
+          paymentStatus = "paid";
+          finalPaidAmount = totals.finalAmount;
+        } else {
+          const paid = Number(paidAmount || 0);
+          finalPaidAmount = paid;
+
+          if (paid === 0) paymentStatus = "unpaid";
+          else if (paid < totals.finalAmount) paymentStatus = "partial";
+          else paymentStatus = "paid";
+
+          // no payment yet → no method
+          if (paid === 0) {
+            finalPaymentType = null;
+          }
+        }
+
         // ✅ create transaction
         const [newTransaction] = await tx
           .insert(transactionsTable)
@@ -213,9 +242,18 @@ export const checkoutVisit = async (req: Request, res: Response) => {
             companyId: user.companyId,
             visitId: visit.id,
             transactionType,
+
             totalAmount: totals.totalAmount.toString(),
             totalDiscount: totals.totalDiscount.toString(), 
-            finalAmount: totals.finalAmount.toString(),     
+            finalAmount: totals.finalAmount.toString(),    
+            
+            paymentStatus,
+            paidAmount: finalPaidAmount.toString(),
+            paymentType: finalPaymentType,
+
+            remainingAmount: (
+              totals.finalAmount - finalPaidAmount
+            ).toString(),
           })
           .returning();
 
@@ -279,9 +317,7 @@ export const getAllVisits = async (req: Request, res: Response) => {
     const { startDate, endDate } = req.query;
 
     if (!user?.companyId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     let conditions = [];
@@ -447,6 +483,10 @@ export const getVisitById = async (req: Request, res: Response) => {
         totalAmount: transactionsTable.totalAmount,
         totalDiscount: transactionsTable.totalDiscount,  
         finalAmount: transactionsTable.finalAmount, 
+
+        paymentStatus: transactionsTable.paymentStatus,
+        paymentType: transactionsTable.paymentType,
+        paidAmount: transactionsTable.paidAmount,
       })
       .from(transactionsTable)
       .where(

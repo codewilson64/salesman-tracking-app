@@ -9,6 +9,8 @@ export type VisitDraft = {
   result: "new order" | "follow-up" | "shop closed" | null;
   transactionType: "cash" | "credit" | null;
   products: DraftProduct[];
+  paidAmount: number;
+  paymentType: "cash" | "transfer" | null;
   orderBy: string;
   notes: string;
 };

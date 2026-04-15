@@ -60,7 +60,7 @@ const VisitList = () => {
       return;
     }
 
-    const { result, transactionType, orderBy, notes, products } = draft;
+    const { result, transactionType, orderBy, notes, products, paidAmount, paymentType } = draft;
 
     Alert.alert(
       "Confirm Checkout",
@@ -85,6 +85,8 @@ const VisitList = () => {
                 transactionType: transactionType as "cash" | "credit",
                 products: mappedProducts,
                 orderBy,
+                paymentType,
+                paidAmount,
                 notes,
               });
 
@@ -198,17 +200,17 @@ const VisitList = () => {
                       {item.visitResult}
                     </Text>
                   </View>
-
+{/* 
                   <Text className="text-lg capitalize">
                     {item.checkOutAt &&
                       item.visitResult === "new order" &&
                       `(${item.approvalStatus || "Pending"})`}
-                  </Text>
+                  </Text> */}
                 </View>
               );
             })()}
 
-            {(!item.checkOutAt || item.approvalStatus === "rejected") && (
+            {!item.checkOutAt && (
               <View className="absolute bottom-3 right-3 flex-row items-center">               
                 {/* EDIT */}
                 <Pressable

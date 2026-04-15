@@ -8,6 +8,7 @@ import areaRoute from './routes/area.route.js'
 import customerRoute from './routes/customer.route.js'
 import visitRoute from './routes/visit.route.js'
 import uploadRoute from './routes/upload.route.js'
+import transactionRoute from './routes/transaction.route.js'
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/areas', areaRoute)
 app.use('/api/customers', customerRoute)
 app.use('/api/visits', visitRoute)
 app.use('/api/upload', uploadRoute)
+app.use('/api/transactions/outstanding', transactionRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");

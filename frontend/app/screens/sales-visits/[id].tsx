@@ -53,7 +53,7 @@ const SalesVisitDetail = () => {
   const router = useRouter();
 
   const { data: visit, isLoading, isError } = useGetVisitById(id);
-  const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
+  const { mutateAsync: deleteVisit } = useDeleteVisit();
   const { mutateAsync, isPending: isReviewing } = useReviewVisit()
 
   const [activeTab, setActiveTab] = useState<"info" | "result">("info");
@@ -101,7 +101,7 @@ const SalesVisitDetail = () => {
     );
   }
   
-  const isReviewed = !!visit.approvalStatus;
+  const isReviewed = ["approved", "rejected"].includes(visit.approvalStatus);
 
   const lat = visit.latitude;
   const lng = visit.longitude;
@@ -425,14 +425,14 @@ const SalesVisitDetail = () => {
           </View>
 
           {/* Order by */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Order by</Text>
-            <Text className="text-lg font-medium">
-              {visit.orderBy || "-"}
-            </Text>
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Order by</Text>
+              <Text className="text-lg font-medium">
+                {visit.orderBy || "-"}
+              </Text>
+            </View>
           </View>
-        </View>
 
           {/* Notes */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
@@ -444,96 +444,51 @@ const SalesVisitDetail = () => {
             </View>
           </View>
 
-          {/* ================= APPROVAL RESULT ================= */}
-          {isReviewed && (
+          {/* Payment Info */}
+          {visit.transactions?.[0] && (
             <>
+              {/* Payment Status */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Approval Status</Text>
+                  <Text className="text-gray-500 text-sm">Payment Status</Text>
                   <Text
                     className={`text-lg font-medium capitalize ${
-                      visit.approvalStatus === "approved"
+                      visit.transactions[0].paymentStatus === "paid"
                         ? "text-green-600"
+                        : visit.transactions[0].paymentStatus === "partial"
+                        ? "text-yellow-600"
                         : "text-red-600"
                     }`}
                   >
-                    {visit.approvalStatus}
+                    {visit.transactions[0].paymentStatus || "-"}
                   </Text>
                 </View>
               </View>
 
-              {/* Admin Note */}
+              {/* Payment Type */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Admin Note</Text>
-                  <Text className="text-lg font-medium">
-                    {visit.adminNote || "-"}
+                  <Text className="text-gray-500 text-sm">Payment Type</Text>
+                  <Text className="text-lg font-medium capitalize">
+                    {visit.transactions[0].paymentType || "-"}
                   </Text>
                 </View>
               </View>
 
-              {/* Rejection Reason */}
-              {visit.approvalStatus === "rejected" && (
-                <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                  <View>
-                    <Text className="text-gray-500 text-sm">Rejection Reason</Text>
-                    <Text className="text-lg font-medium text-red-600">
-                      {visit.rejectionReason || "-"}
-                    </Text>
-                  </View>
+              {/* Paid Amount */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Paid Amount</Text>
+                  <Text className="text-lg font-medium">
+                    Rp{" "}
+                    {Number(visit.transactions[0].paidAmount || 0).toLocaleString()}
+                  </Text>
                 </View>
-              )}
-            </>
-          )}
-
-          {/* ================= APPROVAL SECTION ================= */}   
-          {!isReviewed && (
-            <View className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <Text className="text-base font-semibold mb-4">
-                Review Visit
-              </Text>
-
-              <View className="gap-4">
-                <FormSelectModal
-                  control={control}
-                  name="status"
-                  label="Approval Status"
-                  options={approval_status}
-                  getLabel={(item: { label: string }) => item.label}
-                  errors={errors}
-                />
-
-                <FormInput 
-                  control={control} 
-                  name="adminNote" 
-                  label="Notes" 
-                  errors={errors} 
-                />
-                
-                {watch("status") === "rejected" && (
-                  <FormInput 
-                    control={control} 
-                    name="rejectionReason" 
-                    label="Rejection Reason" 
-                    errors={errors} 
-                  />
-                )}
               </View>
-
-              {/* Submit */}
-              <Pressable
-                onPress={handleSubmit(onSubmit)}
-                className="bg-black rounded-lg p-4 mt-6"
-              >
-                <Text className="text-white text-center font-semibold">
-                  {isReviewing ? "Submitting..." : "Submit"}
-                </Text>
-              </Pressable>
-            </View>
+            </>
           )}
         </>
       )}
-
   
         {/* Button */}
         {/* <View className="mt-6">

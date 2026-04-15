@@ -22,6 +22,9 @@ export const useVisitTransaction = (
         totalDiscount: 0,
         finalAmount: 0,
         transactionType: null as "cash" | "credit" | null,
+        paymentStatus: null as "paid" | "partial" | "unpaid" | null,
+        paidAmount: 0,
+        paymentType: null as "cash" | "transfer" | null,
       };
     }
 
@@ -67,12 +70,27 @@ export const useVisitTransaction = (
       ? visit.transactions?.[0]?.transactionType ?? null
       : draft?.transactionType ?? null;
 
+    const paymentStatus = isCheckedOut
+      ? visit.transactions?.[0]?.paymentStatus ?? null
+      : null;
+
+    const paidAmount = isCheckedOut
+      ? visit.transactions?.[0]?.paidAmount ?? 0
+      : draft?.paidAmount ?? 0;
+
+    const paymentType = isCheckedOut
+      ? visit.transactions?.[0]?.paymentType ?? 0
+      : draft?.paymentType ?? 0;
+
     return {
       mappedItems,
       subtotal,
       totalDiscount,
       finalAmount,
       transactionType,
+      paymentStatus,
+      paidAmount,
+      paymentType,
     };
   }, [visit, draft]);
 };

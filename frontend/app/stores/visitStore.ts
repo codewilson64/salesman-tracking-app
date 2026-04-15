@@ -10,6 +10,8 @@ const defaultDraft: VisitDraft = {
   result: null,
   transactionType: null,
   products: [],
+  paidAmount: 0,         
+  paymentType: null,      
   orderBy: "",
   notes: "",
 };

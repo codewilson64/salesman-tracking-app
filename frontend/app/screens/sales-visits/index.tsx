@@ -56,6 +56,7 @@ const DateListScreen = () => {
       <FlatList
         data={dateList}
         keyExtractor={(item) => item}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const formatted = new Date(item).toLocaleDateString("id-ID");
 
