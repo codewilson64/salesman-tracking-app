@@ -5,6 +5,7 @@ export type Transaction = {
   shopName: string;
   finalAmount: number;
   remainingAmount: number;
+  transactionType: "cash" | "credit";
   paymentStatus: "unpaid" | "partial";
   customerImage?: string;
   customerImageId?: string;

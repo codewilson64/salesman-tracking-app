@@ -61,7 +61,7 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
     const transactions = await db
       .select({
         // transaction info
-        transactionId: transactionsTable.id,
+        id: transactionsTable.id,
         transactionType: transactionsTable.transactionType,
         totalAmount: transactionsTable.totalAmount,
         totalDiscount: transactionsTable.totalDiscount,
@@ -104,6 +104,160 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
 
     return res.status(500).json({
       message: "Failed to fetch outstanding transactions",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const getTransactionById = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (!user?.companyId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const [transaction] = await db
+      .select({
+        id: transactionsTable.id,
+        transactionType: transactionsTable.transactionType,
+        finalAmount: transactionsTable.finalAmount,
+        paidAmount: transactionsTable.paidAmount,
+        remainingAmount: transactionsTable.remainingAmount,
+        paymentStatus: transactionsTable.paymentStatus,
+        paymentType: transactionsTable.paymentType,
+        createdAt: transactionsTable.createdAt,
+
+        customerName: customersTable.customerName,
+        shopName: customersTable.shopName,
+
+        checkInAt: visitsTable.checkInAt,
+      })
+      .from(transactionsTable)
+      .leftJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
+      .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
+      .where(
+        and(
+          eq(transactionsTable.id, id),
+          eq(transactionsTable.companyId, user.companyId)
+        )
+      );
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    return res.status(200).json({
+      message: "Transaction fetched successfully",
+      data: transaction,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to fetch transaction",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const updateTransactionPayment = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { paidAmount, paymentType } = req.body;
+
+    const user = req.user as {
+      userId: string;
+      companyId: string;
+      role: string;
+    };
+
+    if (!user?.companyId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (paidAmount === undefined || paidAmount === null) {
+      return res.status(400).json({
+        message: "paidAmount is required",
+      });
+    }
+
+    const data = await db.transaction(async (tx) => {
+      const [transaction] = await tx
+        .select()
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.id, id),
+            eq(transactionsTable.companyId, user.companyId)
+          )
+        );
+
+      if (!transaction) {
+        throw new Error("Transaction not found");
+      }
+
+      const finalAmount = Number(transaction.finalAmount);
+      const currentPaid = Number(transaction.paidAmount);
+
+      const paymentInput = Number(paidAmount);
+
+      if (paymentInput < 0) {
+        throw new Error("Paid amount cannot be negative");
+      }
+
+      const newPaidAmount = currentPaid + paymentInput;
+
+      if (newPaidAmount > finalAmount) {
+        throw new Error("Paid amount cannot exceed total amount");
+      }
+
+      let paymentStatus: "paid" | "partial" | "unpaid" = "unpaid";
+
+      if (newPaidAmount === 0) {
+        paymentStatus = "unpaid";
+      } else if (newPaidAmount < finalAmount) {
+        paymentStatus = "partial";
+      } else {
+        paymentStatus = "paid";
+      }
+
+      let finalPaymentType = paymentType || transaction.paymentType;
+
+      if (newPaidAmount === 0) {
+        finalPaymentType = null;
+      }
+
+      const remainingAmount = finalAmount - newPaidAmount;
+
+      const [updatedTransaction] = await tx
+        .update(transactionsTable)
+        .set({
+          paidAmount: newPaidAmount.toString(),
+          remainingAmount: remainingAmount.toString(),
+          paymentStatus,
+          paymentType: finalPaymentType,
+        })
+        .where(eq(transactionsTable.id, id))
+        .returning();
+
+      return updatedTransaction;
+    });
+
+    return res.status(200).json({
+      message: "Transaction payment updated successfully",
+      data,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to update transaction payment",
       error: error instanceof Error ? error.message : error,
     });
   }

@@ -24,7 +24,7 @@ app.use('/api/areas', areaRoute)
 app.use('/api/customers', customerRoute)
 app.use('/api/visits', visitRoute)
 app.use('/api/upload', uploadRoute)
-app.use('/api/transactions/outstanding', transactionRoute)
+app.use('/api/transactions', transactionRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");

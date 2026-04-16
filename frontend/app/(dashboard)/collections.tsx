@@ -104,9 +104,8 @@ const CollectionsScreen = () => {
               {isExpanded && (
                 <View className="pl-1">
                   {item.transactions.map((t, index) => (
-                    <Pressable
+                    <View
                       key={t.id}
-                      onPress={() => router.push(`screens/transactions/${t.id}`)}
                       className="flex-row items-start py-4 border-b border-gray-200 last:border-b-0"
                     >
                       {/* NUMBER */}
@@ -138,13 +137,13 @@ const CollectionsScreen = () => {
                       <Pressable
                         onPress={(e) => {
                           e.stopPropagation();
-                          // router.push(`screens/customers/edit/${customer.id}`);
+                          router.push(`screens/transactions/edit/${t.id}`);
                         }}
                         className="p-2 self-start"
                       >
                         <FontAwesome6 name="edit" size={16} color="black" />
                       </Pressable>
-                    </Pressable>
+                    </View>
                   ))}
                 </View>
               )}
