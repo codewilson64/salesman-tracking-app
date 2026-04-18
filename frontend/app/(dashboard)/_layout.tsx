@@ -29,9 +29,9 @@ export default function DashboardLayout() {
           )}}
         />
          <Tabs.Screen 
-          name='collections'
+          name='reports'
           options={{
-            title: 'Collections',
+            title: 'Reports',
             tabBarIcon: ({ focused }) => (
               <Image
                 source={collections}

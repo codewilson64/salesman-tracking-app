@@ -11,6 +11,13 @@ export const getOutstandingTransactions = async ({ startDate, endDate, }: { star
   return res.data.data;
 };
 
+export const getPaidTransactions = async ({ startDate, endDate, }: { startDate?: string; endDate?: string; }) => {
+  const res = await api.get("/transactions/paid", {
+    params: { startDate, endDate },
+  })
+  return res.data.data;
+};
+
 export const getTransactionById = async (id: string) => {
   const res = await api.get(`/transactions/${id}`)
   return res.data.data

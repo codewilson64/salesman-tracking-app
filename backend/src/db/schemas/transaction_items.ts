@@ -5,7 +5,7 @@ import { transactionsTable } from "./transactions";
 export const transactionItemsTable = pgTable("transaction_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   transactionId: uuid("transaction_id")
-    .references(() => transactionsTable.id)
+    .references(() => transactionsTable.id, { onDelete: "cascade" })
     .notNull(),
   productId: uuid("product_id")
     .references(() => productsTable.id)

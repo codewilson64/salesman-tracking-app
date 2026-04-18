@@ -24,15 +24,15 @@ export const transactionsTable = pgTable("transactions", {
     .references(() => companiesTable.id)
     .notNull(),
   visitId: uuid("visit_id")
-    .references(() => visitsTable.id)
+    .references(() => visitsTable.id, { onDelete: "cascade" })
     .notNull(),
   
   transactionType: transactionTypeEnum("transaction_type").notNull(),
-  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
   totalDiscount: numeric("total_discount", { precision: 12, scale: 2 }).default("0").notNull(),
-  finalAmount: numeric("final_amount", { precision: 12, scale: 2 }),
+  finalAmount: numeric("final_amount", { precision: 12, scale: 2 }).notNull(),
 
-  paymentStatus: paymentStatusEnum("payment_status"),
+  paymentStatus: paymentStatusEnum("payment_status").notNull(),
   paidAmount: numeric("paid_amount", { precision: 12, scale: 2 }),
   paymentType: paymentTypeEnum("payment_type"),
 

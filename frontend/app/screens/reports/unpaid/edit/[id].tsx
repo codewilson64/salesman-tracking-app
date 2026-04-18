@@ -9,19 +9,20 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import back from "../../../assets/globalIcons/back.png";
+import back from "../../../../assets/globalIcons/back.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
-import { FormInput } from "../../../components/areaInputForm/FormInput";
-import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
-import { useGetTransactionById } from "../../../hooks/transaction/useGetTransactionById";
-import { formatTime } from "../../../helper/formatTime";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUpdateTransactionPayment } from "../../../hooks/transaction/useUpdateTransaction";
-import { TUpdateTransactionPaymentInput } from "../../../libs/updateTransactionPayment.schema";
+import { useGetTransactionById } from "../../../../hooks/transaction/useGetTransactionById";
+import { useUpdateTransactionPayment } from "../../../../hooks/transaction/useUpdateTransaction";
+import { TUpdateTransactionPaymentInput } from "../../../../libs/updateTransactionPayment.schema";
+
+import { formatTime } from "../../../../helper/formatTime";
+import { FormInput } from "../../../../components/areaInputForm/FormInput";
+import { FormSelectModal } from "../../../../components/areaInputForm/FormSelectModal";
 
 const paymentMethods = ["cash", "transfer"];
 

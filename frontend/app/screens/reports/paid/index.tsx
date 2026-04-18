@@ -5,25 +5,37 @@ import {
   ActivityIndicator,
   Pressable,
   Image,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import { useGetOutstandingTransactions } from "../hooks/transaction/useGetOutstandingTransactions";
-import { useExpand } from "../hooks/useExpand";
-import { groupTransactionsByCustomer } from "../utils/groupBy/customers";
-import { formatTime } from "../helper/formatTime";
+import { useQueryClient } from "@tanstack/react-query";
+import { useExpand } from "../../../hooks/useExpand";
+import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
+import { formatTime } from "../../../helper/formatTime";
 
+import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useGetPaidTransactions } from "../../../hooks/transaction/useGetPaidTransactions";
 
-const CollectionsScreen = () => {
+const PaidPaymentScreen = () => {
   const router = useRouter();
 
-  const { data: transactions = [], isLoading, isError } = useGetOutstandingTransactions({});
+  const { data: transactions = [], isLoading, isError } = useGetPaidTransactions({});
 
   const { expanded, toggle } = useExpand();
+
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const onRefresh = async () => {
+    setRefreshing(true);
+      await queryClient.invalidateQueries({ queryKey: ["transactions", "paid"] });
+    setRefreshing(false);
+  };
 
   const grouped = useMemo(() => {
     return groupTransactionsByCustomer(transactions);
@@ -41,7 +53,7 @@ const CollectionsScreen = () => {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-red-500 text-lg">
-          Failed to load collections
+          Failed to load payments
         </Text>
       </View>
     );
@@ -50,8 +62,19 @@ const CollectionsScreen = () => {
   return (
     <SafeAreaView className="flex-1 p-4 bg-gray-100">
       {/* HEADER */}
-      <View className="mb-4">
-        <Text className="text-2xl font-bold">Collections</Text>
+      <View className="flex-row items-center mb-4">
+        <Pressable
+          onPress={() => router.back()}
+          className="mr-3 p-2"
+        >
+          <Image
+            source={back}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+        </Pressable>
+
+        <Text className="text-2xl font-bold">Paid Payment</Text>
       </View>
 
       <FlatList
@@ -59,6 +82,14 @@ const CollectionsScreen = () => {
         keyExtractor={(item) => item.customerId}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2563EB"]} // optional: Android spinner color
+            tintColor="#2563EB"  // optional: iOS spinner color
+          />
+        }
         renderItem={({ item }) => {
           const isExpanded = expanded[item.customerId] ?? false;
 
@@ -137,7 +168,7 @@ const CollectionsScreen = () => {
                       <Pressable
                         onPress={(e) => {
                           e.stopPropagation();
-                          router.push(`screens/transactions/edit/${t.id}`);
+                          router.push(`screens/reports/unpaid/edit/${t.id}`);
                         }}
                         className="p-2 self-start"
                       >
@@ -155,4 +186,4 @@ const CollectionsScreen = () => {
   );
 };
 
-export default CollectionsScreen;
+export default PaidPaymentScreen;
