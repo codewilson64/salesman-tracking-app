@@ -2,17 +2,18 @@ import { Tabs } from "expo-router";
 import { Image } from "react-native";
 import home from '../assets/menuIcons/home.png'
 import collections from '../assets/menuIcons/collections.png'
+import profile from '../assets/menuIcons/profile.png'
 
 export default function DashboardLayout() {
     return (
       <>
         <Tabs
-            screenOptions={{
-                headerShown: false,
-                tabBarStyle: {
-                  height: 100
-                }
-            }}
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: {
+              height: 100
+            }
+          }}
         >
           <Tabs.Screen 
             name='home'
@@ -28,9 +29,9 @@ export default function DashboardLayout() {
               />
           )}}
         />
-         <Tabs.Screen 
-          name='reports'
-          options={{
+          <Tabs.Screen 
+            name='reports'
+            options={{
             title: 'Reports',
             tabBarIcon: ({ focused }) => (
               <Image
@@ -43,9 +44,27 @@ export default function DashboardLayout() {
                 resizeMode="contain"
               />
             ),
+            }}
+          />
+
+          <Tabs.Screen 
+            name='profile'
+            options={{
+            title: 'Me',
+            tabBarIcon: ({ focused }) => (
+              <Image
+                source={profile}
+                style={{
+                  width: 24,
+                  height: 24,
+                  tintColor: focused ? "#0096ff" : "gray",
+                }}
+                resizeMode="contain"
+              />
+            ),
           }}
         />
-        </Tabs>
+          </Tabs>
       </>
     )
 }

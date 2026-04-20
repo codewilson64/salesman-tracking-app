@@ -19,9 +19,8 @@ import { formatTime } from "../../../helper/formatTime";
 
 import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-const CollectionsScreen = () => {
+const UnpaidScreen = () => {
   const router = useRouter();
 
   const { data: transactions = [], isLoading, isError } = useGetOutstandingTransactions({});
@@ -133,11 +132,12 @@ const CollectionsScreen = () => {
 
               {/* TRANSACTION LIST */}
               {isExpanded && (
-                <View className="pl-1">
+                <View className="">
                   {item.transactions.map((t, index) => (
-                    <View
+                    <Pressable
                       key={t.id}
                       className="flex-row items-start py-4 border-b border-gray-200 last:border-b-0"
+                      onPress={() => router.push(`/screens/reports/unpaid/edit/${t.id}`)}
                     >
                       {/* NUMBER */}
                       <Text className="w-6 font-bold">
@@ -153,28 +153,18 @@ const CollectionsScreen = () => {
                         <Text className="font-semibold">
                           Rp {Number(t.finalAmount).toLocaleString()}
                         </Text>
+                      </View>
 
-                        {/* <Text
-                          className={`text-xs ${
+                      <Text
+                          className={`text-sm p-2 capitalize ${
                             t.paymentStatus === "partial"
                               ? "text-yellow-600"
                               : "text-red-500"
                           }`}
                         >
                           {t.paymentStatus}
-                        </Text> */}
-                      </View>
-                      {/* EDIT BUTTON */}
-                      <Pressable
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          router.push(`screens/reports/unpaid/edit/${t.id}`);
-                        }}
-                        className="p-2 self-start"
-                      >
-                        <FontAwesome6 name="edit" size={16} color="black" />
-                      </Pressable>
-                    </View>
+                        </Text> 
+                    </Pressable>
                   ))}
                 </View>
               )}
@@ -186,4 +176,4 @@ const CollectionsScreen = () => {
   );
 };
 
-export default CollectionsScreen;
+export default UnpaidScreen;

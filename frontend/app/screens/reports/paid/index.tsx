@@ -18,7 +18,6 @@ import { formatTime } from "../../../helper/formatTime";
 
 import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useGetPaidTransactions } from "../../../hooks/transaction/useGetPaidTransactions";
 
 const PaidPaymentScreen = () => {
@@ -133,11 +132,12 @@ const PaidPaymentScreen = () => {
 
               {/* TRANSACTION LIST */}
               {isExpanded && (
-                <View className="pl-1">
+                <View>
                   {item.transactions.map((t, index) => (
-                    <View
+                    <Pressable
                       key={t.id}
                       className="flex-row items-start py-4 border-b border-gray-200 last:border-b-0"
+                      onPress={() => router.push(`/screens/reports/paid/${t.id}`)}
                     >
                       {/* NUMBER */}
                       <Text className="w-6 font-bold">
@@ -153,28 +153,12 @@ const PaidPaymentScreen = () => {
                         <Text className="font-semibold">
                           Rp {Number(t.finalAmount).toLocaleString()}
                         </Text>
-
-                        {/* <Text
-                          className={`text-xs ${
-                            t.paymentStatus === "partial"
-                              ? "text-yellow-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {t.paymentStatus}
-                        </Text> */}
                       </View>
-                      {/* EDIT BUTTON */}
-                      <Pressable
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          router.push(`screens/reports/unpaid/edit/${t.id}`);
-                        }}
-                        className="p-2 self-start"
-                      >
-                        <FontAwesome6 name="edit" size={16} color="black" />
-                      </Pressable>
-                    </View>
+
+                      <Text className="text-sm p-2 capitalize text-green-500">
+                        {t.paymentStatus}
+                      </Text> 
+                    </Pressable>
                   ))}
                 </View>
               )}

@@ -9,6 +9,7 @@ import customerRoute from './routes/customer.route.js'
 import visitRoute from './routes/visit.route.js'
 import uploadRoute from './routes/upload.route.js'
 import transactionRoute from './routes/transaction.route.js'
+import profileRoute from './routes/profile.route.js'
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/customers', customerRoute)
 app.use('/api/visits', visitRoute)
 app.use('/api/upload', uploadRoute)
 app.use('/api/transactions', transactionRoute)
+app.use('/api/profile', profileRoute)
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");

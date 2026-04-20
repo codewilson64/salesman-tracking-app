@@ -41,6 +41,8 @@ export const createSalesmen = async (req: Request, res: Response) => {
           password: hashedPassword,
           role: "salesman",
           companyId,
+          profileImage,
+          profileImageId,
         })
         .returning();
 

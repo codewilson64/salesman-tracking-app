@@ -9,46 +9,20 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import back from "../../../../assets/globalIcons/back.png";
+import back from "../../../assets/globalIcons/back.png";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useForm } from "react-hook-form";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetTransactionById } from "../../../../hooks/transaction/useGetTransactionById";
-import { useUpdateTransactionPayment } from "../../../../hooks/transaction/useUpdateTransaction";
-import { TUpdateTransactionPaymentInput } from "../../../../libs/updateTransactionPayment.schema";
-
-import { formatTime } from "../../../../helper/formatTime";
-import { FormInput } from "../../../../components/areaInputForm/FormInput";
-import { FormSelectModal } from "../../../../components/areaInputForm/FormSelectModal";
-import { useAuthStore } from "../../../../stores/authStore";
-
-const paymentMethods = ["cash", "transfer"];
+import { useGetTransactionById } from "../../../hooks/transaction/useGetTransactionById";
+import { formatTime } from "../../../helper/formatTime";
 
 const TransactionDetailScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const user = useAuthStore((state) => state.user);
-
   const { data: transaction, isLoading } = useGetTransactionById(id);
-  const { mutateAsync, isPending } = useUpdateTransactionPayment();
-
-  const {
-    control,
-    handleSubmit,
-    setError,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm<TUpdateTransactionPaymentInput>({
-    defaultValues: {
-      paidAmount: 0,
-      paymentType: null,
-    },
-  });
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -57,34 +31,6 @@ const TransactionDetailScreen = () => {
     setRefreshing(true);
       await queryClient.invalidateQueries({ queryKey: ["transaction", id] });
     setRefreshing(false);
-  };
-
-  /* ================= WATCH ================= */
-
-  const paidAmount = watch("paidAmount");
-
-  /* ================= PREFILL ================= */
-
-  useEffect(() => {
-    if (!transaction) return;
-
-    reset({
-      paidAmount: 0, // always input fresh payment
-      paymentType: null,
-    });
-  }, [transaction]);
-
-  /* ================= DERIVED VALUES ================= */
-  
-  const remainingAfterPayment = Number(transaction?.remainingAmount || 0) - Number(paidAmount || 0);
-
-  const onSubmit = async (data: TUpdateTransactionPaymentInput) => {
-    try {
-      await mutateAsync({ id, data });
-      router.back();
-    } catch {
-      setError("root", { message: "Update payment failed" });
-    }
   };
 
   if (isLoading) {
@@ -184,64 +130,7 @@ const TransactionDetailScreen = () => {
               </View>
             </View>
 
-            {/* PAYMENT SECTION */}
-            {transaction.transactionType === "credit" && transaction.remainingAmount > 0 && (
-              <>
-                {user?.role === "salesman" && (
-                  <FormInput
-                    control={control}
-                    name="paidAmount"
-                    label="Pay Amount"
-                    keyboardType="numeric"
-                  />
-                )}
-
-                {/* PREVIEW AFTER PAYMENT */}
-                {Number(paidAmount) > 0 && (
-                  <View className="p-3 bg-green-50 rounded-lg">
-                    <Text className="text-green-700 font-medium">
-                      Remaining after payment:
-                    </Text>
-                    <Text className="text-green-700 font-bold">
-                      Rp {Math.max(0, remainingAfterPayment).toLocaleString()}
-                    </Text>
-                  </View>
-                )}
-
-                {Number(paidAmount) > 0 && (
-                  <FormSelectModal
-                    control={control}
-                    name="paymentType"
-                    label="Payment Method"
-                    options={paymentMethods.map((p) => ({ value: p }))}
-                    getLabel={(item: { value: string }) => item.value}
-                    errors={errors}
-                  />
-                )}
-              </>
-            )}
-
-            {/* FULLY PAID STATE */}
-            {transaction.remainingAmount === 0 && (
-              <View className="p-4 bg-green-100 rounded-lg">
-                <Text className="text-green-700 font-semibold text-center">
-                  Fully Paid
-                </Text>
-              </View>
-            )}
           </View>
-
-          {/* SUBMIT */}
-          {transaction.remainingAmount > 0 && user?.role === "salesman" && (
-            <Pressable
-              onPress={handleSubmit(onSubmit)}
-              className="bg-blue-600 rounded-lg p-4 mt-6"
-            >
-              <Text className="text-white text-center font-semibold">
-                {isPending ? "Saving..." : "Save"}
-              </Text>
-            </Pressable>
-          )}
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>

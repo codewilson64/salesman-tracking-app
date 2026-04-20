@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
 
 export const api = axios.create({
-  baseURL: "http://192.168.216.179:5000/api",
+  baseURL: "http://192.168.1.12:5000/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

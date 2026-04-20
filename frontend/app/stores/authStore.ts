@@ -10,6 +10,7 @@ type User = {
   email: string;
   role: string;
   companyId: string;
+  profileImage: string;
 };
 
 type AuthState = {
@@ -35,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
             user: res.user,
             accessToken: res.accessToken,
           });
-        } catch (error: any) {
+        } catch (error) {
           console.log("LOGIN ERROR:", error);
           throw error;
         }
@@ -50,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
             user: res.user,
             accessToken: res.accessToken,
           });
-        } catch (error: any) {
+        } catch (error) {
           console.log("SIGNUP ERROR:", error);
           throw error;
         }
