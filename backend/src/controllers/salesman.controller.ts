@@ -41,8 +41,8 @@ export const createSalesmen = async (req: Request, res: Response) => {
           password: hashedPassword,
           role: "salesman",
           companyId,
-          profileImage,
-          profileImageId,
+          profileImage,      
+          profileImageId, 
         })
         .returning();
 
@@ -57,8 +57,6 @@ export const createSalesmen = async (req: Request, res: Response) => {
           address,
           phone,
           companyId,
-          profileImage,
-          profileImageId,
         })
         .returning();
 
@@ -94,11 +92,11 @@ export const getAllSalesmen = async (req: Request, res: Response) => {
         name: salesmenTable.name,
         address: salesmenTable.address,
         phone: salesmenTable.phone,
-        profileImage: salesmenTable.profileImage,
 
         userId: usersTable.id,
         email: usersTable.email,
         role: usersTable.role,
+        profileImage: usersTable.profileImage,
       })
       .from(salesmenTable)
       .innerJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
@@ -134,11 +132,11 @@ export const getSalesmenById = async (req: Request, res: Response) => {
         name: salesmenTable.name,
         address: salesmenTable.address,
         phone: salesmenTable.phone,
-        profileImage: salesmenTable.profileImage,
-        profileImageId: salesmenTable.profileImageId,
-
+        
         email: usersTable.email,
         role: usersTable.role,
+        profileImage: usersTable.profileImage,
+        profileImageId: usersTable.profileImageId,
       })
       .from(salesmenTable)
       .innerJoin(usersTable, eq(salesmenTable.userId, usersTable.id)) 
@@ -187,8 +185,6 @@ export const updateSalesmen = async (req: Request, res: Response) => {
         name,
         address,
         phone,
-        profileImage,
-        profileImageId,
       })
       .where(
         and(
@@ -202,6 +198,16 @@ export const updateSalesmen = async (req: Request, res: Response) => {
       return res.status(404).json({
         message: "Salesman not found",
       });
+    }
+
+    if (profileImage || profileImageId) {
+      await db
+        .update(usersTable)
+        .set({
+          profileImage,
+          profileImageId,
+        })
+        .where(eq(usersTable.id, updatedSalesman[0]!.userId));
     }
 
     return res.status(200).json({

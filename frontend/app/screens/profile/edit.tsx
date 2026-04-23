@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -122,6 +123,18 @@ export default function EditProfileScreen() {
               label="Email"
               errors={errors}
             />
+
+            <TouchableOpacity
+              onPress={() => router.push("screens/profile/password")}
+              className="flex-row items-center active:opacity-70"
+            >
+              {/* Left: Icon + Label */}
+              <View className="flex-row items-center flex-1">
+                <Text className="font-normal text-blue-600 text-lg underline capitalize">
+                  Change password
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
 
           {/* BUTTON */}

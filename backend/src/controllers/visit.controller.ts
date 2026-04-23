@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, transactionsTable, transactionItemsTable } from "../db/schemas";
+import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, transactionsTable, transactionItemsTable, usersTable } from "../db/schemas";
 import { db } from "..";
 import { and, eq, gte, isNull, lte } from "drizzle-orm";
 
@@ -376,13 +376,16 @@ export const getAllVisits = async (req: Request, res: Response) => {
         // salesman info
         salesmanId: salesmenTable.id,
         salesmanName: salesmenTable.name,
-        salesmanImage: salesmenTable.profileImage,
-        salesmanImageId: salesmenTable.profileImageId,
+
+        // user info
+        salesmanImage: usersTable.profileImage,
+        salesmanImageId: usersTable.profileImageId,
       })
       .from(visitsTable)
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
       .leftJoin(areasTable, eq(visitsTable.areaId, areasTable.id))
       .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
+      .leftJoin(usersTable, eq(visitsTable.salesmanId, usersTable.id))
       .where(and(...conditions));
 
     return res.status(200).json({

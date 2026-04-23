@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import validator from "validator";
 import bcrypt from "bcrypt";
-import { salesmenTable, usersTable } from "../db/schemas";
+import { usersTable } from "../db/schemas";
 import { db } from "..";
 import { eq } from "drizzle-orm";
 
@@ -22,16 +22,6 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
-    }
-
-    if (profileImage || profileImageId) {
-      await db
-        .update(salesmenTable)
-        .set({
-          ...(profileImage !== undefined && { profileImage }),
-          ...(profileImageId !== undefined && { profileImageId }),
-        })
-        .where(eq(salesmenTable.userId, userId)); 
     }
 
     return res.status(200).json({

@@ -11,8 +11,9 @@ import { pickImageFromLibrary } from "../../../utils/pickImage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FormInput } from "../../../components/areaInputForm/FormInput";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { updateSalesmanSchema } from "../../../libs/updateSalesman";
 
-type FormData = z.infer<typeof salesmanSchema>;
+type FormData = z.infer<typeof updateSalesmanSchema>;
 
 export default function EditSalesmanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,10 +29,11 @@ export default function EditSalesmanScreen() {
     formState: { isDirty, errors },
     reset,
   } = useForm<FormData>({
-    resolver: zodResolver(salesmanSchema),
+    resolver: zodResolver(updateSalesmanSchema),
   });
   
   const [image, setImage] = useState<string | null>(null);
+  
   const isDisabled = (!isDirty && !image) || isPending;
 
   const pickImage = async () => {

@@ -37,7 +37,7 @@ export default function CreateSalesmanScreen() {
     const uri = await pickImageFromLibrary();
       if (uri) {
         setImage(uri);
-        setValue("profileImage", uri); // ✅ sync to RHF
+        setValue("profileImage", uri); 
       }
   };
 
