@@ -1,6 +1,5 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import Navbar from "../components/Navbar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
@@ -12,21 +11,12 @@ const Home = () => {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
-  const logout = useAuthStore((state) => state.logout);
-
-  const handleLogout = () => {
-    logout();
-    router.replace("/login");
-  };
-
   const filteredMenu = Menus.filter((item) =>
     item.roles.includes(user?.role || "")
   );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <Navbar onLogout={handleLogout} />
-
       <View className="p-4">
         {filteredMenu.map((item) => (
           <View 

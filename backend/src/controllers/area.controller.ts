@@ -349,18 +349,25 @@ export const deleteArea = async (req: Request, res: Response) => {
       message: "Area deleted successfully",
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
 
-    if (error.message === "NOT_FOUND") {
-      return res.status(404).json({
-        message: "Area not found",
-      });
-    }
+    if (error instanceof Error) {
+      if (error.message === "NOT_FOUND") {
+        return res.status(404).json({
+          message: "Area not found",
+        });
+      }
 
-    if (error.message === "AREA_IN_USE") {
-      return res.status(400).json({
-        message: "Cannot delete area because it still has customers",
+      if (error.message === "AREA_IN_USE") {
+        return res.status(400).json({
+          message: "Cannot delete area because it still has customers",
+        });
+      }
+
+      return res.status(500).json({
+        message: "Failed to delete area",
+        error: error.message,
       });
     }
 

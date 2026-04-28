@@ -24,7 +24,7 @@ export const updateSalesmanById = async (id: string, data: FormData) => {
   return res.data.data;
 };
 
-export const deleteSalesmanById = async (id: string) => {
-  const res = await api.delete(`/salesmen/${id}`)
+export const deleteSalesmanAccountById = async (id: string) => {
+  const res = await api.delete(`/delete-account/account/${id}`)
   return res.data
 }

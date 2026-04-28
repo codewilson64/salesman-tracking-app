@@ -3,6 +3,19 @@ import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, 
 import { db } from "..";
 import { and, eq, gte, isNull, lte } from "drizzle-orm";
 
+type ProductInput = {
+  productId: string;
+  price: number | string;
+  quantity: number | string;
+  discount?: number | string;
+};
+
+type Totals = {
+  totalAmount: number;
+  totalDiscount: number;
+  finalAmount: number;
+};
+
 export const createVisit = async (req: Request, res: Response) => {
   try {
     const { areaId, customerId, checkInImage, checkInImageId } = req.body;
@@ -191,9 +204,8 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       let transaction = null;
 
       if (result === "new order") {
-        // ✅ calculate totals
         const totals = products.reduce(
-          (acc: any, p: any) => {
+          (acc: Totals, p: ProductInput) => {
             const price = Number(p.price);
             const quantity = Number(p.quantity);
             const discount = Number(p.discount || 0);
@@ -263,7 +275,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
 
         // ✅ insert items with discount
         await tx.insert(transactionItemsTable).values(
-          products.map((p: any) => {
+          products.map((p: ProductInput) => {
             const price = Number(p.price);
             const quantity = Number(p.quantity);
             const discount = Number(p.discount || 0);

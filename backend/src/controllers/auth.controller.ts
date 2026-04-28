@@ -90,9 +90,11 @@ export const signup = async (req: Request, res: Response) => {
       accessToken,
     });
 
-  } catch (error: any) {
-    console.error("Error in signup controller:", error.message);
-    return res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error in signup controller:", error.message);
+      return res.status(500).json({ error: error.message });
+    }
   }
 };
 
@@ -139,9 +141,11 @@ export const login = async (req: Request, res: Response) => {
       accessToken,
     });
 
-  } catch (error: any) {
-    console.error("Login error:", error.message);
-    return res.status(500).json({ error: "Server error" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Login error:", error.message);
+      return res.status(500).json({ error: "Server error" });
+    }
   }
 };
 
@@ -174,9 +178,6 @@ export const getMe = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("GetMe error:", error);
-
-    return res.status(500).json({
-      error: "Server error",
-    });
+    return res.status(500).json({error: "Server error"});
   }
 };

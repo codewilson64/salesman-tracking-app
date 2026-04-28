@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -24,13 +25,26 @@ import { updateProfileSchema } from "../../libs/profile.schema";
 import { useUpdateProfile } from "../../hooks/profile/useUpdateProfile";
 import { useGetMe } from "../../hooks/profile/useGetMe";
 
+import { useAuthStore } from "../../stores/authStore";
+import { useDeleteMyAccount } from "../../hooks/account/useDeleteMyAccount";
+import { useDeleteCompanyAccount } from "../../hooks/account/useDeleteCompanyAccount";
+
 type FormData = z.infer<typeof updateProfileSchema>;
 
 export default function EditProfileScreen() {
   const router = useRouter();
 
+  const logout = useAuthStore((state) => state.logout);
+
   const { data: user, isLoading } = useGetMe();
   const { mutateAsync, isPending } = useUpdateProfile();
+
+  const { mutateAsync: deleteAccount, isPending: isDeletingUser } = useDeleteMyAccount();
+  const { mutateAsync: deleteCompany, isPending: isDeletingCompany } = useDeleteCompanyAccount();
+
+  const isDeleting = isDeletingUser || isDeletingCompany;
+
+  const isAdmin = user?.role === "owner";
 
   const {
     control,
@@ -64,6 +78,36 @@ export default function EditProfileScreen() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDeleteAccount = () => {
+    const title = isAdmin ? "Delete Company" : "Delete Account";
+
+    const message = isAdmin
+      ? "This will permanently delete your company and ALL data (salesmen, customers, transactions). This cannot be undone."
+      : "This will permanently delete your account and all your data. This cannot be undone.";
+
+    Alert.alert(title, message, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (isAdmin) {
+              await deleteCompany();   
+            } else {
+              await deleteAccount();  
+            }
+
+            logout();
+            router.replace("/login");
+          } catch (err) {
+            console.error(err);
+          }
+        },
+      },
+    ]);
   };
 
   if (isLoading || !user) {
@@ -132,6 +176,22 @@ export default function EditProfileScreen() {
               <View className="flex-row items-center flex-1">
                 <Text className="font-normal text-blue-600 text-lg underline capitalize">
                   Change password
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleDeleteAccount}
+              className="flex-row items-center active:opacity-70"
+            >
+              {/* Left: Icon + Label */}
+              <View className="flex-row items-center flex-1">
+                <Text className="font-normal text-red-600 text-lg underline capitalize">
+                  {isDeleting
+                    ? "Deleting..."
+                    : isAdmin
+                    ? "Delete company"
+                    : "Delete account"}
                 </Text>
               </View>
             </TouchableOpacity>

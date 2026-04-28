@@ -362,14 +362,8 @@ export const deleteCustomer = async (req: Request, res: Response) => {
       message: "Customer deleted successfully",
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
-
-    if (error.message === "NOT_FOUND") {
-      return res.status(404).json({
-        message: "Customer not found",
-      });
-    }
 
     return res.status(500).json({
       message: "Failed to delete customer",

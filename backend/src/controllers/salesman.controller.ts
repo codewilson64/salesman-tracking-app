@@ -267,14 +267,8 @@ export const deleteSalesmen = async (req: Request, res: Response) => {
       message: "Salesman deleted successfully",
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
-
-    if (error.message === "NOT_FOUND") {
-      return res.status(404).json({
-        message: "Salesman not found",
-      });
-    }
 
     return res.status(500).json({
       message: "Failed to delete salesman",
