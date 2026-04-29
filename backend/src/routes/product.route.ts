@@ -1,7 +1,7 @@
 import express from 'express'
-import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from '../controllers/product.controller'
-import { authorize } from '../../middleware/authorize'
-import { protect } from '../../middleware/protectedRoute'
+import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from '../controllers/product.controller.js'
+import { authorize } from '../../middleware/authorize.js'
+import { protect } from '../../middleware/protectedRoute.js'
 
 const router = express.Router()
 

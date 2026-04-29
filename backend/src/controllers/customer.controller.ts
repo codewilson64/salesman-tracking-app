@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
-import { areasTable } from "../db/schemas/areas";
-import { db } from "..";
+import { areasTable } from "../db/schemas/areas.js";
+import { db } from "../index.js";
 import { and, eq } from "drizzle-orm";
-import { customersTable } from "../db/schemas/customers";
-import { salesmenTable, usersTable } from "../db/schemas";
+import { customersTable } from "../db/schemas/customers.js";
+import { salesmenTable } from "../db/schemas/salesmen.js";
+import { usersTable } from "../db/schemas/users.js";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {

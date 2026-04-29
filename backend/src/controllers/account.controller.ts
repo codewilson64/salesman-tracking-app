@@ -1,8 +1,17 @@
 import type { Request, Response } from "express";
-import { db } from "..";
-import { areasTable, companiesTable, customersTable, productsTable, salesmenTable, transactionsTable, usersTable, visitsTable } from "../db/schemas";
+import { db } from "../index.js";
 import { and, eq, inArray } from "drizzle-orm";
 import { v2 as cloudinary } from "cloudinary";
+
+import { areasTable } from "../db/schemas/areas.js";
+import { companiesTable } from "../db/schemas/companies.js";
+import { customersTable } from "../db/schemas/customers.js";
+import { productsTable } from "../db/schemas/products.js";
+import { salesmenTable } from "../db/schemas/salesmen.js";
+import { transactionsTable } from "../db/schemas/transactions.js";
+import { usersTable } from "../db/schemas/users.js";
+import { visitsTable } from "../db/schemas/visit.js";
+
 
 export const deleteCompanyAccount = async (req: Request, res: Response) => {
   try {

@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
-import { customersTable, salesmenTable, visitsTable, transactionsTable } from "../db/schemas";
-import { db } from "..";
+import { customersTable } from "../db/schemas/customers.js";
+import { salesmenTable } from "../db/schemas/salesmen.js";
+import { transactionsTable } from "../db/schemas/transactions.js";
+import { visitsTable } from "../db/schemas/visit.js";
+import { db } from "../index.js";
 import { and, eq, gte, lte, or } from "drizzle-orm";
 
 export const getOutstandingTransactions = async (req: Request, res: Response) => {

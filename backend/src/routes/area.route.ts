@@ -1,6 +1,6 @@
 import express from 'express'
-import { createArea, deleteArea, getAllAreas, getAreaById, getCustomersByArea, updateArea } from '../controllers/area.controller'
-import { protect } from '../../middleware/protectedRoute'
+import { createArea, deleteArea, getAllAreas, getAreaById, getCustomersByArea, updateArea } from '../controllers/area.controller.js'
+import { protect } from '../../middleware/protectedRoute.js'
 
 const router = express.Router()
 

@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
 import validator from "validator";
 import bcrypt from "bcrypt";
-import { usersTable } from "../db/schemas";
-import { db } from "..";
+import { db } from "../index.js";
 import { eq } from "drizzle-orm";
+
+import { usersTable } from "../db/schemas/users.js";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const userId = req.user?.userId as string;

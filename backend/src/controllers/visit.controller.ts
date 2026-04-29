@@ -1,7 +1,15 @@
 import type { Request, Response } from "express";
-import { areasTable, customersTable, salesmenTable, visitsTable, productsTable, transactionsTable, transactionItemsTable, usersTable } from "../db/schemas";
-import { db } from "..";
+import { db } from "../index.js";
 import { and, eq, gte, isNull, lte } from "drizzle-orm";
+
+import { areasTable } from "../db/schemas/areas.js";
+import { customersTable } from "../db/schemas/customers.js";
+import { productsTable } from "../db/schemas/products.js";
+import { salesmenTable } from "../db/schemas/salesmen.js";
+import { transactionsTable } from "../db/schemas/transactions.js";
+import { transactionItemsTable } from "../db/schemas/transaction_items.js";
+import { usersTable } from "../db/schemas/users.js";
+import { visitsTable } from "../db/schemas/visit.js";
 
 type ProductInput = {
   productId: string;

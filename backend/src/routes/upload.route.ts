@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import upload from '../../middleware/multer';
-import { deleteSingleImage, uploadSingleImage } from '../controllers/upload.controller';
-import { protect } from '../../middleware/protectedRoute';
+import upload from '../../middleware/multer.js';
+import { deleteSingleImage, uploadSingleImage } from '../controllers/upload.controller.js';
+import { protect } from '../../middleware/protectedRoute.js';
 
 const router = Router();
 

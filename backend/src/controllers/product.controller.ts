@@ -1,5 +1,5 @@
 import { type Request, type Response } from "express";
-import { productsTable } from "../db/schemas/products";
+import { productsTable } from "../db/schemas/products.js";
 import { db } from "../index.js";
 import { and, eq } from "drizzle-orm";
 

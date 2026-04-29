@@ -1,9 +1,11 @@
 import { type Request, type Response } from "express";
 import { eq, and } from "drizzle-orm";
-import { db } from "..";
-import { salesmenTable, usersTable } from "../db/schemas";
-import { areasTable } from "../db/schemas/areas";
-import { customersTable } from "../db/schemas/customers";
+import { db } from "../index.js";
+
+import { salesmenTable } from "../db/schemas/salesmen.js";
+import { usersTable } from "../db/schemas/users.js";
+import { areasTable } from "../db/schemas/areas.js";
+import { customersTable } from "../db/schemas/customers.js";
 
 export const createArea = async (req: Request, res: Response) => {
   try {

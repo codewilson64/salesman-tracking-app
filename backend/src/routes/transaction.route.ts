@@ -1,6 +1,6 @@
 import express from 'express'
-import { protect } from '../../middleware/protectedRoute'
-import { getOutstandingTransactions, getPaidTransactions, getTransactionById, updateTransactionPayment } from '../controllers/transaction.controller'
+import { protect } from '../../middleware/protectedRoute.js'
+import { getOutstandingTransactions, getPaidTransactions, getTransactionById, updateTransactionPayment } from '../controllers/transaction.controller.js'
 
 const router = express.Router()
 

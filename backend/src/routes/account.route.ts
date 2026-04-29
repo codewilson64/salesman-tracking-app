@@ -1,7 +1,7 @@
 import express from 'express'
-import { protect } from '../../middleware/protectedRoute'
-import { deleteCompanyAccount, deleteMyAccount, deleteSalesmanAccountByAdmin } from '../controllers/account.controller'
-import { authorize } from '../../middleware/authorize'
+import { protect } from '../../middleware/protectedRoute.js'
+import { deleteCompanyAccount, deleteMyAccount, deleteSalesmanAccountByAdmin } from '../controllers/account.controller.js'
+import { authorize } from '../../middleware/authorize.js'
 
 const router = express.Router()
 

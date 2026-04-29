@@ -1,6 +1,6 @@
 import express from 'express'
-import { protect } from '../../middleware/protectedRoute'
-import { checkoutVisit, createVisit, deleteVisit, getAllVisits, getVisitById, reviewVisit } from '../controllers/visit.controller'
+import { protect } from '../../middleware/protectedRoute.js'
+import { checkoutVisit, createVisit, deleteVisit, getAllVisits, getVisitById, reviewVisit } from '../controllers/visit.controller.js'
 
 const router = express.Router()
 

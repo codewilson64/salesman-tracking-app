@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies";
-import { usersTable } from "./users";
+import { companiesTable } from "./companies.js";
+import { usersTable } from "./users.js";
 
 export const salesmenTable = pgTable("salesmen", {
   id: uuid("id").defaultRandom().primaryKey(),
