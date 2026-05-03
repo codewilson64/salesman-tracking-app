@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker } from "react-native-maps";
 import back from '../../assets/globalIcons/back.png'
 
 import { useGetVisitById } from "../../hooks/visit/useGetVisitById";
@@ -268,32 +267,18 @@ const VisitDetail = () => {
 
         {/* MAP */}
         {hasLocation && (
-          <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm mb-2">Check-in location</Text>
-
-            <Pressable onPress={() => openMap(lat, lng)}>
-              <MapView
-                style={{ width: "100%", height: 200, borderRadius: 12 }}
-                initialRegion={{
-                  latitude: lat,
-                  longitude: lng,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: lat,
-                    longitude: lng,
-                  }}
-                  title={visit.shopName}
-                  description={visit.address}
-                />
-              </MapView>
+          <View className="bg-gray-100 p-4 rounded-lg">
+            <Text className="text-gray-700 mb-2">
+              Tap to view location
+            </Text>
+          
+            <Pressable
+              onPress={() => openMap(lat, lng)}
+              className="bg-green-600 rounded-lg p-3"
+            >
+              <Text className="text-white text-center">
+                Open Location
+              </Text>
             </Pressable>
           </View>
         )}

@@ -10,22 +10,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-
 import { useQueryClient } from "@tanstack/react-query";
-import { useExpand } from "../../../hooks/useExpand";
-import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
-import { formatTime } from "../../../helper/formatTime";
 
 import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useGetPaidTransactions } from "../../../hooks/transaction/useGetPaidTransactions";
+import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
+import { Customer } from "../../../types/customer";
+import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
 
-const PaidPaymentScreen = () => {
+const SalesmenScreen = () => {
   const router = useRouter();
 
-  const { data: transactions = [], isLoading, isError } = useGetPaidTransactions({});
-
-  const { expanded, toggle } = useExpand();
+  const { data: customers = [], isLoading, isError } = useGetAllCustomer();
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -37,8 +33,8 @@ const PaidPaymentScreen = () => {
   };
 
   const grouped = useMemo(() => {
-    return groupTransactionsByCustomer(transactions);
-  }, [transactions]);
+    return groupCustomersBySalesman(customers as Customer[]);
+  }, [customers]);
 
   if (isLoading) {
     return (
@@ -78,7 +74,7 @@ const PaidPaymentScreen = () => {
 
       <FlatList
         data={grouped}
-        keyExtractor={(item) => item.customerId}
+        keyExtractor={(item) => item.salesmanId}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
@@ -90,78 +86,48 @@ const PaidPaymentScreen = () => {
           />
         }
         renderItem={({ item }) => {
-          const isExpanded = expanded[item.customerId] ?? false;
-
           return (
             <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
               {/* CUSTOMER HEADER */}
               <Pressable
-                onPress={() => toggle(item.customerId)}
+                onPress={() =>
+                router.push({
+                  pathname: "screens/reports/paid/customers",
+                  params: {
+                  salesmanId: item.salesmanId,
+                  salesmanName: item.salesmanName,
+                },
+                })
+              }
                 className="flex-row items-center justify-between py-3 px-1"
               >
                 <View className="flex-row items-center flex-1">
                   <Image
                     source={{
                       uri:
-                        item.customerImage ||
+                        item.salesmanImage ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          item.customerName
+                          item.salesmanName
                         )}&background=random&size=64`,
                     }}
                     className="w-12 h-12 rounded-full mr-3"
                   />
                   <View>
                     <Text className="text-xl font-bold capitalize">
-                      {item.shopName}
-                    </Text>
-
-                    <Text className="text-sm text-gray-500">
-                      {item.transactions.length} transaction
-                      {item.transactions.length !== 1 ? "s" : ""}
+                      {item.salesmanName}
                     </Text>
                   </View>
                 </View>
 
                 {/* CHEVRON */}
                 <MaterialIcons
-                  name={isExpanded ? "keyboard-arrow-down" : "keyboard-arrow-right"}
+                  name="keyboard-arrow-right"
                   size={24}
                   color="black"
                 />
               </Pressable>
 
-              {/* TRANSACTION LIST */}
-              {isExpanded && (
-                <View>
-                  {item.transactions.map((t, index) => (
-                    <Pressable
-                      key={t.id}
-                      className="flex-row items-start py-4 border-b border-gray-200 last:border-b-0"
-                      onPress={() => router.push(`/screens/reports/paid/${t.id}`)}
-                    >
-                      {/* NUMBER */}
-                      <Text className="w-6 font-bold">
-                        {index + 1}.
-                      </Text>
 
-                      {/* INFO */}
-                      <View className="flex-1">
-                        <Text className="text-sm">
-                          {formatTime(t.checkInAt)}
-                        </Text>
-
-                        <Text className="font-semibold">
-                          Rp {Number(t.finalAmount).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <Text className="text-sm p-2 capitalize text-green-500">
-                        {t.paymentStatus}
-                      </Text> 
-                    </Pressable>
-                  ))}
-                </View>
-              )}
             </View>
           );
         }}
@@ -170,4 +136,4 @@ const PaidPaymentScreen = () => {
   );
 };
 
-export default PaidPaymentScreen;
+export default SalesmenScreen;

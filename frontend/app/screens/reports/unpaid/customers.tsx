@@ -8,33 +8,45 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
+
 import { useQueryClient } from "@tanstack/react-query";
+import { useGetOutstandingTransactions } from "../../../hooks/transaction/useGetOutstandingTransactions";
+import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
 
 import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
-import { Customer } from "../../../types/customer";
-import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
+import { Transaction } from "../../../types/transaction";
 
-const SalesmenScreen = () => {
+const UnpaidScreen = () => {
   const router = useRouter();
 
-  const { data: customers = [], isLoading, isError } = useGetAllCustomer();
+  const { salesmanId, salesmanName } = useLocalSearchParams<{ 
+    salesmanId: string, 
+    salesmanName: string 
+  }>();
+
+  const { data: transactions = [], isLoading, isError } = useGetOutstandingTransactions({});
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   
   const onRefresh = async () => {
     setRefreshing(true);
-      await queryClient.invalidateQueries({ queryKey: ["transactions", "paid"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", "outstanding"] });
     setRefreshing(false);
   };
 
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(
+      (t: Transaction) => t.salesmanId === salesmanId
+    );
+  }, [transactions, salesmanId]);
+
   const grouped = useMemo(() => {
-    return groupCustomersBySalesman(customers as Customer[]);
-  }, [customers]);
+    return groupTransactionsByCustomer(filteredTransactions);
+  }, [filteredTransactions]);
 
   if (isLoading) {
     return (
@@ -48,7 +60,7 @@ const SalesmenScreen = () => {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-red-500 text-lg">
-          Failed to load payments
+          Failed to load collections
         </Text>
       </View>
     );
@@ -69,12 +81,12 @@ const SalesmenScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">Tagihan</Text>
+        <Text className="text-2xl font-bold">{salesmanName}</Text>
       </View>
 
       <FlatList
         data={grouped}
-        keyExtractor={(item) => item.salesmanId}
+        keyExtractor={(item) => item.customerId}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
@@ -91,30 +103,35 @@ const SalesmenScreen = () => {
               {/* CUSTOMER HEADER */}
               <Pressable
                 onPress={() =>
-                router.push({
-                  pathname: "screens/reports/unpaid/customers",
-                  params: {
-                    salesmanId: item.salesmanId,
-                    salesmanName: item.salesmanName,
-                },
-                })
-              }
+                  router.push({
+                    pathname: "screens/reports/unpaid/transactions",
+                    params: {
+                      customerId: item.customerId,
+                      shopName: item.shopName,
+                    },
+                  })
+                }
                 className="flex-row items-center justify-between py-3 px-1"
               >
                 <View className="flex-row items-center flex-1">
                   <Image
                     source={{
                       uri:
-                        item.salesmanImage ||
+                        item.customerImage ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          item.salesmanName
+                          item.customerName
                         )}&background=random&size=64`,
                     }}
                     className="w-12 h-12 rounded-full mr-3"
                   />
                   <View>
                     <Text className="text-xl font-bold capitalize">
-                      {item.salesmanName}
+                      {item.shopName}
+                    </Text>
+
+                    <Text className="text-sm text-gray-500">
+                      {item.transactions.length} transaction
+                      {item.transactions.length !== 1 ? "s" : ""}
                     </Text>
                   </View>
                 </View>
@@ -126,8 +143,6 @@ const SalesmenScreen = () => {
                   color="black"
                 />
               </Pressable>
-
-
             </View>
           );
         }}
@@ -136,4 +151,4 @@ const SalesmenScreen = () => {
   );
 };
 
-export default SalesmenScreen;
+export default UnpaidScreen;

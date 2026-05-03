@@ -11,18 +11,18 @@ import z from "zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import MapView, { Marker } from "react-native-maps";
-
 import back from '../../assets/globalIcons/back.png'
 import { useGetVisitById } from "../../hooks/visit/useGetVisitById";
 import { useDeleteVisit } from "../../hooks/visit/useDeleteVisit";
 import { formatTime } from "../../helper/formatTime";
 import { formatDuration } from "../../helper/formatDuration";
+
 import { openMap } from "../../utils/openMap";
 import { useState } from "react";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import { useReviewVisit } from "../../hooks/review-visit/useReviewVisit";
 import { reviewVisitSchema } from "../../libs/reviewVisit.schema";
 import { FormInput } from "../../components/areaInputForm/FormInput";
@@ -283,32 +283,18 @@ const SalesVisitDetail = () => {
 
         {/* MAP */}
         {hasLocation && (
-          <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm mb-2">Check-in location</Text>
+          <View className="bg-gray-100 p-4 rounded-lg">
+            <Text className="text-gray-700 mb-2">
+              Tap to view location
+            </Text>
 
-            <Pressable onPress={() => openMap(lat, lng)}>
-              <MapView
-                style={{ width: "100%", height: 200, borderRadius: 12 }}
-                initialRegion={{
-                  latitude: lat,
-                  longitude: lng,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: lat,
-                    longitude: lng,
-                  }}
-                  title={visit.shopName}
-                  description={visit.address}
-                />
-              </MapView>
+            <Pressable
+              onPress={() => openMap(lat, lng)}
+              className="bg-green-600 rounded-lg p-3"
+            >
+              <Text className="text-white text-center">
+                Open Location
+              </Text>
             </Pressable>
           </View>
         )}

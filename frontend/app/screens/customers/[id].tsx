@@ -2,10 +2,11 @@ import { View, Text, ActivityIndicator, Pressable, Alert, Image, Platform, Linki
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import MapView, { Marker } from "react-native-maps";
-import back from '../../assets/globalIcons/back.png'
 import { useGetCustomerById } from "../../hooks/customer/useGetCustomerById";
 import { useDeleteCustomer } from "../../hooks/customer/useDeleteCustomer";
+import { openMap } from "../../utils/openMap";
+
+import back from '../../assets/globalIcons/back.png'
 
 const CustomerDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -56,22 +57,10 @@ const CustomerDetail = () => {
     );
   }
 
-    const lat = customer.latitude;
-    const lng = customer.longitude;
+  const lat = customer.latitude;
+  const lng = customer.longitude;
   
-    const hasLocation = lat != null && lng != null;
-  
-    const openMap = () => {
-      if (!hasLocation) return;
-  
-      const url = Platform.select({
-        ios: `maps:0,0?q=${lat},${lng}`,
-        android: `geo:0,0?q=${lat},${lng}`,
-        default: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-      });
-  
-      Linking.openURL(url!);
-    };
+  const hasLocation = lat != null && lng != null;
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
@@ -165,32 +154,18 @@ const CustomerDetail = () => {
 
         {/* MAP */}
         {hasLocation && (
-          <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm mb-2">Location</Text>
-
-            <Pressable onPress={openMap}>
-              <MapView
-                style={{ width: "100%", height: 200, borderRadius: 12 }}
-                initialRegion={{
-                  latitude: lat,
-                  longitude: lng,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: lat,
-                    longitude: lng,
-                  }}
-                  title={customer.shopName}
-                  description={customer.address}
-                />
-              </MapView>
+          <View className="bg-gray-100 p-4 rounded-lg">
+            <Text className="text-gray-700 mb-2">
+              Tap to view location
+            </Text>
+          
+            <Pressable
+              onPress={() => openMap(lat, lng)}
+              className="bg-green-600 rounded-lg p-3"
+            >
+              <Text className="text-white text-center">
+                Open Location
+              </Text>
             </Pressable>
           </View>
         )}

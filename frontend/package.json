@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "build:android-aab": "eas build -p android --profile production",
+    "build:android-apk": "eas build -p android --profile preview",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
@@ -26,7 +27,6 @@
     "expo-location": "~19.0.8",
     "expo-router": "~6.0.23",
     "expo-splash-screen": "~31.0.13",
-    "expo-status-bar": "~3.0.9",
     "nativewind": "^4.2.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.1.0",

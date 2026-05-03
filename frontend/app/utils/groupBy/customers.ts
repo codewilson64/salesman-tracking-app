@@ -13,9 +13,7 @@ export const groupTransactionsByCustomer = (
     customerImage: transactions[0].customerImage,
     finalAmount: transactions[0].finalAmount,
     totalOutstanding: transactions.reduce(
-        (sum, t) => sum + Number(t.remainingAmount),
-        0
-        ),
+        (sum, t) => sum + Number(t.remainingAmount), 0),
     checkInAt: transactions[0].checkInAt,
     transactions,
   }));

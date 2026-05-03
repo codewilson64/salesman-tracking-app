@@ -1,14 +1,20 @@
 export type Transaction = {
   id: string,
+  
+  salesmanId: string;
+  salesmanName: string;
+  salesmanImage: string;
+
   customerId: string;
   customerName: string;
   shopName: string;
+  customerImage?: string;
+  customerImageId?: string;
+  
   finalAmount: number;
   remainingAmount: number;
   transactionType: "cash" | "credit";
   paymentStatus: "unpaid" | "partial";
-  customerImage?: string;
-  customerImageId?: string;
   checkInAt?: string;
 }
 
