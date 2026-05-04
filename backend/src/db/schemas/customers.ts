@@ -6,8 +6,8 @@ import {
   doublePrecision,
 } from "drizzle-orm/pg-core";
 
-import { companiesTable } from "./companies";
-import { areasTable } from "./areas";
+import { companiesTable } from "./companies.js";
+import { areasTable } from "./areas.js";
 
 export const customersTable = pgTable("customers", {
   id: uuid("id").defaultRandom().primaryKey(),

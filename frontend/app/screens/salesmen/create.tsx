@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { Controller, useForm } from "react-hook-form";
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
