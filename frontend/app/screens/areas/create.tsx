@@ -20,7 +20,7 @@ import { useGetAllSalesmen } from "../../hooks/salesman/useGetAllSalesmen";
 import { FormInput } from "../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormMultiSelectModal } from "../../components/areaInputForm/FormMultiSelectModal";
-import { Salesman } from "../../types/user";
+import { User } from "../../types/user";
 
 type FormData = z.infer<typeof areaSchema>;
 
@@ -64,12 +64,12 @@ export default function CreateAreaScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
           showsVerticalScrollIndicator={false}
@@ -109,11 +109,11 @@ export default function CreateAreaScreen() {
               control={control}
               name="salesmanId"
               label="Salesman"
-              options={salesmen?.map((s: Salesman) => ({
+              options={salesmen?.map((s: User) => ({
                 value: s.id,
                 name: s.name,
               })) || []}
-              getLabel={(item: Salesman) => item.name}
+              getLabel={(item: User) => item.name}
               errors={errors}
             />
 
@@ -152,7 +152,7 @@ export default function CreateAreaScreen() {
             </Text>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

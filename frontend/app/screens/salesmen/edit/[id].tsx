@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import z from "zod";
 import back from '../../../assets/globalIcons/back.png'
-import { salesmanSchema } from "../../../libs/salesmen.schema";
+
 import { useUpdateSalesman } from "../../../hooks/salesman/useUpdateSalesman";
 import { useGetSalesmanById } from "../../../hooks/salesman/useGetSalesmanById";
 import { pickImageFromLibrary } from "../../../utils/pickImage";

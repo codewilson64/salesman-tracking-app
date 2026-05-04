@@ -103,15 +103,11 @@ const CheckoutVisit = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <SafeAreaView className="flex-1">
+      <SafeAreaView className="flex-1 bg-white">
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="flex-1"
+          behavior="padding"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         >
           <ScrollView 
             showsVerticalScrollIndicator={false}
@@ -269,7 +265,6 @@ const CheckoutVisit = () => {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </KeyboardAvoidingView>
   );
 };
 

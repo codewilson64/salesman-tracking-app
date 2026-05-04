@@ -1,9 +1,10 @@
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "../stores/authStore";
 import { Link, useRouter } from "expo-router";
 import { signUpSchema, TsignUpSchema } from "../libs/auth.schema";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignupScreen() {
   const {
@@ -33,82 +34,110 @@ export default function SignupScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center px-6 bg-white">
-      <Text className="text-3xl font-bold mb-8 text-center">Sign Up</Text>
-
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Email"
-            autoCapitalize="none"
-            value={value}
-            onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-4"
-          />
-        )}
-      />
-      {errors.email && (
-        <Text className="text-red-500 mb-3">{errors.email.message}</Text>
-      )}
-
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Password"
-            secureTextEntry
-            value={value}
-            onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-4"
-          />
-        )}
-      />
-      {errors.password && (
-        <Text className="text-red-500 mb-4">{errors.password.message}</Text>
-      )}
-
-      <Controller
-        control={control}
-        name="companyName"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Company name"
-            value={value}
-            onChangeText={onChange}
-            className="border border-gray-300 rounded-lg p-4 mb-4"
-          />
-        )}
-      />
-      {errors.companyName && (
-        <Text className="text-red-500 mb-4">{errors.companyName.message}</Text>
-      )}
-
-      <Pressable
-        onPress={handleSubmit(onSubmit)}
-        className="bg-black rounded-lg p-4"
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <Text className="text-white text-center font-semibold">
-          {isSubmitting ? "Signing up..." : "Create Account"}
-        </Text>
-      </Pressable>
-
-      <Text className="text-center mt-4">
-        Already have an account?{" "}
-        <Link href="/login">
-          <Text className="underline text-blue-500 font-semibold">
-            Login
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 24,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text className="text-3xl font-bold mb-8 text-center">
+            Sign Up
           </Text>
-        </Link>
-      </Text>
 
-      {errors.root && (
-        <Text className="text-red-500 text-center mt-4">
-          {errors.root.message}
-        </Text>
-      )}
-    </View>
+          {/* EMAIL */}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder="Email"
+                autoCapitalize="none"
+                value={value}
+                onChangeText={onChange}
+                className="border border-gray-300 rounded-lg p-4 mb-4"
+              />
+            )}
+          />
+          {errors.email && (
+            <Text className="text-red-500 mb-3">
+              {errors.email.message}
+            </Text>
+          )}
+
+          {/* PASSWORD */}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder="Password"
+                secureTextEntry
+                value={value}
+                onChangeText={onChange}
+                className="border border-gray-300 rounded-lg p-4 mb-4"
+              />
+            )}
+          />
+          {errors.password && (
+            <Text className="text-red-500 mb-4">
+              {errors.password.message}
+            </Text>
+          )}
+
+          {/* COMPANY */}
+          <Controller
+            control={control}
+            name="companyName"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder="Company name"
+                value={value}
+                onChangeText={onChange}
+                className="border border-gray-300 rounded-lg p-4 mb-4"
+              />
+            )}
+          />
+          {errors.companyName && (
+            <Text className="text-red-500 mb-4">
+              {errors.companyName.message}
+            </Text>
+          )}
+
+          {/* BUTTON */}
+          <Pressable
+            onPress={handleSubmit(onSubmit)}
+            className="bg-black rounded-lg p-4"
+          >
+            <Text className="text-white text-center font-semibold">
+              {isSubmitting ? "Signing up..." : "Create Account"}
+            </Text>
+          </Pressable>
+
+          {/* LOGIN LINK */}
+          <Text className="text-center mt-4">
+            Already have an account?{" "}
+            <Link href="/login">
+              <Text className="underline text-blue-500 font-semibold">
+                Login
+              </Text>
+            </Link>
+          </Text>
+
+          {/* ERROR */}
+          {errors.root && (
+            <Text className="text-red-500 text-center mt-4">
+              {errors.root.message}
+            </Text>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

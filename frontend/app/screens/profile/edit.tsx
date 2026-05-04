@@ -122,17 +122,17 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <SafeAreaView className="flex-1">
-        <ScrollView
-          contentContainerStyle={{ padding: 24 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
+          <ScrollView
+            contentContainerStyle={{ padding: 24 }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
           {/* HEADER */}
           <View className="flex-row items-center mb-8">
             <Pressable onPress={() => router.back()} className="mr-3">
@@ -244,7 +244,7 @@ export default function EditProfileScreen() {
             </Text>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

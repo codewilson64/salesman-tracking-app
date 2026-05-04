@@ -53,12 +53,12 @@ export default function CreateSalesmanScreen() {
   };
 
   return (
+  <SafeAreaView className="flex-1 bg-white">
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
+      className="flex-1"
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       >
-      <SafeAreaView>
         <ScrollView 
           contentContainerStyle={{ padding: 24 }}
           showsVerticalScrollIndicator={false}
@@ -180,7 +180,7 @@ export default function CreateSalesmanScreen() {
           )}
         </ScrollView>
 
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
  );
 }
