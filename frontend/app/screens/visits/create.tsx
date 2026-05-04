@@ -49,10 +49,10 @@ export default function CreateVisitScreen() {
   
   const pickImage = async () => {
     const uri = await takePhoto();
-    if (uri) {
-      setImage(uri);
-      setValue("checkInImage", uri); // ✅ sync to RHF
-    }
+      if (uri) {
+        setImage(uri);
+        setValue("checkInImage", uri); // ✅ sync to RHF
+      }
   };
 
   /* ================= WATCH ================= */

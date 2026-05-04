@@ -53,7 +53,10 @@ export default function EditProfileScreen() {
   } = useForm<FormData>({
     resolver: zodResolver(updateProfileSchema),
     values: {
+      name: user?.name ?? "",
       email: user?.email ?? "",
+      address: user?.address ?? "",
+      phone: user?.phone ?? "",
     },
   });
 
@@ -160,11 +163,35 @@ export default function EditProfileScreen() {
               </Text>
             </View>
 
+            {/* Name */}
+            <FormInput
+              control={control}
+              name="name"
+              label="Name"
+              errors={errors}
+            />
+
             {/* EMAIL */}
             <FormInput
               control={control}
               name="email"
               label="Email"
+              errors={errors}
+            />
+
+            {/* Address */}
+            <FormInput
+              control={control}
+              name="address"
+              label="Address"
+              errors={errors}
+            />
+
+            {/* Phone */}
+            <FormInput
+              control={control}
+              name="phone"
+              label="Phone"
               errors={errors}
             />
 

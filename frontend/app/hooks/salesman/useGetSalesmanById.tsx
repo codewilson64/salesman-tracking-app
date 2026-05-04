@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSalesmanById } from "../../services/Salesmen/salesmenService";
-import { Salesman } from "../../types/salesman";
+import { Salesman } from "../../types/user";
 
 export const useGetSalesmanById = (id: string) => {
   return useQuery<Salesman>({

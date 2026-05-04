@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
 import { customersTable } from "../db/schemas/customers.js";
-import { salesmenTable } from "../db/schemas/salesmen.js";
 import { transactionsTable } from "../db/schemas/transactions.js";
 import { visitsTable } from "../db/schemas/visit.js";
 import { db } from "../index.js";
 import { and, eq, gte, lte, or } from "drizzle-orm";
+import { usersTable } from "../db/schemas/users.js";
 
 export const getOutstandingTransactions = async (req: Request, res: Response) => {
   try {
@@ -22,34 +22,19 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
 
     let conditions = [];
 
-    /* ================= BASE CONDITION ================= */
-
     conditions.push(eq(transactionsTable.companyId, user.companyId));
 
-    // salesman restriction (same pattern as visits)
     if (user.role === "salesman") {
-      const [salesman] = await db
-        .select()
-        .from(salesmenTable)
-        .where(eq(salesmenTable.userId, user.userId));
-
-      if (!salesman) {
-        return res.status(400).json({ message: "Salesman not found" });
-      }
-
       conditions.push(eq(visitsTable.salesmanId, user.userId));
     }
 
-    /* ================= PAYMENT STATUS FILTER ================= */
-
+    // payment filter
     conditions.push(
       or(
         eq(transactionsTable.paymentStatus, "unpaid"),
         eq(transactionsTable.paymentStatus, "partial")
       )
     );
-
-    /* ================= DATE FILTER ================= */
 
     if (startDate) {
       conditions.push(gte(transactionsTable.createdAt, new Date(startDate as string)));
@@ -59,11 +44,8 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
       conditions.push(lte(transactionsTable.createdAt, new Date(endDate as string)));
     }
 
-    /* ================= QUERY ================= */
-
     const transactions = await db
       .select({
-        // transaction info
         id: transactionsTable.id,
         transactionType: transactionsTable.transactionType,
         totalAmount: transactionsTable.totalAmount,
@@ -75,26 +57,21 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
         paymentType: transactionsTable.paymentType,
         createdAt: transactionsTable.createdAt,
 
-        // visit info
         visitId: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
-        checkOutAt: visitsTable.checkOutAt,
 
-        // customer info
         customerId: customersTable.id,
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
         customerImage: customersTable.customerImage,
-        customerImageId: customersTable.customerImageId,
 
-        // salesman info
-        salesmanId: salesmenTable.id,
-        salesmanName: salesmenTable.name,
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
       })
       .from(transactionsTable)
       .leftJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
-      .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
+      .leftJoin(usersTable, eq(visitsTable.salesmanId, usersTable.id))
       .where(and(...conditions));
 
     return res.status(200).json({
@@ -104,7 +81,6 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Failed to fetch outstanding transactions",
       error: error instanceof Error ? error.message : error,
@@ -128,29 +104,13 @@ export const getPaidTransactions = async (req: Request, res: Response) => {
 
     let conditions = [];
 
-    /* ================= BASE CONDITION ================= */
-
     conditions.push(eq(transactionsTable.companyId, user.companyId));
 
-    // salesman restriction (same pattern as visits)
     if (user.role === "salesman") {
-      const [salesman] = await db
-        .select()
-        .from(salesmenTable)
-        .where(eq(salesmenTable.userId, user.userId));
-
-      if (!salesman) {
-        return res.status(400).json({ message: "Salesman not found" });
-      }
-
       conditions.push(eq(visitsTable.salesmanId, user.userId));
     }
 
-    /* ================= PAYMENT STATUS FILTER ================= */
-
-    conditions.push(eq(transactionsTable.paymentStatus, "paid"),);
-
-    /* ================= DATE FILTER ================= */
+    conditions.push(eq(transactionsTable.paymentStatus, "paid"));
 
     if (startDate) {
       conditions.push(gte(transactionsTable.createdAt, new Date(startDate as string)));
@@ -160,15 +120,10 @@ export const getPaidTransactions = async (req: Request, res: Response) => {
       conditions.push(lte(transactionsTable.createdAt, new Date(endDate as string)));
     }
 
-    /* ================= QUERY ================= */
-
     const transactions = await db
       .select({
-        // transaction info
         id: transactionsTable.id,
         transactionType: transactionsTable.transactionType,
-        totalAmount: transactionsTable.totalAmount,
-        totalDiscount: transactionsTable.totalDiscount,
         finalAmount: transactionsTable.finalAmount,
         paidAmount: transactionsTable.paidAmount,
         remainingAmount: transactionsTable.remainingAmount,
@@ -176,26 +131,21 @@ export const getPaidTransactions = async (req: Request, res: Response) => {
         paymentType: transactionsTable.paymentType,
         createdAt: transactionsTable.createdAt,
 
-        // visit info
         visitId: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
-        checkOutAt: visitsTable.checkOutAt,
 
-        // customer info
         customerId: customersTable.id,
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
         customerImage: customersTable.customerImage,
-        customerImageId: customersTable.customerImageId,
 
-        // salesman info
-        salesmanId: salesmenTable.id,
-        salesmanName: salesmenTable.name,
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
       })
       .from(transactionsTable)
       .leftJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
-      .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
+      .leftJoin(usersTable, eq(visitsTable.salesmanId, usersTable.id))
       .where(and(...conditions));
 
     return res.status(200).json({
@@ -205,7 +155,6 @@ export const getPaidTransactions = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Failed to fetch paid transactions",
       error: error instanceof Error ? error.message : error,
@@ -241,11 +190,15 @@ export const getTransactionById = async (req: Request, res: Response) => {
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
 
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
+
         checkInAt: visitsTable.checkInAt,
       })
       .from(transactionsTable)
       .leftJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
+      .leftJoin(usersTable, eq(visitsTable.salesmanId, usersTable.id))
       .where(
         and(
           eq(transactionsTable.id, id),

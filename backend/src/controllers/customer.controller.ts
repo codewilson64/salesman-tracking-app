@@ -3,7 +3,6 @@ import { areasTable } from "../db/schemas/areas.js";
 import { db } from "../index.js";
 import { and, eq } from "drizzle-orm";
 import { customersTable } from "../db/schemas/customers.js";
-import { salesmenTable } from "../db/schemas/salesmen.js";
 import { usersTable } from "../db/schemas/users.js";
 
 export const createCustomer = async (req: Request, res: Response) => {
@@ -99,35 +98,19 @@ export const getAllCustomers = async (req: Request, res: Response) => {
     };
 
     if (!user?.companyId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     let condition;
 
-    /* ================= CONDITION ================= */
-
     if (user.role === "salesman") {
-      // 🔥 map userId → salesmanId
-      const [salesman] = await db
-        .select()
-        .from(salesmenTable)
-        .where(eq(salesmenTable.userId, user.userId));
-
-      if (!salesman) {
-        return res.status(400).json({ message: "Salesman not found" });
-      }
-
       condition = and(
         eq(customersTable.companyId, user.companyId),
-        eq(areasTable.salesmanId, salesman.id) // ✅ filter via area
+        eq(areasTable.salesmanId, user.userId)
       );
     } else {
       condition = eq(customersTable.companyId, user.companyId);
     }
-
-    /* ================= QUERY ================= */
 
     const customers = await db
       .select({
@@ -139,22 +122,17 @@ export const getAllCustomers = async (req: Request, res: Response) => {
         description: customersTable.description,
         createdAt: customersTable.createdAt,
 
-        // area info
         areaId: areasTable.id,
         areaName: areasTable.name,
         city: areasTable.city,
 
-        // salesman info
-        salesmanId: salesmenTable.id,
-        salesmanName: salesmenTable.name,
-
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
         salesmanImage: usersTable.profileImage,
-        salesmanImageId: usersTable.profileImageId,
       })
       .from(customersTable)
       .leftJoin(areasTable, eq(customersTable.areaId, areasTable.id))
-      .leftJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))
-      .leftJoin(usersTable, eq(salesmenTable.userId, usersTable.id))
+      .leftJoin(usersTable, eq(areasTable.salesmanId, usersTable.id))
       .where(condition);
 
     return res.status(200).json({
@@ -164,7 +142,6 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Failed to fetch customers",
       error: error instanceof Error ? error.message : error,
@@ -177,22 +154,8 @@ export const getCustomerById = async (req: Request, res: Response) => {
     const id = req.params.id as string;
 
     const user = req.user as {
-      userId: string;
       companyId: string;
-      role: string;
     };
-
-    if (!user?.companyId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
-
-    if (!id) {
-      return res.status(400).json({
-        message: "Customer ID is required",
-      });
-    }
 
     const [customer] = await db
       .select({
@@ -207,21 +170,19 @@ export const getCustomerById = async (req: Request, res: Response) => {
         customerImage: customersTable.customerImage,
         customerImageId: customersTable.customerImageId,
 
-        // area info
         areaId: areasTable.id,
         areaName: areasTable.name,
         city: areasTable.city,
         day: areasTable.day,
         weeks: areasTable.weeks,
 
-        // salesman info
-        salesmanId: salesmenTable.id,
-        salesmanName: salesmenTable.name,
-        salesmanPhone: salesmenTable.phone,
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
+        salesmanPhone: usersTable.phone,
       })
       .from(customersTable)
       .leftJoin(areasTable, eq(customersTable.areaId, areasTable.id))
-      .leftJoin(salesmenTable, eq(areasTable.salesmanId, salesmenTable.id))
+      .leftJoin(usersTable, eq(areasTable.salesmanId, usersTable.id))
       .where(
         and(
           eq(customersTable.id, id),
@@ -242,7 +203,6 @@ export const getCustomerById = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Failed to fetch customer",
       error: error instanceof Error ? error.message : error,
@@ -287,7 +247,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
       }
     }
 
-    const updatedCustomer = await db
+    const [updatedCustomer] = await db
       .update(customersTable)
       .set({
         areaId,
@@ -307,7 +267,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
       )
       .returning();
 
-    if (updatedCustomer.length === 0) {
+    if (!updatedCustomer) {
       return res.status(404).json({
         message: "Customer not found",
       });
@@ -315,7 +275,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Customer updated successfully",
-      data: updatedCustomer[0],
+      data: updatedCustomer,
     });
 
   } catch (error) {

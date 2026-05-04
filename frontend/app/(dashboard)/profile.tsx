@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Image, Pressable, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../stores/authStore";
@@ -25,6 +25,10 @@ const Profile = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
+      >
       {/* Header + Avatar */}
       <View className="mb-6">
         <View className="items-center">
@@ -54,38 +58,63 @@ const Profile = () => {
       </View>
 
       {/* Info Section */}
-      <View className="mt-4">
-        {/* Email */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Email</Text>
-            <Text className="text-lg font-medium">{user.email}</Text>
+        <View className="mt-4">
+          {/* Company */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Company</Text>
+              <Text className="text-lg font-medium">{user.companyName || "-"}</Text>
+            </View>
           </View>
-        </View>
-
-        {/* Role */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Role</Text>
-            <Text className="text-lg font-medium capitalize">
-              {user.role}
-            </Text>
+          {/* Name */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Name</Text>
+              <Text className="text-lg font-medium">{user.name || "-"}</Text>
+            </View>
           </View>
-        </View>
+          {/* Address */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Address</Text>
+              <Text className="text-lg font-medium">{user.address || "-"}</Text>
+            </View>
+          </View>
+          {/* Phone */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Phone</Text>
+              <Text className="text-lg font-medium">{user.phone || "-"}</Text>
+            </View>
+          </View>
+          {/* Email */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Email</Text>
+              <Text className="text-lg font-medium">{user.email || "-"}</Text>
+            </View>
+          </View>
+          {/* Role */}
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+              <Text className="text-gray-500 text-sm">Role</Text>
+              <Text className="text-lg font-medium capitalize">{user.role || "-"}</Text>
+            </View>
+          </View>
 
         {/* Actions */}
-        <View className="mt-4">
+          <View className="mt-4">
             <Pressable
-            onPress={handleLogout}
-            className="bg-red-600 rounded-lg p-4"
+              onPress={handleLogout}
+              className="bg-red-600 rounded-lg p-4"
             >
-            <Text className="text-white text-center font-semibold">
+              <Text className="text-white text-center font-semibold">
                 Logout
-            </Text>
+              </Text>
             </Pressable>
+          </View>
         </View>
-      </View>
-
+      </ScrollView>
     </SafeAreaView>
   );
 };

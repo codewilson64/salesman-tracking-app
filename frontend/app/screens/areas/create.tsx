@@ -20,7 +20,7 @@ import { useGetAllSalesmen } from "../../hooks/salesman/useGetAllSalesmen";
 import { FormInput } from "../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormMultiSelectModal } from "../../components/areaInputForm/FormMultiSelectModal";
-import { Salesman } from "../../types/salesman";
+import { Salesman } from "../../types/user";
 
 type FormData = z.infer<typeof areaSchema>;
 

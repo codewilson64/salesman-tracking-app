@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { salesmenTable } from "./salesmen.js";
+import { companiesTable } from "./companies";
+import { usersTable } from "./users";
 
 export const areasTable = pgTable("areas", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -8,7 +8,7 @@ export const areasTable = pgTable("areas", {
     .references(() => companiesTable.id)
     .notNull(),
   salesmanId: uuid("salesman_id")
-    .references(() => salesmenTable.id)
+    .references(() => usersTable.id)
     .notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   city: varchar("city", { length: 255 }).notNull(),

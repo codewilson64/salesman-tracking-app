@@ -8,12 +8,15 @@ import { usersTable } from "../db/schemas/users.js";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const userId = req.user?.userId as string;
-  const { email, profileImage, profileImageId } = req.body;
+  const { name, phone, address, email, profileImage, profileImageId } = req.body;
 
   try {
     const [updatedUser] = await db
       .update(usersTable)
       .set({ 
+        name,
+        phone,
+        address,
         email,
         profileImage,
         profileImageId, 

@@ -157,27 +157,37 @@ export const getMe = async (req: Request, res: Response) => {
 
     const userId = req.user.userId;
 
-    const [user] = await db
-      .select()
+    const result = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        role: usersTable.role,
+        companyId: usersTable.companyId,
+        profileImage: usersTable.profileImage,
+        profileImageId: usersTable.profileImageId,
+        name: usersTable.name,
+        address: usersTable.address,
+        phone: usersTable.phone,
+      
+        companyName: companiesTable.name,
+      })
       .from(usersTable)
+      .leftJoin(companiesTable, eq(usersTable.companyId, companiesTable.id))
       .where(eq(usersTable.id, userId));
+
+    const user = result[0];
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    return res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        companyId: user.companyId,
-        profileImage: user.profileImage,
-        profileImageId: user.profileImageId,
-      },
+    return res.status(200).json({
+      message: "User data fetched successfully",
+      data: user,
     });
+    
   } catch (error) {
     console.error("GetMe error:", error);
-    return res.status(500).json({error: "Server error"});
+    return res.status(500).json({ error: "Server error" });
   }
 };

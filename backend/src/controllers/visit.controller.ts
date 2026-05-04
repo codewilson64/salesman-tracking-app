@@ -5,7 +5,6 @@ import { and, eq, gte, isNull, lte } from "drizzle-orm";
 import { areasTable } from "../db/schemas/areas.js";
 import { customersTable } from "../db/schemas/customers.js";
 import { productsTable } from "../db/schemas/products.js";
-import { salesmenTable } from "../db/schemas/salesmen.js";
 import { transactionsTable } from "../db/schemas/transactions.js";
 import { transactionItemsTable } from "../db/schemas/transaction_items.js";
 import { usersTable } from "../db/schemas/users.js";
@@ -342,24 +341,12 @@ export const getAllVisits = async (req: Request, res: Response) => {
 
     let conditions = [];
 
-    /* ================= BASE CONDITION ================= */
-
+    // salesman restriction
     if (user.role === "salesman") {
-      const [salesman] = await db
-        .select()
-        .from(salesmenTable)
-        .where(eq(salesmenTable.userId, user.userId));
-
-      if (!salesman) {
-        return res.status(400).json({ message: "Salesman not found" });
-      }
-
       conditions.push(eq(visitsTable.salesmanId, user.userId));
     }
 
     conditions.push(eq(visitsTable.companyId, user.companyId));
-
-    /* ================= DATE FILTER ================= */
 
     if (startDate) {
       conditions.push(gte(visitsTable.checkInAt, new Date(startDate as string)));
@@ -369,11 +356,8 @@ export const getAllVisits = async (req: Request, res: Response) => {
       conditions.push(lte(visitsTable.checkInAt, new Date(endDate as string)));
     }
 
-    /* ================= QUERY ================= */
-
     const visits = await db
       .select({
-        // visit info
         id: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
         checkOutAt: visitsTable.checkOutAt,
@@ -382,29 +366,23 @@ export const getAllVisits = async (req: Request, res: Response) => {
         approvalStatus: visitsTable.approvalStatus,
         createdAt: visitsTable.createdAt,
 
-        // customer info
         customerId: customersTable.id,
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
         address: customersTable.address,
 
-        // area info
         areaId: areasTable.id,
         areaName: areasTable.name,
         city: areasTable.city,
 
-        // salesman info
-        salesmanId: salesmenTable.id,
-        salesmanName: salesmenTable.name,
-
-        // user info
+        // ✅ FIX: from usersTable
+        salesmanId: usersTable.id,
+        salesmanName: usersTable.name,
         salesmanImage: usersTable.profileImage,
-        salesmanImageId: usersTable.profileImageId,
       })
       .from(visitsTable)
       .leftJoin(customersTable, eq(visitsTable.customerId, customersTable.id))
       .leftJoin(areasTable, eq(visitsTable.areaId, areasTable.id))
-      .leftJoin(salesmenTable, eq(visitsTable.salesmanId, salesmenTable.userId))
       .leftJoin(usersTable, eq(visitsTable.salesmanId, usersTable.id))
       .where(and(...conditions));
 
@@ -415,7 +393,6 @@ export const getAllVisits = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Failed to fetch visits",
       error: error instanceof Error ? error.message : error,

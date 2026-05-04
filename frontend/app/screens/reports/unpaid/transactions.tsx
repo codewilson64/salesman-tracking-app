@@ -96,7 +96,7 @@ const TransactionsScreen = () => {
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
-              router.push(`/screens/reports/paid/${item.id}`)
+              router.push(`/screens/reports/unpaid/edit/${item.id}`)
             }
             className="bg-white p-4 mb-2 rounded-xl flex-row items-center justify-between"
           >

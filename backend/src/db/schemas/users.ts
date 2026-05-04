@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { roleEnum } from "./enums.js";
+import { companiesTable } from "./companies";
+import { roleEnum } from "./enums";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -10,6 +10,10 @@ export const usersTable = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   role: roleEnum("role").default("salesman").notNull(),
+
+  name: varchar("name", { length: 255 }),
+  address: varchar("address", { length: 255 }),
+  phone: varchar("phone", { length: 20 }),
   profileImage: varchar("profile_image", { length: 500 }),
   profileImageId: varchar("profile_image_id", { length: 255 }),
 
