@@ -1,6 +1,6 @@
-import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { roleEnum } from "./enums.js";
+import { pgTable, uuid, varchar, timestamp, text } from "drizzle-orm/pg-core";
+import { companiesTable } from "./companies";
+import { roleEnum } from "./enums";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -16,6 +16,9 @@ export const usersTable = pgTable("users", {
   phone: varchar("phone", { length: 20 }),
   profileImage: varchar("profile_image", { length: 500 }),
   profileImageId: varchar("profile_image_id", { length: 255 }),
+
+  resetPasswordToken: text("reset_password_token"),
+  resetPasswordExpires: timestamp("reset_password_expires"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

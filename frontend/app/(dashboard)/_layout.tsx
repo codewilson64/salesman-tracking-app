@@ -3,10 +3,11 @@ import { Image } from "react-native";
 import home from '../assets/menuIcons/home.png'
 import collections from '../assets/menuIcons/collections.png'
 import profile from '../assets/menuIcons/profile.png'
+import AuthUserOnly from "../components/auth/AuthUserOnly";
 
 export default function DashboardLayout() {
     return (
-      <>
+      <AuthUserOnly>
         <Tabs
           screenOptions={{
             headerShown: false,
@@ -65,6 +66,6 @@ export default function DashboardLayout() {
           }}
         />
           </Tabs>
-      </>
+      </AuthUserOnly>
     )
 }

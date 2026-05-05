@@ -1,6 +1,6 @@
 import { pgTable, uuid, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { visitsTable } from "./visit.js";
+import { companiesTable } from "./companies";
+import { visitsTable } from "./visit";
 
 export const transactionTypeEnum = pgEnum("transaction_type_enum", [
   "cash",

@@ -16,9 +16,14 @@ type User = {
 type AuthState = {
   user: User | null;
   accessToken: string | null;
+  isHydrated: boolean;
+  isLoading: boolean;
+
   login: (data: TloginSchema) => Promise<void>;
   signup: (data: TsignUpSchema) => Promise<void>;
   logout: () => void;
+
+  setHydrated: () => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -26,35 +31,25 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       accessToken: null,
-      
-      // login
-      login: async (data) => {
-        try {
-          const res = await loginUser(data);
+      isHydrated: false,
+      isLoading: true,
 
-          set({
-            user: res.user,
-            accessToken: res.accessToken,
-          });
-        } catch (error) {
-          console.log("LOGIN ERROR:", error);
-          throw error;
-        }
+      setHydrated: () => set({ isHydrated: true, isLoading: false }),
+
+      login: async (data) => {
+        const res = await loginUser(data);
+        set({
+          user: res.user,
+          accessToken: res.accessToken,
+        });
       },
 
-      // sign up
       signup: async (data) => {
-        try {
-          const res = await signupUser(data);
-
-          set({
-            user: res.user,
-            accessToken: res.accessToken,
-          });
-        } catch (error) {
-          console.log("SIGNUP ERROR:", error);
-          throw error;
-        }
+        const res = await signupUser(data);
+        set({
+          user: res.user,
+          accessToken: res.accessToken,
+        });
       },
 
       logout: () => {
@@ -67,6 +62,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
     }
   )
 );

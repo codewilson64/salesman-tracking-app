@@ -1,11 +1,17 @@
 import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
+
 import bcrypt from "bcrypt";
 import validator from "validator";
+import crypto from "crypto";
+import { Resend } from "resend";
+
 import { generateToken } from "../utils/generateToken.js";
 import { db } from "../index.js";
 import { usersTable } from "../db/schemas/users.js";
 import { companiesTable } from "../db/schemas/companies.js";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const signup = async (req: Request, res: Response) => {
   const { email, password, companyName } = req.body;
@@ -188,6 +194,109 @@ export const getMe = async (req: Request, res: Response) => {
     
   } catch (error) {
     console.error("GetMe error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  try {
+    const result = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+
+    const user = result[0];
+
+    if (!user) {
+      return res.json({ message: "If email exists, reset link sent" });
+    }
+
+    // generate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    // save to DB
+    await db
+      .update(usersTable)
+      .set({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: expires,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    // create reset link
+    const resetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
+
+    // send email
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: email,
+      subject: "Reset your password",
+      html: `
+        <p>You requested a password reset</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p>This link expires in 15 minutes</p>
+      `,
+    });
+
+    return res.json({ message: "Reset email sent" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+
+  try {
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const result = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.resetPasswordToken, hashedToken));
+
+    const user = result[0];
+
+    if (!user || !user.resetPasswordExpires) {
+      return res.status(400).json({ error: "Invalid token" });
+    }
+
+    if (new Date(user.resetPasswordExpires) < new Date()) {
+      return res.status(400).json({ error: "Token expired" });
+    }
+
+    // hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    await db
+      .update(usersTable)
+      .set({
+        password: hash,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    return res.json({ 
+      message: "Password reset successful" 
+    });
+  } 
+  catch (error) {
+    console.error(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
