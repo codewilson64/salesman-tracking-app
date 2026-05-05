@@ -1,6 +1,6 @@
 import { pgTable, uuid, numeric, integer } from "drizzle-orm/pg-core";
-import { productsTable } from "./products"; 
-import { transactionsTable } from "./transactions";
+import { productsTable } from "./products.js"; 
+import { transactionsTable } from "./transactions.js";
 
 export const transactionItemsTable = pgTable("transaction_items", {
   id: uuid("id").defaultRandom().primaryKey(),
