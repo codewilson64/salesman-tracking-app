@@ -16,13 +16,16 @@ type User = {
 type AuthState = {
   user: User | null;
   accessToken: string | null;
+  refreshToken: string | null;
+
   isHydrated: boolean;
   isLoading: boolean;
 
   login: (data: TloginSchema) => Promise<void>;
   signup: (data: TsignUpSchema) => Promise<void>;
   logout: () => void;
-
+  
+  setAccessToken: (token: string) => void;
   setHydrated: () => void;
 };
 
@@ -31,6 +34,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       accessToken: null,
+      refreshToken: null,
       isHydrated: false,
       isLoading: true,
 
@@ -41,6 +45,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: res.user,
           accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
         });
       },
 
@@ -56,6 +61,13 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           accessToken: null,
+          refreshToken: null,
+        });
+      },
+
+      setAccessToken: (token) => {
+        set({
+          accessToken: token,
         });
       },
     }),

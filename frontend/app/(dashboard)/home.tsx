@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { Menus } from "../constants/menu";
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Navbar from "../components/Navbar";
 
 const Home = () => {
   const user = useAuthStore((state) => state.user);

@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
 
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import crypto from "crypto";
 import { Resend } from "resend";
 
-import { generateToken } from "../utils/generateToken.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { db } from "../index.js";
 import { usersTable } from "../db/schemas/users.js";
 import { companiesTable } from "../db/schemas/companies.js";
@@ -77,7 +78,14 @@ export const signup = async (req: Request, res: Response) => {
     const { user, company } = result;
 
     // Create JWT
-    const accessToken = generateToken(user.id, user.companyId, user.role);
+    const payload = {
+      userId: user.id,
+      companyId: user.companyId,
+      role: user.role,
+    };
+
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
 
     return res.status(201).json({
       message: "Signup successful",
@@ -94,6 +102,7 @@ export const signup = async (req: Request, res: Response) => {
         name: company.name,
       },
       accessToken,
+      refreshToken
     });
 
   } catch (error: unknown) {
@@ -133,7 +142,15 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Generate token
-    const accessToken = generateToken(user.id, user.companyId, user.role);
+    const payload = {
+      userId: user.id,
+      companyId: user.companyId,
+      role: user.role,
+    };
+
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
     return res.status(200).json({
       message: "Login successful",
       user: {
@@ -145,6 +162,7 @@ export const login = async (req: Request, res: Response) => {
         profileImageId: user.profileImageId, 
       },
       accessToken,
+      refreshToken
     });
 
   } catch (error: unknown) {
@@ -298,5 +316,35 @@ export const resetPassword = async (req: Request, res: Response) => {
   catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const refreshAccessToken = async ( req: Request, res: Response ) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ error: "No refresh token" });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET as string
+    ) as JwtPayload;
+
+    const newAccessToken = generateAccessToken({
+      userId: decoded.userId,
+      companyId: decoded.companyId,
+      role: decoded.role,
+    });
+
+    return res.status(200).json({
+      accessToken: newAccessToken,
+    });
+
+  } catch {
+    return res.status(401).json({
+      error: "Invalid refresh token",
+    });
   }
 };

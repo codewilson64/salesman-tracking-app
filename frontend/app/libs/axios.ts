@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
+import { refreshTokenRequest } from "../services/Auth/refreshTokenService";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -11,6 +12,7 @@ export const api = axios.create({
   },
 });
 
+// Request interceptor
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
 
@@ -20,3 +22,38 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const { refreshToken } = useAuthStore.getState();
+
+        if (!refreshToken) {
+          throw new Error("No refresh token");
+        }
+
+        const res = await refreshTokenRequest(refreshToken);
+
+        useAuthStore.getState().setAccessToken(res.accessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${res.accessToken}`;
+
+        return api(originalRequest);
+
+      } catch {
+        useAuthStore.getState().logout();
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);

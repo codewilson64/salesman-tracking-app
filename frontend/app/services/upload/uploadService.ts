@@ -6,11 +6,17 @@ export const uploadImage = async (image: string, folder: string): Promise<{
 }> => {
   const formData = new FormData();
 
-  formData.append("image", {
+  const imageFile: {
+    uri: string;
+    type: string;
+    name: string;
+  } = {
     uri: image,
     type: "image/jpeg",
     name: "photo.jpg",
-  } as any);
+  };
+
+  formData.append("image", imageFile as unknown as Blob);
 
   const res = await api.post("/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },

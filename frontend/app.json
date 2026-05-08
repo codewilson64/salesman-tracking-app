@@ -12,10 +12,8 @@
     "android": {
       "package": "com.codewilson64.salesteamtracker",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#FFF",
+        "foregroundImage": "./assets/logo.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -32,7 +30,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Salesman Tracker App to use your location for better experience."
+          "locationAlwaysAndWhenInUsePermission": "Allow Sales Team Tracker to use your location for better experience."
         }
       ],
       [

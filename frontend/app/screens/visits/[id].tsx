@@ -91,7 +91,7 @@ const VisitDetail = () => {
   const hasLocation = lat != null && lng != null;
 
   return (
-    <SafeAreaView className="flex-1 p-4 bg-white">
+    <SafeAreaView className="flex-1 pl-4 pr-4 bg-white">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -267,11 +267,7 @@ const VisitDetail = () => {
 
         {/* MAP */}
         {hasLocation && (
-          <View className="bg-gray-100 p-4 rounded-lg">
-            <Text className="text-gray-700 mb-2">
-              Tap to view location
-            </Text>
-          
+          <View className="rounded-lg pt-4 pb-4">          
             <Pressable
               onPress={() => openMap(lat, lng)}
               className="bg-green-600 rounded-lg p-3"

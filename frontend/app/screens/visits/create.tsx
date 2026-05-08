@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -51,7 +51,9 @@ export default function CreateVisitScreen() {
     const uri = await takePhoto();
       if (uri) {
         setImage(uri);
-        setValue("checkInImage", uri); // ✅ sync to RHF
+        setValue("checkInImage", uri, {
+          shouldValidate: true,
+        });
       }
   };
 
@@ -126,11 +128,14 @@ export default function CreateVisitScreen() {
                         resizeMode="cover"
                       />
 
-                      {/* ❌ REMOVE BUTTON */}
+                      {/* REMOVE BUTTON */}
                       <Pressable
                         onPress={(e) => {
                           e.stopPropagation();
                           setImage(null);
+                          setValue("checkInImage", "", {
+                            shouldValidate: true,
+                          });
                         }}
                         className="absolute top-2 right-2"
                       >
@@ -164,10 +169,9 @@ export default function CreateVisitScreen() {
                   name: a.areaName,
                 })) || []
               }
-              getLabel={(item: any) => item.name}
+              getLabel={(item: { value: string; name: string }) => item.name}
               errors={errors}
               onChangeExtra={() => {
-                // reset customer when area changes
                 setValue("customerId", "");
               }}
             />
@@ -183,7 +187,7 @@ export default function CreateVisitScreen() {
                   name: c.shopName,
                 })) || []
               }
-              getLabel={(item: any) => item.name}
+              getLabel={(item: { value: string; name: string }) => item.name}
               errors={errors}
               disabled={!selectedAreaId}
             />

@@ -15,9 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { z } from "zod";
 import { useState } from "react";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import back from '../../assets/globalIcons/back.png'
 import { customerSchema } from "../../libs/customer.schema";
 import { useCreateCustomer } from "../../hooks/customer/useCreateCustomer";
 import { useGetAllArea } from "../../hooks/area/useGetAllAreas";
@@ -26,6 +23,10 @@ import { takePhoto } from "../../utils/takePhoto";
 import { Area } from "../../types/area";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../components/areaInputForm/FormInput";
+
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import back from '../../assets/globalIcons/back.png'
 
 type FormData = z.infer<typeof customerSchema>;
 
@@ -58,7 +59,9 @@ export default function CreateCustomerScreen() {
     const uri = await takePhoto();
     if (uri) {
       setImage(uri);
-      setValue("customerImage", uri); // ✅ sync to RHF
+      setValue("customerImage", uri, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -133,7 +136,7 @@ export default function CreateCustomerScreen() {
                   name: a.areaName,
                 })) || []
               }
-              getLabel={(item: any) => item.name}
+              getLabel={(item: { value: string; name: string }) => item.name}
               errors={errors}
             />
 
@@ -234,6 +237,9 @@ export default function CreateCustomerScreen() {
                         onPress={(e) => {
                           e.stopPropagation();
                           setImage(null);
+                          setValue("customerImage", "", {
+                            shouldValidate: true,
+                          });
                         }}
                         className="absolute top-2 right-2"
                       >

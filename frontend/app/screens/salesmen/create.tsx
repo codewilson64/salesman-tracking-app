@@ -37,7 +37,9 @@ export default function CreateSalesmanScreen() {
     const uri = await pickImageFromLibrary();
       if (uri) {
         setImage(uri);
-        setValue("profileImage", uri); 
+        setValue("profileImage", uri, {
+          shouldValidate: true,
+        });
       }
   };
 
@@ -141,6 +143,9 @@ export default function CreateSalesmanScreen() {
                         onPress={(e) => {
                           e.stopPropagation();
                           setImage(null);
+                          setValue("profileImage", "", {
+                            shouldValidate: true,
+                          });
                         }}
                         className="absolute top-2 right-2"
                       >
