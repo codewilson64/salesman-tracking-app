@@ -59,7 +59,7 @@ export default function ChangePasswordScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
+      className="flex-1 bg-gray-100"
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >

@@ -24,7 +24,7 @@ const Profile = () => {
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 pl-4 pr-4 bg-white">
+    <SafeAreaView edges={["top"]} className="flex-1 pl-4 pr-4 bg-gray-100">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}

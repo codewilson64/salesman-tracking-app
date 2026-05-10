@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  TextInput,
+  Modal,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -62,6 +64,9 @@ export default function EditProfileScreen() {
 
   const [image, setImage] = useState<string | null>(null);
 
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
   const isDisabled = (!isDirty && !image) || isPending;
 
   const pickImage = async () => {
@@ -91,26 +96,43 @@ export default function EditProfileScreen() {
       : "This will permanently delete your account and all your data. This cannot be undone.";
 
     Alert.alert(title, message, [
-      { text: "Cancel", style: "cancel" },
       {
-        text: "Delete",
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Yes",
         style: "destructive",
-        onPress: async () => {
-          try {
-            if (isAdmin) {
-              await deleteCompany();   
-            } else {
-              await deleteAccount();  
-            }
-
-            logout();
-            router.replace("/login");
-          } catch (err) {
-            console.error(err);
-          }
+        onPress: () => {
+          setConfirmVisible(true);
         },
       },
     ]);
+  };
+
+  const confirmDelete = async () => {
+    const requiredText = isAdmin ? "delete company" : "delete account";
+
+    if (confirmText.trim().toLowerCase() !== requiredText) {
+      Alert.alert(
+        "Invalid confirmation",
+        `Please type "${requiredText}" exactly.`
+      );
+      return;
+    }
+
+    try {
+      if (isAdmin) {
+        await deleteCompany();
+      } else {
+        await deleteAccount();
+      }
+
+      logout();
+      router.replace("/login");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (isLoading || !user) {
@@ -122,7 +144,7 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-gray-100">
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
@@ -245,6 +267,55 @@ export default function EditProfileScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={confirmVisible}
+        transparent
+        animationType="fade"
+      >
+        <View className="flex-1 justify-center items-center bg-black/50 px-6">
+          <View className="bg-white w-full rounded-2xl p-6">
+            <Text className="text-xl font-bold mb-3">
+              {isAdmin ? "Delete Company" : "Delete Account"}
+            </Text>
+
+            <Text className="text-gray-600 mb-4">
+              Type{" "}
+              <Text className="font-bold">
+                {isAdmin ? "delete company" : "delete account"}
+              </Text>{" "}
+              to confirm.
+            </Text>
+
+            <TextInput
+              value={confirmText}
+              onChangeText={setConfirmText}
+              placeholder={isAdmin ? "delete company" : "delete account"}
+              autoCapitalize="none"
+              className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+            />
+
+            <View className="flex-row justify-end gap-3">
+              <Pressable
+                onPress={() => {
+                  setConfirmVisible(false);
+                  setConfirmText("");
+                }}
+              >
+                <Text className="text-gray-500">Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={confirmDelete}
+              >
+                <Text className="text-red-600 font-semibold">
+                  Delete
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
