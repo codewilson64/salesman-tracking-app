@@ -32,7 +32,6 @@ export const deleteVisitById = async (id: string) => {
   return res.data
 }
 
-// review visit API
 export const reviewVisitById = async (id: string, data: TReviewVisitInput) => {  
   const res = await api.patch(`/visits/${id}/review`, data);
   return res.data;

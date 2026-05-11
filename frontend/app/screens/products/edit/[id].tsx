@@ -62,12 +62,12 @@ export default function EditProductScreen() {
   }
 
   return (
-  <KeyboardAvoidingView
-    className="flex-1 bg-white"
-    behavior="padding"
-    keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-  >
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-white">
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
       <ScrollView
         contentContainerStyle={{ padding: 24 }}
         showsVerticalScrollIndicator={false}
@@ -193,7 +193,7 @@ export default function EditProductScreen() {
           </Text>
         )}
       </ScrollView>
-    </SafeAreaView>
-  </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
+  </SafeAreaView>
 );
 }

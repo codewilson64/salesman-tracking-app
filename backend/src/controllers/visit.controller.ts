@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { db } from "../index.js";
-import { and, eq, gte, isNull, lte } from "drizzle-orm";
+import { and, count, eq, gte, isNull, lte } from "drizzle-orm";
 
 import { areasTable } from "../db/schemas/areas.js";
 import { customersTable } from "../db/schemas/customers.js";
@@ -204,6 +204,8 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           orderBy,
           checkOutAt: new Date(),
           status: "check-out",
+          isAdminNotificationRead: false,
+          isSalesmanNotificationRead: false,
         })
         .where(eq(visitsTable.id, visit.id))
         .returning();

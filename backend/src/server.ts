@@ -11,6 +11,7 @@ import uploadRoute from './routes/upload.route.js'
 import transactionRoute from './routes/transaction.route.js'
 import profileRoute from './routes/profile.route.js'
 import accountRoute from './routes/account.route.js'
+import notificationRoute from './routes/notification.route.js'
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/upload', uploadRoute)
 app.use('/api/transactions', transactionRoute)
 app.use('/api/profile', profileRoute)
 app.use('/api/delete-account', accountRoute)
+app.use('/api/notifications', notificationRoute)
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

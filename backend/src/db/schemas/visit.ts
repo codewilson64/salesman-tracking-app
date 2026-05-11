@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, text, pgEnum, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, text, pgEnum, varchar, boolean } from "drizzle-orm/pg-core";
 import { companiesTable } from "./companies";
 import { areasTable } from "./areas";
 import { customersTable } from "./customers";
@@ -46,6 +46,9 @@ export const visitsTable = pgTable("visits", {
   checkInImage: varchar("check_in_image", { length: 500 }),
   checkInImageId: varchar("check_in_image_id", { length: 255 }),
 
+  isAdminNotificationRead: boolean("is_admin_notification_read").default(true).notNull(),
+  isSalesmanNotificationRead: boolean("is_salesman_notification_read").default(true).notNull(),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   // Admin Approval

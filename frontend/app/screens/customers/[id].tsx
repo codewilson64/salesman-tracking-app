@@ -154,11 +154,7 @@ const CustomerDetail = () => {
 
         {/* MAP */}
         {hasLocation && (
-          <View className="bg-gray-100 p-4 rounded-lg">
-            <Text className="text-gray-700 mb-2">
-              Tap to view location
-            </Text>
-          
+          <View className="pt-4 pb-4 rounded-lg">
             <Pressable
               onPress={() => openMap(lat, lng)}
               className="bg-green-600 rounded-lg p-3"
