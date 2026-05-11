@@ -179,12 +179,14 @@ export const getTransactionById = async (req: Request, res: Response) => {
     const [transaction] = await db
       .select({
         id: transactionsTable.id,
+        visitId: transactionsTable.visitId,
         transactionType: transactionsTable.transactionType,
         finalAmount: transactionsTable.finalAmount,
         paidAmount: transactionsTable.paidAmount,
         remainingAmount: transactionsTable.remainingAmount,
         paymentStatus: transactionsTable.paymentStatus,
         paymentType: transactionsTable.paymentType,
+        paidAt: transactionsTable.paidAt,
         createdAt: transactionsTable.createdAt,
 
         customerName: customersTable.customerName,
@@ -298,6 +300,7 @@ export const updateTransactionPayment = async (req: Request, res: Response) => {
           remainingAmount: remainingAmount.toString(),
           paymentStatus,
           paymentType: finalPaymentType,
+          paidAt: paymentStatus === "paid" ? transaction.paidAt || new Date() : null,
         })
         .where(eq(transactionsTable.id, id))
         .returning();

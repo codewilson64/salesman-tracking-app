@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import back from "../../../assets/globalIcons/back.png";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,10 +18,13 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetTransactionById } from "../../../hooks/transaction/useGetTransactionById";
 import { formatTime } from "../../../helper/formatTime";
+import { useAuthStore } from "../../../stores/authStore";
 
 const TransactionDetailScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  const user = useAuthStore((state) => state.user);
 
   const { data: transaction, isLoading } = useGetTransactionById(id);
 
@@ -78,10 +82,18 @@ const TransactionDetailScreen = () => {
           </View>
 
           <View className="gap-4">
+            {/* Name */}
+            <View>
+              <Text className="text-gray-500">Salesman</Text>
+              <Text className="font-semibold">
+                {transaction.salesmanName}
+              </Text>
+            </View>
+
             {/* Date of visit */}
             <View>
               <Text className="text-gray-500">Date of visit</Text>
-              <Text className="text-lg font-semibold">
+              <Text className="font-semibold">
                 {formatTime(transaction.checkInAt)}
               </Text>
             </View>
@@ -89,7 +101,7 @@ const TransactionDetailScreen = () => {
             {/* SHOP NAME */}
             <View>
               <Text className="text-gray-500">Shop</Text>
-              <Text className="text-lg font-semibold">
+              <Text className="font-semibold">
                 {transaction.shopName}
               </Text>
             </View>
@@ -107,6 +119,14 @@ const TransactionDetailScreen = () => {
               <Text className="text-gray-500">Payment Status</Text>
               <Text className="font-semibold capitalize">
                 {transaction.paymentStatus}
+              </Text>
+            </View>
+
+            {/* Paid at */}
+            <View>
+              <Text className="text-gray-500">Paid At</Text>
+              <Text className="font-semibold capitalize">
+                {formatTime(transaction.paidAt)}
               </Text>
             </View>
 
@@ -129,6 +149,22 @@ const TransactionDetailScreen = () => {
                 </Text>
               </View>
             </View>
+
+            <TouchableOpacity
+              onPress={() => router.push(
+                  user?.role === "salesman"
+                    ? `screens/visits/${transaction.visitId}`
+                    : `screens/sales-visits/${transaction.visitId}`
+                )
+              }
+              className="flex-row items-center active:opacity-70 mb-8"
+            >
+              <View className="flex-row items-center flex-1">
+                <Text className="font-normal text-blue-600 text-lg underline">
+                  See visit detail
+                </Text>
+              </View>
+            </TouchableOpacity>
 
           </View>
         </ScrollView>

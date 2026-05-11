@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import back from "../../../../assets/globalIcons/back.png";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -104,12 +105,12 @@ const TransactionDetailScreen = () => {
     }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        className="flex-1 "
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 24 }}
@@ -132,10 +133,18 @@ const TransactionDetailScreen = () => {
           </View>
 
           <View className="gap-4">
+            {/* Name */}
+            <View>
+              <Text className="text-gray-500">Salesman</Text>
+              <Text className="font-semibold">
+                {transaction.salesmanName}
+              </Text>
+            </View>
+
             {/* Date of visit */}
             <View>
               <Text className="text-gray-500">Date of visit</Text>
-              <Text className="text-lg font-semibold">
+              <Text className="font-semibold">
                 {formatTime(transaction.checkInAt)}
               </Text>
             </View>
@@ -143,7 +152,7 @@ const TransactionDetailScreen = () => {
             {/* SHOP NAME */}
             <View>
               <Text className="text-gray-500">Shop</Text>
-              <Text className="text-lg font-semibold">
+              <Text className="font-semibold">
                 {transaction.shopName}
               </Text>
             </View>
@@ -183,6 +192,22 @@ const TransactionDetailScreen = () => {
                 </Text>
               </View>
             </View>
+
+            <TouchableOpacity
+              onPress={() => router.push(
+                  user?.role === "salesman"
+                    ? `screens/visits/${transaction.visitId}`
+                    : `screens/sales-visits/${transaction.visitId}`
+                )
+              }
+              className="flex-row items-center active:opacity-70 mb-8"
+            >
+              <View className="flex-row items-center flex-1">
+                <Text className="font-normal text-blue-600 text-lg underline">
+                  See visit detail
+                </Text>
+              </View>
+            </TouchableOpacity>
 
             {/* PAYMENT SECTION */}
             {transaction.transactionType === "credit" && transaction.remainingAmount > 0 && (
@@ -243,8 +268,8 @@ const TransactionDetailScreen = () => {
             </Pressable>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

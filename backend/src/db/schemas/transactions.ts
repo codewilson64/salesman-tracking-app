@@ -1,6 +1,6 @@
 import { pgTable, uuid, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { visitsTable } from "./visit.js";
+import { companiesTable } from "./companies";
+import { visitsTable } from "./visit";
 
 export const transactionTypeEnum = pgEnum("transaction_type_enum", [
   "cash",
@@ -35,6 +35,8 @@ export const transactionsTable = pgTable("transactions", {
   paymentStatus: paymentStatusEnum("payment_status").notNull(),
   paidAmount: numeric("paid_amount", { precision: 12, scale: 2 }),
   paymentType: paymentTypeEnum("payment_type"),
+
+  paidAt: timestamp("paid_at"),
 
   remainingAmount: numeric("remaining_amount", { precision: 12, scale: 2 }).default("0").notNull(),
 

@@ -254,7 +254,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           }
         }
 
-        // ✅ create transaction
+        // create transaction
         const [newTransaction] = await tx
           .insert(transactionsTable)
           .values({
@@ -270,6 +270,8 @@ export const checkoutVisit = async (req: Request, res: Response) => {
             paidAmount: finalPaidAmount.toString(),
             paymentType: finalPaymentType,
 
+            paidAt: paymentStatus === "paid" ? new Date() : null,
+
             remainingAmount: (
               totals.finalAmount - finalPaidAmount
             ).toString(),
@@ -280,7 +282,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           throw new Error("Failed to create transaction");
         }
 
-        // ✅ insert items with discount
+        // insert items with discount
         await tx.insert(transactionItemsTable).values(
           products.map((p: ProductInput) => {
             const price = Number(p.price);

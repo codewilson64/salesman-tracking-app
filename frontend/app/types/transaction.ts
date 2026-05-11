@@ -1,5 +1,6 @@
 export type Transaction = {
   id: string,
+  visitId: string;
   
   salesmanId: string;
   salesmanName: string;
@@ -16,6 +17,7 @@ export type Transaction = {
   transactionType: "cash" | "credit";
   paymentStatus: "unpaid" | "partial";
   checkInAt?: string;
+  paidAt: string;
 }
 
 export type GroupedTransaction = {
