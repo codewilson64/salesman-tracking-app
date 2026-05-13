@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, numeric, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { companiesTable } from "./companies";
 import { visitsTable } from "./visit";
 
@@ -37,8 +37,13 @@ export const transactionsTable = pgTable("transactions", {
   paymentType: paymentTypeEnum("payment_type"),
 
   paidAt: timestamp("paid_at"),
-
   remainingAmount: numeric("remaining_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+
+  adminPaidNotificationRead: boolean("admin_paid_notification_read").default(true).notNull(),
+  salesmanPaidNotificationRead: boolean("salesman_paid_notification_read").default(true).notNull(),
+
+  adminUnpaidNotificationRead: boolean("admin_unpaid_notification_read").default(true).notNull(),
+  salesmanUnpaidNotificationRead: boolean("salesman_unpaid_notification_read").default(true).notNull(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

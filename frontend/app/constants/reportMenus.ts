@@ -10,7 +10,6 @@ export type ReportItem = {
 
 import paid from "../assets/reportIcons/paid.png";
 import unpaid from "../assets/reportIcons/unpaid.png";
-import summaryIcon from "../assets/menuIcons/summary.png";
 
 export const ReportMenus = [
   {
@@ -19,6 +18,7 @@ export const ReportMenus = [
     route: "screens/reports/paid",
     roles: ["owner", "salesman"],
     icon: paid,
+    notificationType: "paid",
   },
   {
     id: 2,
@@ -26,12 +26,6 @@ export const ReportMenus = [
     route: "screens/reports/unpaid",
     roles: ["owner", "salesman"],
     icon: unpaid,
+    notificationType: "unpaid",
   },
-//   {
-//     id: 3,
-//     label: "Sales Summary",
-//     route: "screens/reports/summary",
-//     roles: ["owner"], // only admin
-//     icon: summaryIcon,
-//   },
 ];

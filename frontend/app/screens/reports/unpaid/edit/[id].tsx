@@ -63,6 +63,9 @@ const TransactionDetailScreen = () => {
   /* ================= WATCH ================= */
 
   const paidAmount = watch("paidAmount");
+  const paymentType = watch("paymentType");
+
+  const isDisabled = !paidAmount || Number(paidAmount) <= 0 || !paymentType || isPending;
 
   /* ================= PREFILL ================= */
 
@@ -104,6 +107,7 @@ const TransactionDetailScreen = () => {
       );
     }
 
+  
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -259,8 +263,11 @@ const TransactionDetailScreen = () => {
           {/* SUBMIT */}
           {transaction.remainingAmount > 0 && user?.role === "salesman" && (
             <Pressable
+              disabled={isDisabled}
               onPress={handleSubmit(onSubmit)}
-              className="bg-blue-600 rounded-lg p-4 mt-6"
+              className={`rounded-lg p-4 mt-6 ${
+                isDisabled ? "bg-gray-400" : "bg-blue-600"
+              }`}
             >
               <Text className="text-white text-center font-semibold">
                 {isPending ? "Saving..." : "Save"}

@@ -6,10 +6,13 @@ import { useRouter } from "expo-router";
 import { ReportMenus } from "../constants/reportMenus";
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useGetTransactionNotificationCounts } from "../hooks/notification/useGetTransactionNotificationCounts";
 
 const Reports = () => {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
+
+  const { data } = useGetTransactionNotificationCounts();
 
   const filteredMenu = ReportMenus.filter((item) =>
     item.roles.includes(user?.role || "")
@@ -18,9 +21,15 @@ const Reports = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <View className="p-4">
-        {filteredMenu.map((item) => (
-          <View 
-            key={item.id} 
+        {filteredMenu.map((item) => {
+
+        const notificationCount = item.notificationType === "paid"
+          ? data?.paid || 0
+          : data?.unpaid || 0;
+
+        return (
+          <View
+            key={item.id}
             className="mb-3 bg-white rounded-xl shadow-sm overflow-hidden"
           >
             <TouchableOpacity
@@ -29,7 +38,8 @@ const Reports = () => {
             >
               {/* Left: Icon + Label */}
               <View className="flex-row items-center flex-1">
-                <View className="w-16 h-16 justify-center items-center mr-4 overflow-hidden">
+
+                <View className="w-16 h-16 justify-center items-center mr-4 relative">
                   <Image
                     source={item.icon}
                     className="w-12 h-12"
@@ -42,17 +52,25 @@ const Reports = () => {
                 </Text>
               </View>
 
-              {/* Right: Chevron Arrow */}
-              <View>
-                <MaterialIcons 
-                  name="keyboard-arrow-right" 
-                  size={24} 
-                  color="black" 
+              <View className="flex-row items-center">
+                {notificationCount > 0 && (
+                  <View className="min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full items-center justify-center mr-2">
+                    <Text className="text-white text-xs font-bold">
+                      {notificationCount > 99 ? "99+" : notificationCount}
+                    </Text>
+                  </View>
+                )}
+
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  color="black"
                 />
               </View>
             </TouchableOpacity>
           </View>
-        ))}
+        );
+      })}
       </View>
     </SafeAreaView>
   );

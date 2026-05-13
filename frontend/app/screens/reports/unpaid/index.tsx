@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import back from '../../../assets/globalIcons/back.png'
@@ -17,11 +17,16 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
 import { Customer } from "../../../types/customer";
 import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
+import { useUnpaidNotificationsAsRead } from "../../../hooks/notification/useMarkUnpaidTransactionsAsRead";
 
 const SalesmenScreen = () => {
   const router = useRouter();
 
   const { data: customers = [], isLoading, isError } = useGetAllCustomer();
+  
+  const grouped = useMemo(() => {
+    return groupCustomersBySalesman(customers as Customer[]);
+  }, [customers]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -32,9 +37,12 @@ const SalesmenScreen = () => {
     setRefreshing(false);
   };
 
-  const grouped = useMemo(() => {
-    return groupCustomersBySalesman(customers as Customer[]);
-  }, [customers]);
+  const { mutate } = useUnpaidNotificationsAsRead();
+  
+  useEffect(() => {
+    mutate();
+  }, [mutate]);
+
 
   if (isLoading) {
     return (

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import back from '../../../assets/globalIcons/back.png'
@@ -17,6 +17,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
 import { Customer } from "../../../types/customer";
 import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
+import { usePaidNotificationsAsRead } from "../../../hooks/notification/useMarkPaidTransactionsAsRead";
 
 const SalesmenScreen = () => {
   const router = useRouter();
@@ -31,6 +32,12 @@ const SalesmenScreen = () => {
       await queryClient.invalidateQueries({ queryKey: ["transactions", "paid"] });
     setRefreshing(false);
   };
+
+  const { mutate } = usePaidNotificationsAsRead();
+
+  useEffect(() => {
+    mutate();
+  }, [mutate]);
 
   const grouped = useMemo(() => {
     return groupCustomersBySalesman(customers as Customer[]);

@@ -274,6 +274,18 @@ export const checkoutVisit = async (req: Request, res: Response) => {
 
             paidAt: paymentStatus === "paid" ? new Date() : null,
 
+            adminPaidNotificationRead:
+              paymentStatus === "paid" ? false : true,
+
+            salesmanPaidNotificationRead:
+              paymentStatus === "paid" ? false : true,
+
+            adminUnpaidNotificationRead:
+              paymentStatus !== "paid" ? false : true,
+
+            salesmanUnpaidNotificationRead:
+              paymentStatus !== "paid" ? false : true,
+
             remainingAmount: (
               totals.finalAmount - finalPaidAmount
             ).toString(),
