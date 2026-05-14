@@ -5,6 +5,5 @@ export const useGetUnreadVisitsCount = () => {
   return useQuery({
     queryKey: ["unread-visit-count"],
     queryFn: getUnreadVisitsCount,
-    refetchInterval: 10000,
   });
 };

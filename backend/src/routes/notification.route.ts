@@ -1,6 +1,6 @@
 import express from 'express'
 import { protect } from '../../middleware/protectedRoute.js'
-import { getTransactionNotificationCounts, getUnreadVisitsCount, markPaidNotificationsAsRead, markUnpaidNotificationsAsRead, markVisitsReportsAsRead } from '../controllers/notification.controller.js'
+import { getPaidNotificationCountsBySalesman, getTransactionNotificationCounts, getUnpaidNotificationCountsBySalesman, getUnreadVisitsCount, markPaidNotificationsBySalesmanAsRead, markUnpaidNotificationsBySalesmanAsRead, markVisitsReportsAsRead } from '../controllers/notification.controller.js'
 
 const router = express.Router()
 
@@ -8,7 +8,10 @@ router.get('/unread-visits', protect, getUnreadVisitsCount)
 router.patch('/mark-as-read', protect, markVisitsReportsAsRead)
 
 router.get("/transaction-counts", protect, getTransactionNotificationCounts);
-router.patch("/paid/mark-as-read", protect, markPaidNotificationsAsRead);
-router.patch("/unpaid/mark-as-read", protect, markUnpaidNotificationsAsRead);
+
+router.get("/paid/salesman-counts", protect, getPaidNotificationCountsBySalesman)
+router.get("/unpaid/salesman-counts", protect, getUnpaidNotificationCountsBySalesman)
+router.patch("/paid/:id/mark-as-read", protect, markPaidNotificationsBySalesmanAsRead)
+router.patch("/unpaid/:id/mark-as-read", protect, markUnpaidNotificationsBySalesmanAsRead)
 
 export default router

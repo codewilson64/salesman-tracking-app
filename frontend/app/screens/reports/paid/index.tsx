@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import back from '../../../assets/globalIcons/back.png'
@@ -17,12 +17,22 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
 import { Customer } from "../../../types/customer";
 import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
-import { usePaidNotificationsAsRead } from "../../../hooks/notification/useMarkPaidTransactionsAsRead";
+import { useGetPaidNotificationCountsBySalesman } from "../../../hooks/notification/useGetPaidNotificationCountsBySalesman";
 
 const SalesmenScreen = () => {
   const router = useRouter();
 
   const { data: customers = [], isLoading, isError } = useGetAllCustomer();
+  const { data: notifications = [] } = useGetPaidNotificationCountsBySalesman();
+  
+  const notificationMap = useMemo(() => {
+    return Object.fromEntries(
+        notifications.map((item) => [
+          item.salesmanId,
+          Number(item.count),
+        ])
+    );
+  }, [notifications]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -32,12 +42,6 @@ const SalesmenScreen = () => {
       await queryClient.invalidateQueries({ queryKey: ["transactions", "paid"] });
     setRefreshing(false);
   };
-
-  const { mutate } = usePaidNotificationsAsRead();
-
-  useEffect(() => {
-    mutate();
-  }, [mutate]);
 
   const grouped = useMemo(() => {
     return groupCustomersBySalesman(customers as Customer[]);
@@ -93,6 +97,8 @@ const SalesmenScreen = () => {
           />
         }
         renderItem={({ item }) => {
+          const notificationCount = notificationMap[item.salesmanId] || 0;
+
           return (
             <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
               {/* CUSTOMER HEADER */}
@@ -126,15 +132,24 @@ const SalesmenScreen = () => {
                   </View>
                 </View>
 
-                {/* CHEVRON */}
-                <MaterialIcons
-                  name="keyboard-arrow-right"
-                  size={24}
-                  color="black"
-                />
+                <View className="flex-row items-center">
+                  {notificationCount > 0 && (
+                    <View className="min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full items-center justify-center mr-2">
+                      <Text className="text-white text-xs font-bold">
+                        {notificationCount > 99
+                          ? "99+"
+                          : notificationCount}
+                      </Text>
+                    </View>
+                  )}
+
+                  <MaterialIcons
+                    name="keyboard-arrow-right"
+                    size={24}
+                    color="black"
+                  />
+                </View>
               </Pressable>
-
-
             </View>
           );
         }}

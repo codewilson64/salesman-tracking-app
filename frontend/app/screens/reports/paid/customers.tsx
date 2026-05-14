@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
@@ -18,6 +18,7 @@ import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useGetPaidTransactions } from "../../../hooks/transaction/useGetPaidTransactions";
 import { Transaction } from "../../../types/transaction";
+import { usePaidNotificationsBySalesmanAsRead } from "../../../hooks/notification/usePaidNotificationsBySalesmanAsRead";
 
 const CustomersScreen = () => {
   const router = useRouter();
@@ -28,6 +29,14 @@ const CustomersScreen = () => {
   }>();
 
   const { data: transactions = [], isLoading, isError } = useGetPaidTransactions({});
+
+  const { mutate } = usePaidNotificationsBySalesmanAsRead();
+
+  useEffect(() => {
+    if (salesmanId) {
+      mutate(salesmanId);
+    }
+  }, [salesmanId, mutate]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);

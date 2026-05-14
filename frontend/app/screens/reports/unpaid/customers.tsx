@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetOutstandingTransactions } from "../../../hooks/transaction/useGetOutstandingTransactions";
@@ -18,8 +18,9 @@ import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
 import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Transaction } from "../../../types/transaction";
+import { useUnpaidNotificationsBySalesmanAsRead } from "../../../hooks/notification/useUnpaidNotificationsBySalesmanAsRead";
 
-const UnpaidScreen = () => {
+const CustomersScreen = () => {
   const router = useRouter();
 
   const { salesmanId, salesmanName } = useLocalSearchParams<{ 
@@ -28,6 +29,14 @@ const UnpaidScreen = () => {
   }>();
 
   const { data: transactions = [], isLoading, isError } = useGetOutstandingTransactions({});
+
+  const { mutate } = useUnpaidNotificationsBySalesmanAsRead();
+  
+  useEffect(() => {
+    if (salesmanId) {
+      mutate(salesmanId);
+    }
+  }, [salesmanId, mutate]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -151,4 +160,4 @@ const UnpaidScreen = () => {
   );
 };
 
-export default UnpaidScreen;
+export default CustomersScreen;
