@@ -1,6 +1,6 @@
 import { type Request, type Response, type NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { db } from "../src";
+import { db } from "../src/index.js";
 import { eq } from "drizzle-orm";
 import { companiesTable } from "../src/db/schemas/companies.js";
 
