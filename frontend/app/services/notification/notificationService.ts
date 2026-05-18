@@ -39,3 +39,37 @@ export const markUnpaidNotificationsBySalesmanAsRead = async (salesmanId: string
   const res = await api.patch(`/notifications/unpaid/${salesmanId}/mark-as-read`);
   return res.data;
 };
+
+
+// Notification for list of customers
+export const getUnreadPaidCustomers = async (salesmanId: string) => {
+  const res = await api.get(`/notifications/paid/customers-unread/${salesmanId}`);
+  return res.data;
+};
+
+export const getUnreadUnpaidCustomers = async (salesmanId: string) => {
+  const res = await api.get(`/notifications/unpaid/customers-unread/${salesmanId}`);
+  return res.data;
+};
+
+
+// Notification for list of transactions
+export const getUnreadPaidTransactions = async (customerId: string) => {
+  const res = await api.get(`/notifications/paid/transactions-unread/${customerId}`);
+  return res.data;
+};
+
+export const getUnreadUnpaidTransactions = async (customerId: string) => {
+  const res = await api.get(`/notifications/unpaid/transactions-unread/${customerId}`);
+  return res.data;
+};
+
+export const markPaidTransactionAsRead = async (transactionId: string) => {
+  const res = await api.patch(`/notifications/paid/transaction/mark-as-read/${transactionId}`);
+  return res.data;
+};
+
+export const markUnpaidTransactionAsRead = async (transactionId: string) => {
+  const res = await api.patch(`/notifications/unpaid/transaction/mark-as-read/${transactionId}`);
+  return res.data;
+};

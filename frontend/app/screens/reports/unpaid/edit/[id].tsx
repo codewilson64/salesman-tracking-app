@@ -25,6 +25,7 @@ import { formatTime } from "../../../../helper/formatTime";
 import { FormInput } from "../../../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../../../components/areaInputForm/FormSelectModal";
 import { useAuthStore } from "../../../../stores/authStore";
+import { useMarkUnpaidTransactionAsRead } from "../../../../hooks/notification/transactions-menus/useMarkUnpaidTransactionAsRead";
 
 const paymentMethods = ["cash", "transfer"];
 
@@ -53,6 +54,12 @@ const TransactionDetailScreen = () => {
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+
+  const { mutate } = useMarkUnpaidTransactionAsRead();
+  
+  useEffect(() => {
+    if (id) mutate(id);
+  }, [id, mutate]);
 
   const onRefresh = async () => {
     setRefreshing(true);

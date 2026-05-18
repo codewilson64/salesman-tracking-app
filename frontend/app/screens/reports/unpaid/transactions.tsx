@@ -19,6 +19,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import type { Transaction } from "../../../types/transaction";
 import { useGetOutstandingTransactions } from "../../../hooks/transaction/useGetOutstandingTransactions";
+import { useGetUnreadUnpaidTransactions } from "../../../hooks/notification/transactions-menus/useGetUnreadUnpaidTransactions";
 
 const TransactionsScreen = () => {
   const router = useRouter();
@@ -29,6 +30,17 @@ const TransactionsScreen = () => {
   }>();
 
   const { data: transactions = [], isLoading, isError } = useGetOutstandingTransactions({});
+
+  const { data: unreadTransactions = [] } = useGetUnreadUnpaidTransactions(customerId);
+  
+  const unreadMap = useMemo(() => {
+      return Object.fromEntries(
+        unreadTransactions.map((item) => [
+          item.transactionId,
+          true,
+        ])
+      );
+  }, [unreadTransactions]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -93,49 +105,57 @@ const TransactionsScreen = () => {
             onRefresh={onRefresh}
           />
         }
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() =>
-              router.push(`/screens/reports/unpaid/edit/${item.id}`)
-            }
-            className="bg-white p-4 mb-2 rounded-xl flex-row items-center justify-between"
-          >
-            {/* LEFT */}
-            <View className="flex-row items-center flex-1">
-              <View>
-                <Text className="font-semibold">
-                    Rp {Number(item.finalAmount).toLocaleString()}
-                </Text>
+        renderItem={({ item }) => {
+          const isUnread = unreadMap[item.id];
 
-                <Text className="text-gray-500 text-sm">
-                  {formatTime(item.checkInAt)}
-                </Text>
+          return  (
+            <Pressable
+              onPress={() =>
+                router.push(`/screens/reports/unpaid/edit/${item.id}`)
+              }
+              className={`p-4 mb-2 rounded-xl flex-row items-center justify-between border ${
+                isUnread
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-white border-transparent"
+              }`}
+            >
+              {/* LEFT */}
+              <View className="flex-row items-center flex-1">
+                <View>
+                  <Text className="font-semibold">
+                      Rp {Number(item.finalAmount).toLocaleString()}
+                  </Text>
+
+                  <Text className="text-gray-500 text-sm">
+                    {formatTime(item.checkInAt)}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            {/* RIGHT */}
-            <View className="items-end mr-2">
-              <Text
-                className={`text-sm capitalize ${
-                  item.paymentStatus === "partial"
-                    ? "text-yellow-500"
-                    : item.paymentStatus === "unpaid"
-                    ? "text-red-500"
-                    : "text-green-500"
-                }`}
-                >
-                  {item.paymentStatus}
-                </Text>
-            </View>
+              {/* RIGHT */}
+              <View className="items-end mr-2">
+                <Text
+                  className={`text-sm capitalize ${
+                    item.paymentStatus === "partial"
+                      ? "text-yellow-500"
+                      : item.paymentStatus === "unpaid"
+                      ? "text-red-500"
+                      : "text-green-500"
+                  }`}
+                  >
+                    {item.paymentStatus}
+                  </Text>
+              </View>
 
-            {/* ARROW */}
-            <MaterialIcons
-              name="keyboard-arrow-right"
-              size={24}
-              color="black"
-            />
-          </Pressable>
-        )}
+              {/* ARROW */}
+              <MaterialIcons
+                name="keyboard-arrow-right"
+                size={24}
+                color="black"
+              />
+            </Pressable>
+          )}
+        } 
       />
     </SafeAreaView>
   );

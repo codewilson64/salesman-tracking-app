@@ -1,5 +1,8 @@
 import { type Request, type Response, type NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { db } from "../src";
+import { eq } from "drizzle-orm";
+import { companiesTable } from "../src/db/schemas/companies.js";
 
 type JwtUserPayload = {
   userId: string;
@@ -7,7 +10,7 @@ type JwtUserPayload = {
   role: string;
 };
 
-export const protect = (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -27,6 +30,20 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, secret) as JwtUserPayload;
+
+    const company = await db.query.companiesTable.findFirst({
+      where: eq(
+        companiesTable.id,
+        decoded.companyId
+      )
+    });
+
+  if (company?.subscriptionStatus !== "active") {
+    return res.status(403).json({
+      message: "Your account is currently inactive. Please contact your administrator."
+    });
+  }
+
     req.user = decoded; 
     next();
   } catch {

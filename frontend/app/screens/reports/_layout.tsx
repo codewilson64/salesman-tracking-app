@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { useMarkVisitsReportsAsRead } from '../../hooks/notification/useMarkVisitsReportsAsRead';
+import { useMarkVisitsReportsAsRead } from '../../hooks/notification/reports-tab/useMarkVisitsReportsAsRead';
 import { useEffect } from 'react';
 
 export default function ReportsLayout() {

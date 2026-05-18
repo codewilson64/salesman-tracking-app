@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTransactionNotificationCounts } from "../../services/notification/notificationService";
+import { getTransactionNotificationCounts } from "../../../services/notification/notificationService";
 
 export const useGetTransactionNotificationCounts = () => {
   return useQuery({
     queryKey: ["transaction-notifications"],
     queryFn: getTransactionNotificationCounts,
-    refetchInterval: 10000,
+    refetchIntervalInBackground: false,
+    staleTime: 0,
+    refetchInterval: 20000,
   });
 };

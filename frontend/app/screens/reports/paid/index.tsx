@@ -17,7 +17,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { groupCustomersBySalesman } from "../../../utils/groupBy/sales";
 import { Customer } from "../../../types/customer";
 import { useGetAllCustomer } from "../../../hooks/customer/useGetAllCustomer";
-import { useGetPaidNotificationCountsBySalesman } from "../../../hooks/notification/useGetPaidNotificationCountsBySalesman";
+import { useGetPaidNotificationCountsBySalesman } from "../../../hooks/notification/salesmen-menus/useGetPaidNotificationCountsBySalesman";
 
 const SalesmenScreen = () => {
   const router = useRouter();

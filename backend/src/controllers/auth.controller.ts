@@ -117,31 +117,38 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    // Validate fields
     if (!email || !password) {
       return res.status(400).json({ error: "All fields must be filled" });
     }
 
-    // Find user
     const result = await db
-      .select()
+      .select({
+        user: usersTable,
+        company: companiesTable
+      })
       .from(usersTable)
+      .leftJoin(companiesTable, eq(usersTable.companyId, companiesTable.id))
       .where(eq(usersTable.email, email));
 
-    const user = result[0];
+    const row = result[0];
 
-    if (!user) {
+    if (!row) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Compare password
+    const user = row.user;
+    const company = row.company;
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Generate token
+    if (company?.subscriptionStatus !== "active") {
+      return res.status(403).json({ error: "Your account is currently inactive. Please contact your administrator." });
+    }
+
     const payload = {
       userId: user.id,
       companyId: user.companyId,

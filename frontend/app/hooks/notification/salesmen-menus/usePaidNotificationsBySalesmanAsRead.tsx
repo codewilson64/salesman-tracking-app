@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { markPaidNotificationsBySalesmanAsRead } from "../../services/notification/notificationService";
+import { markPaidNotificationsBySalesmanAsRead } from "../../../services/notification/notificationService";
 
 export const usePaidNotificationsBySalesmanAsRead = () => {
   const queryClient = useQueryClient();

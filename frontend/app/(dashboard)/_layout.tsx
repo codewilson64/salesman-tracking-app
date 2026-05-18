@@ -4,7 +4,7 @@ import home from '../assets/menuIcons/home.png'
 import collections from '../assets/menuIcons/collections.png'
 import profile from '../assets/menuIcons/profile.png'
 import AuthUserOnly from "../components/auth/AuthUserOnly";
-import { useGetUnreadVisitsCount } from "../hooks/notification/useGetUnreadVisitsCount";
+import { useGetUnreadVisitsCount } from "../hooks/notification/reports-tab/useGetUnreadVisitsCount";
 
 export default function DashboardLayout() {
   const { data } = useGetUnreadVisitsCount();

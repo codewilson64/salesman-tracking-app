@@ -310,3 +310,262 @@ export const markUnpaidNotificationsBySalesmanAsRead = async (req: Request, res:
     return res.status(500).json({ message: "Failed to mark Unpaid notifications" });
   }
 };
+
+
+// Notification for list of customer
+export const getUnreadPaidCustomers = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const salesmanId = req.params.id as string;
+
+    const result = await db
+      .selectDistinct({
+        customerId: visitsTable.customerId,
+      })
+      .from(transactionsTable)
+      .innerJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.companyId, user.companyId),
+          eq(visitsTable.salesmanId, salesmanId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminPaidNotificationRead, false)
+            : eq(transactionsTable.salesmanPaidNotificationRead, false)
+        )
+      );
+
+    return res.status(200).json(result);
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Failed to get unread paid customers",
+    });
+  }
+};
+
+export const getUnreadUnpaidCustomers = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const salesmanId = req.params.id as string;
+
+    const result = await db
+      .selectDistinct({
+        customerId: visitsTable.customerId,
+      })
+      .from(transactionsTable)
+      .innerJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.companyId, user.companyId),
+          eq(visitsTable.salesmanId, salesmanId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminUnpaidNotificationRead, false)
+            : eq(transactionsTable.salesmanUnpaidNotificationRead, false)
+        )
+      );
+
+    return res.status(200).json(result);
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Failed to get unread unpaid customers",
+    });
+  }
+};
+
+// Notification for list of customer transactions
+export const getUnreadPaidTransactions = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const customerId = req.params.id as string;
+
+    if (!customerId) {
+      return res.status(400).json({ message: "customerId is required" });
+    }
+
+    const result = await db
+      .selectDistinct({
+        transactionId: transactionsTable.id,
+      })
+      .from(transactionsTable)
+      .innerJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.companyId, user.companyId),
+          eq(visitsTable.customerId, customerId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminPaidNotificationRead, false)
+            : eq(transactionsTable.salesmanPaidNotificationRead, false)
+        )
+      );
+
+    return res.status(200).json(result);
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Failed to get unread paid transactions",
+    });
+  }
+};
+
+export const getUnreadUnpaidTransactions = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const customerId = req.params.id as string;
+
+    if (!customerId) {
+      return res.status(400).json({ message: "customerId is required" });
+    }
+
+    const result = await db
+      .selectDistinct({
+        transactionId: transactionsTable.id,
+      })
+      .from(transactionsTable)
+      .innerJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.companyId, user.companyId),
+          eq(visitsTable.customerId, customerId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminUnpaidNotificationRead, false)
+            : eq(transactionsTable.salesmanUnpaidNotificationRead, false)
+        )
+      );
+
+    return res.status(200).json(result);
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Failed to get unread paid transactions",
+    });
+  }
+};
+
+export const markPaidTransactionAsRead = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const transactionId = req.params.id as string;
+
+    await db
+      .update(transactionsTable)
+      .set(
+        user.role === "owner"
+          ? { adminPaidNotificationRead: true }
+          : { salesmanPaidNotificationRead: true }
+      )
+      .from(visitsTable)
+      .where(
+        and(
+          eq(transactionsTable.id, transactionId),
+          eq(transactionsTable.visitId, visitsTable.id),
+          eq(transactionsTable.companyId, user.companyId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminPaidNotificationRead, false)
+            : and(
+                eq(transactionsTable.salesmanPaidNotificationRead, false),
+                eq(visitsTable.salesmanId, user.userId)
+              )
+        )
+      );
+
+    return res.status(200).json({
+      message: "Transaction marked as read",
+    });
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to mark transaction as read",
+    });
+  }
+};
+
+export const markUnpaidTransactionAsRead = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as {
+      companyId: string;
+      role: string;
+      userId: string;
+    };
+
+    const transactionId = req.params.id as string;
+
+    await db
+      .update(transactionsTable)
+      .set(
+        user.role === "owner"
+          ? { adminUnpaidNotificationRead: true }
+          : { salesmanUnpaidNotificationRead: true }
+      )
+      .from(visitsTable)
+      .where(
+        and(
+          eq(transactionsTable.id, transactionId),
+          eq(transactionsTable.visitId, visitsTable.id),
+          eq(transactionsTable.companyId, user.companyId),
+
+          user.role === "owner"
+            ? eq(transactionsTable.adminUnpaidNotificationRead, false)
+            : and(
+                eq(transactionsTable.salesmanUnpaidNotificationRead, false),
+                eq(visitsTable.salesmanId, user.userId)
+              )
+        )
+      );
+
+    return res.status(200).json({
+      message: "Transaction marked as read",
+    });
+  } 
+  catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to mark transaction as read",
+    });
+  }
+};

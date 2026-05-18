@@ -13,12 +13,13 @@ import {
 import back from "../../../assets/globalIcons/back.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetTransactionById } from "../../../hooks/transaction/useGetTransactionById";
 import { formatTime } from "../../../helper/formatTime";
 import { useAuthStore } from "../../../stores/authStore";
+import { useMarkPaidTransactionAsRead } from "../../../hooks/notification/transactions-menus/useMarkPaidTransactionAsRead";
 
 const TransactionDetailScreen = () => {
   const router = useRouter();
@@ -27,6 +28,12 @@ const TransactionDetailScreen = () => {
   const user = useAuthStore((state) => state.user);
 
   const { data: transaction, isLoading } = useGetTransactionById(id);
+
+  const { mutate } = useMarkPaidTransactionAsRead();
+
+  useEffect(() => {
+    if (id) mutate(id);
+  }, [id, mutate]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);

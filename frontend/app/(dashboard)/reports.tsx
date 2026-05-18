@@ -13,8 +13,9 @@ import { useRouter } from "expo-router";
 import { ReportMenus } from "../constants/reportMenus";
 
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useGetTransactionNotificationCounts } from "../hooks/notification/useGetTransactionNotificationCounts";
+
 import { useQueryClient } from "@tanstack/react-query";
+import { useGetTransactionNotificationCounts } from "../hooks/notification/reports-menus/useGetTransactionNotificationCounts";
 
 const Reports = () => {
   const user = useAuthStore((state) => state.user);

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPaidNotificationCountsBySalesman } from "../../services/notification/notificationService";
-import { SalesmanNotificationCount } from "../../types/notification";
+import { getPaidNotificationCountsBySalesman } from "../../../services/notification/notificationService";
+import { SalesmanNotificationCount } from "../../../types/notification";
 
 export const useGetPaidNotificationCountsBySalesman = () => {
   return useQuery<SalesmanNotificationCount[]>({

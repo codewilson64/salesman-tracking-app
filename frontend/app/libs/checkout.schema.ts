@@ -45,6 +45,23 @@ export const checkoutVisitSchema = z.object({
         path: ["orderBy"],
       });
     }
+
+    if (data.transactionType === "cash" && !data.paymentType) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Payment type is required",
+        path: ["paymentType"],
+      });
+    }
+
+    if (data.transactionType === "credit" && Number(data.paidAmount) > 0 && !data.paymentType) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Payment type is required",
+        path: ["paymentType"],
+      });
+    }
+
   }
 });
   

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
 import { refreshTokenRequest } from "../services/Auth/refreshTokenService";
+import { router } from "expo-router";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -22,7 +23,6 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
 
 // Response interceptor
 api.interceptors.response.use(
@@ -52,6 +52,24 @@ api.interceptors.response.use(
       } catch {
         useAuthStore.getState().logout();
       }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.message ===
+        "Your account is currently inactive. Please contact your administrator."
+    ) {
+      useAuthStore.getState().logout();
+
+      router.replace("/login");
     }
 
     return Promise.reject(error);

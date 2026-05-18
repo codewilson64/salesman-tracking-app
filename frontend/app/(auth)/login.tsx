@@ -62,34 +62,50 @@ export default function LoginScreen() {
             Log in
           </Text>
 
+          {/* SERVER ERROR */} 
+          {errors.root && (
+            <Text className="text-red-500 text-center mb-4">
+              {errors.root.message}
+            </Text>
+          )}
+
           {/* EMAIL */}
+          <View className="mb-4">
+            <Text className="mb-2 font-normal text-gray-700">
+              Email
+            </Text>
+
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                placeholder="Email"
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
-                className="border border-gray-300 rounded-lg p-4 mb-4"
+                className="border border-gray-300 rounded-lg p-4 mb-1"
               />
             )}
           />
           {errors.email && (
-            <Text className="text-red-500 mb-3">
+            <Text className="text-red-500 mb-1">
               {errors.email.message}
             </Text>
           )}
+          </View>
 
           {/* PASSWORD */}
+          <View className="mb-4">
+            <Text className="mb-2 font-normal text-gray-700">
+              Password
+            </Text>
+
           <Controller
             control={control}
             name="password"
             render={({ field: { onChange, value } }) => (
-              <View className="relative mb-4">
+              <View className="relative mb-1">
                 <TextInput
-                  placeholder="Password"
                   secureTextEntry={!showPassword}
                   value={value}
                   onChangeText={onChange}
@@ -111,10 +127,11 @@ export default function LoginScreen() {
             )}
           />
           {errors.password && (
-            <Text className="text-red-500 mb-4">
+            <Text className="text-red-500 mb-1">
               {errors.password.message}
             </Text>
           )}
+          </View>
 
           {/* LOGIN BUTTON */}
           <Pressable
@@ -139,16 +156,11 @@ export default function LoginScreen() {
           {/* Forgot password */}
           <Text className="text-center mt-3">
             <Link href="/forgot-password">
-              <Text className="text-blue-500 underline">Forgot Password?</Text>
+              <Text className="text-blue-500 underline font-semibold">Forgot Password?</Text>
             </Link>
           </Text>
 
-          {/* SERVER ERROR */}
-          {errors.root && (
-            <Text className="text-red-500 text-center mt-4">
-              {errors.root.message}
-            </Text>
-          )}
+        
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

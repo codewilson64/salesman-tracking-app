@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { groupTransactionsByCustomer } from "../../../utils/groupBy/customers";
@@ -18,7 +18,7 @@ import back from '../../../assets/globalIcons/back.png'
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useGetPaidTransactions } from "../../../hooks/transaction/useGetPaidTransactions";
 import { Transaction } from "../../../types/transaction";
-import { usePaidNotificationsBySalesmanAsRead } from "../../../hooks/notification/usePaidNotificationsBySalesmanAsRead";
+import { useGetUnreadPaidCustomers } from "../../../hooks/notification/customers-menus/useGetUnreadPaidCustomers ";
 
 const CustomersScreen = () => {
   const router = useRouter();
@@ -30,13 +30,16 @@ const CustomersScreen = () => {
 
   const { data: transactions = [], isLoading, isError } = useGetPaidTransactions({});
 
-  const { mutate } = usePaidNotificationsBySalesmanAsRead();
+  const { data: unreadCustomers = [] } = useGetUnreadPaidCustomers(salesmanId);
 
-  useEffect(() => {
-    if (salesmanId) {
-      mutate(salesmanId);
-    }
-  }, [salesmanId, mutate]);
+  const unreadMap = useMemo(() => {
+    return Object.fromEntries(
+      unreadCustomers.map((item) => [
+        item.customerId,
+        true,
+      ])
+    );
+  }, [unreadCustomers]);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -107,8 +110,16 @@ const CustomersScreen = () => {
           />
         }
         renderItem={({ item }) => {
+          const isUnread = unreadMap[item.customerId];
+
           return (
-            <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
+            <View
+              className={`p-2 mb-3 rounded-xl shadow-sm overflow-hidden border ${
+                isUnread
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-white border-transparent"
+              }`}
+            >
               {/* CUSTOMER HEADER */}
               <Pressable
                 onPress={() =>
