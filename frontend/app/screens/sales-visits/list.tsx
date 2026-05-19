@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Pressable,
   Image,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -12,7 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useGetAllVisits } from "../../hooks/visit/useGetAllVisits";
 import { Visit } from "../../types/visit";
 import { formatTime } from "../../helper/formatTime";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { getStartEndOfDay } from "../../utils/date";
 import { getResultStyle } from "../../helper/resultStyle";
@@ -22,10 +23,20 @@ import { useExpand } from "../../hooks/useExpand";
 
 import back from '../../assets/globalIcons/back.png'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useQueryClient } from "@tanstack/react-query";
 
 const OwnerVisitScreen = () => {
   const { date } = useLocalSearchParams();
   const router = useRouter();
+
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["visits"] });
+    setRefreshing(false);
+  };
 
   const { expanded, toggle } = useExpand();
 
@@ -82,6 +93,14 @@ const OwnerVisitScreen = () => {
         keyExtractor={(item) => item.salesmanId}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2563EB"]} // optional: Android spinner color
+            tintColor="#2563EB"  // optional: iOS spinner color
+          />
+        }
         renderItem={({ item }) => {
           const isExpanded = expanded[item.salesmanId] ?? false;
 

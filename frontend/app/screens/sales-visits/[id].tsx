@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import z from "zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useReviewVisit } from "../../hooks/review-visit/useReviewVisit";
 import { reviewVisitSchema } from "../../libs/reviewVisit.schema";
 import { FormInput } from "../../components/areaInputForm/FormInput";
+import { useQueryClient } from "@tanstack/react-query";
 
 type FormData = z.infer<typeof reviewVisitSchema>;
 
@@ -51,6 +53,15 @@ const SalesVisitDetail = () => {
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["visit", id] });
+    setRefreshing(false);
+  };
 
   const { data: visit, isLoading, isError } = useGetVisitById(id);
   const { mutateAsync: deleteVisit } = useDeleteVisit();
@@ -126,6 +137,14 @@ const SalesVisitDetail = () => {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2563EB"]} // optional: Android spinner color
+            tintColor="#2563EB"  // optional: iOS spinner color
+          />
+        }
       >
       <View className="mb-6">
         <Pressable onPress={() => router.back()} className="absolute left-0 top-0 p-2 z-10">

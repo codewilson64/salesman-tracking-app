@@ -196,6 +196,8 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       }
 
       // update visit
+      const shouldNotify = result === "new order";
+
       const [updatedVisit] = await tx
         .update(visitsTable)
         .set({
@@ -204,8 +206,8 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           orderBy,
           checkOutAt: new Date(),
           status: "check-out",
-          isAdminNotificationRead: false,
-          isSalesmanNotificationRead: false,
+          isAdminNotificationRead: shouldNotify ? false : visit.isAdminNotificationRead,
+          isSalesmanNotificationRead: shouldNotify ? false : visit.isSalesmanNotificationRead,
         })
         .where(eq(visitsTable.id, visit.id))
         .returning();

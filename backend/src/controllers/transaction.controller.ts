@@ -301,9 +301,36 @@ export const updateTransactionPayment = async (req: Request, res: Response) => {
           paymentStatus,
           paymentType: finalPaymentType,
           paidAt: paymentStatus === "paid" ? transaction.paidAt || new Date() : null,
+
+          adminPaidNotificationRead:
+            paymentStatus === "paid" ? false : true,
+
+          salesmanPaidNotificationRead:
+            paymentStatus === "paid" ? false : true,
+
+          adminUnpaidNotificationRead:
+            paymentStatus !== "paid" ? false : true,
+
+          salesmanUnpaidNotificationRead:
+            paymentStatus !== "paid" ? false : true,
         })
         .where(eq(transactionsTable.id, id))
         .returning();
+
+        const previousStatus = transaction.paymentStatus;
+
+        const movedToPaid = previousStatus !== "paid" && paymentStatus === "paid";
+
+        if (movedToPaid) {
+          await tx
+            .update(visitsTable)
+            .set({
+              ...(user.role === "owner"
+                ? { isSalesmanNotificationRead: false }
+                : { isAdminNotificationRead: false }),
+            })
+            .where(eq(visitsTable.id, transaction.visitId));
+        }
 
       return updatedTransaction;
     });
