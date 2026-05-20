@@ -5,16 +5,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetCustomerById } from "../../hooks/customer/useGetCustomerById";
 import { useDeleteCustomer } from "../../hooks/customer/useDeleteCustomer";
 import { openMap } from "../../utils/openMap";
+import { useState } from "react";
 
 import back from '../../assets/globalIcons/back.png'
+import dots from "../../assets/globalIcons/dots.png";
 
 const CustomerDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+
+  const [showMenu, setShowMenu] = useState(false);
+
   const { data: customer, isLoading, isError } = useGetCustomerById(id);
   const { mutateAsync: deleteCustomer, isPending } = useDeleteCustomer();
 
   const handleDelete = () => {
+    setShowMenu(false);
+
     Alert.alert(
       `Delete ${customer?.shopName}?`,
       "Are you sure you want to delete this customer? This action cannot be undone.",
@@ -39,6 +46,15 @@ const CustomerDetail = () => {
         },
       ]
     );
+  };
+
+  const handleEdit = () => {
+    setShowMenu(false);
+
+    router.push({
+      pathname: "/screens/customers/edit/[id]",
+      params: { id },
+    });
   };
 
   if (isLoading) {
@@ -69,17 +85,41 @@ const CustomerDetail = () => {
         showsVerticalScrollIndicator={false}
       >
       {/* INFO */}
-      <View className="mb-6">
-        <Pressable
-          onPress={() => router.back()}
-          className="absolute left-0 top-0 p-2 z-10"
-        >
-          <Image
-            source={back}
-            className="w-6 h-6"
-            resizeMode="contain"
-          />
-        </Pressable>
+      <View className="mb-6 relative">
+          <Pressable
+            onPress={() => router.back()}
+            className="absolute left-0 top-0 p-2 z-10"
+          >
+            <Image source={back} className="w-6 h-6" resizeMode="contain" />
+          </Pressable>
+
+          {/* Dots */}
+          <View className="absolute right-0 top-0 z-20">
+            <Pressable
+              onPress={() => setShowMenu(!showMenu)}
+              className="p-2"
+            >
+              <Image source={dots} className="w-6 h-6" resizeMode="contain" />
+            </Pressable>
+
+            {showMenu && (
+              <View className="absolute top-10 right-0 bg-white rounded-xl border border-gray-200 shadow w-36 overflow-hidden">
+                <Pressable onPress={handleEdit} className="px-4 py-3 border-b border-gray-100">
+                  <Text>Edit</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleDelete}
+                  disabled={isPending}
+                  className="px-4 py-3"
+                >
+                  <Text className="text-red-600">
+                    {isPending ? "Deleting..." : "Delete"}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
         
         <View className="items-center">
           <Image
@@ -166,19 +206,6 @@ const CustomerDetail = () => {
           </View>
         )}
       </View>
-
-        {/* DELETE BUTTON */}
-        <View className="flex-1 justify-end mt-6">
-          <Pressable
-            onPress={handleDelete}
-            disabled={isPending}
-            className="bg-red-600 rounded-lg p-4"
-          >
-            <Text className="text-white text-center font-semibold">
-              Delete Customer
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -2,17 +2,25 @@ import { View, Text, ActivityIndicator, Image, Pressable, Alert } from "react-na
 import { useLocalSearchParams, useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import back from '../../assets/globalIcons/back.png'
 import { useDeleteProduct } from "../../hooks/product/useDeleteProduct";
 import { useGetProductById } from "../../hooks/product/useGetProductById";
+import { useState } from "react";
+
+import back from '../../assets/globalIcons/back.png'
+import dots from "../../assets/globalIcons/dots.png";
 
 const ProductDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter()
+
+  const [showMenu, setShowMenu] = useState(false);
+
   const { data: product, isLoading, isError } = useGetProductById(id);
   const { mutateAsync: deleteProduct, isPending } = useDeleteProduct();
 
   const handleDelete = () => {
+    setShowMenu(false);
+
     Alert.alert(
       `Delete ${product?.name}?`,
       "Are you sure you want to delete this product? This action cannot be undone.",
@@ -37,6 +45,15 @@ const ProductDetail = () => {
     );
   };
 
+  const handleEdit = () => {
+    setShowMenu(false);
+
+    router.push({
+      pathname: "/screens/products/edit/[id]",
+      params: { id },
+    });
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -55,18 +72,52 @@ const ProductDetail = () => {
 
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
-      {/* Avatar */}
-      <View className="mb-6">
+      {/* Header */}
+      <View className="mb-6 relative">
+
+        {/* Back */}
         <Pressable
           onPress={() => router.back()}
           className="absolute left-0 top-0 p-2 z-10"
         >
-          <Image
-            source={back}
-            className="w-6 h-6"
-            resizeMode="contain"
-          />
+          <Image source={back} className="w-6 h-6" resizeMode="contain" />
         </Pressable>
+
+        {/* Dots menu */}
+        <View className="absolute right-0 top-0 z-20">
+          <Pressable
+            onPress={() => setShowMenu(!showMenu)}
+            className="p-2"
+          >
+            <Image source={dots} className="w-6 h-6" resizeMode="contain" />
+          </Pressable>
+
+          {showMenu && (
+            <View className="absolute top-10 right-0 bg-white rounded-xl border border-gray-200 shadow w-36 overflow-hidden">
+
+              <Pressable
+                onPress={handleEdit}
+                className="px-4 py-3 border-b border-gray-100"
+              >
+                <Text className="text-gray-800">
+                  Edit
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleDelete}
+                disabled={isPending}
+                className="px-4 py-3"
+              >
+                <Text className="text-red-600">
+                  {isPending ? "Deleting..." : "Delete"}
+                </Text>
+              </Pressable>
+
+            </View>
+          )}
+
+        </View>
 
         {/* Centered content */}
         <View className="items-center">
@@ -110,18 +161,6 @@ const ProductDetail = () => {
         </View>
         </View>
         
-        {/* Button */}
-        <View className="flex-1 justify-end mt-6">
-          <Pressable
-            onPress={handleDelete}
-            disabled={isPending}
-            className="bg-red-600 rounded-lg p-4"
-          >
-            <Text className="text-white text-center font-semibold">
-              Delete Product
-            </Text>
-          </Pressable>
-        </View>
     </SafeAreaView>
   );
 };

@@ -2,8 +2,8 @@ import { View, Text, FlatList, ActivityIndicator, Image, Pressable } from "react
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import back from '../../assets/globalIcons/back.png'
+
 import { useGetAllSalesmen } from "../../hooks/salesman/useGetAllSalesmen";
 
 
@@ -73,17 +73,6 @@ const SalesmanScreen = () => {
                   {item.name}
                 </Text>
               </View>
-
-              {/* Edit Button */}
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  router.push(`screens/salesmen/edit/${item.id}`);
-                }}
-                className="self-end"
-              >
-                <FontAwesome6 name="edit" size={16} color="black" />
-              </Pressable>
             </Pressable>
           </View>
         )}

@@ -9,7 +9,7 @@ export const useGetOutstandingTransactions = (filters: {
   const user = useAuthStore((state) => state.user);
 
   return useQuery({
-    queryKey: ["transactions", "outstanding", user?.id, filters],
+    queryKey: ["transactions", "unpaid", user?.id, filters],
     queryFn: () => getOutstandingTransactions(filters),
     staleTime: 1000 * 60 * 5,
   })

@@ -13,7 +13,6 @@ import { Customer } from "../../types/customer";
 import { useMemo } from "react";
 
 import back from '../../assets/globalIcons/back.png'
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { groupCustomersBySalesman } from "../../utils/groupBy/sales";
@@ -135,17 +134,6 @@ const CustomerScreen = () => {
                           {customer.address}
                         </Text>
                       </View>
-
-                      {/* EDIT BUTTON */}
-                      <Pressable
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          router.push(`screens/customers/edit/${customer.id}`);
-                        }}
-                        className="p-2 rounded-full self-start mt-1"
-                      >
-                        <FontAwesome6 name="edit" size={16} color="black" />
-                      </Pressable>
                     </Pressable>
                   ))}
                 </View>

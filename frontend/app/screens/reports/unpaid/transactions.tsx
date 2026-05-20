@@ -48,7 +48,7 @@ const TransactionsScreen = () => {
   const onRefresh = async () => {
     setRefreshing(true);
       await queryClient.invalidateQueries({ queryKey: ["transactions", "unpaid"] });
-    setRefreshing(false);
+    setRefreshing(false); 
   };
 
   const filtered = useMemo(() => {

@@ -2,8 +2,8 @@ import { View, Text, FlatList, ActivityIndicator, Image, Pressable } from "react
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import back from '../../assets/globalIcons/back.png'
+
 import { useGetAllProduct } from "../../hooks/product/useGetAllProduct";
 
 
@@ -34,11 +34,7 @@ const ProductScreen = () => {
         onPress={() => router.back()}
         className="mr-3 p-2"
       >
-        <Image
-          source={back}
-          className="w-6 h-6"
-          resizeMode="contain"
-        />
+        <Image source={back} className="w-6 h-6" resizeMode="contain" />
       </Pressable>
 
       <Text className="text-2xl font-bold">List of products</Text>
@@ -81,17 +77,6 @@ const ProductScreen = () => {
                   </Text>
                 )}
               </View>
-
-              {/* Edit Button */}
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  router.push(`screens/products/edit/${item.id}`);
-                }}
-                className="self-end"
-              >
-                <FontAwesome6 name="edit" size={16} color="black" />
-              </Pressable>
             </Pressable>
           </View>
         )}
