@@ -1,8 +1,8 @@
-import { pgTable, uuid, timestamp, text, pgEnum, varchar, boolean } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { areasTable } from "./areas.js";
-import { customersTable } from "./customers.js";
-import { usersTable } from "./users.js";
+import { pgTable, uuid, timestamp, text, pgEnum, varchar, boolean, doublePrecision } from "drizzle-orm/pg-core";
+import { companiesTable } from "./companies";
+import { areasTable } from "./areas";
+import { customersTable } from "./customers";
+import { usersTable } from "./users";
 
 export const visitResultEnum = pgEnum("visit_result_enum", [
   "new order",
@@ -46,16 +46,31 @@ export const visitsTable = pgTable("visits", {
   checkInImage: varchar("check_in_image", { length: 500 }),
   checkInImageId: varchar("check_in_image_id", { length: 255 }),
 
+  // Check in distance
+  checkInLatitude: doublePrecision("check_in_latitude"),
+  checkInLongitude: doublePrecision("check_in_longitude"),
+
+  checkOutLatitude: doublePrecision("check_out_latitude"),
+  checkOutLongitude: doublePrecision("check_out_longitude"),
+
+  checkInDistanceMeters: doublePrecision("check_in_distance_meters"),
+  checkOutDistanceMeters: doublePrecision("check_out_distance_meters"),
+
+  checkInGpsAccuracy: doublePrecision("check_in_gps_accuracy"),
+  checkOutGpsAccuracy: doublePrecision("check_out_gps_accuracy"),
+
+  // Notification
   isAdminNotificationRead: boolean("is_admin_notification_read").default(true).notNull(),
   isSalesmanNotificationRead: boolean("is_salesman_notification_read").default(true).notNull(),
   
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 
   // Admin Approval
   approvalStatus: visitApprovalStatusEnum("approval_status").default("pending").notNull(),
   approvedBy: uuid("approved_by")
-    .references(() => usersTable.id),
+  .references(() => usersTable.id),
   approvedAt: timestamp("approved_at"),
   rejectionReason: text("rejection_reason"),
   adminNote: text("admin_note"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

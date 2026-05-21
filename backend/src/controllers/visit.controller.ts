@@ -9,6 +9,7 @@ import { transactionsTable } from "../db/schemas/transactions.js";
 import { transactionItemsTable } from "../db/schemas/transaction_items.js";
 import { usersTable } from "../db/schemas/users.js";
 import { visitsTable } from "../db/schemas/visit.js";
+import { haversine } from "../utils/haversine.js";
 
 type ProductInput = {
   productId: string;
@@ -25,7 +26,7 @@ type Totals = {
 
 export const createVisit = async (req: Request, res: Response) => {
   try {
-    const { areaId, customerId, checkInImage, checkInImageId } = req.body;
+    const { areaId, customerId, checkInImage, checkInImageId, checkInLatitude, checkInLongitude, checkInGpsAccuracy, } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -97,6 +98,13 @@ export const createVisit = async (req: Request, res: Response) => {
     }
 
     // insert visit (check-in)
+    const checkInDistanceMeters = haversine(
+      customer.latitude,
+      customer.longitude,
+      checkInLatitude,
+      checkInLongitude
+    );
+
     const [visit] = await db
       .insert(visitsTable)
       .values({
@@ -105,8 +113,15 @@ export const createVisit = async (req: Request, res: Response) => {
         areaId,
         customerId,
         status: "check-in",
+
         checkInImage,
         checkInImageId,
+
+        checkInLatitude,
+        checkInLongitude,
+        checkInGpsAccuracy,
+
+        checkInDistanceMeters,
       })
       .returning();
 
@@ -131,7 +146,18 @@ export const createVisit = async (req: Request, res: Response) => {
 export const checkoutVisit = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { result, notes, transactionType, products, orderBy, paymentType, paidAmount } = req.body;
+    const { 
+      result, 
+      notes, 
+      transactionType, 
+      products, 
+      orderBy, 
+      paymentType, 
+      paidAmount,
+      checkOutLatitude,
+      checkOutLongitude,
+      checkOutGpsAccuracy,
+    } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -198,6 +224,22 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       // update visit
       const shouldNotify = result === "new order";
 
+      const [customer] = await tx
+        .select()
+        .from(customersTable)
+        .where(eq(customersTable.id, visit.customerId));
+
+      if (!customer) {
+        throw new Error("Customer not found");
+      }
+
+      const checkOutDistanceMeters = haversine(
+        customer.latitude,
+        customer.longitude,
+        checkOutLatitude,
+        checkOutLongitude
+      );
+
       const [updatedVisit] = await tx
         .update(visitsTable)
         .set({
@@ -205,6 +247,12 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           notes,
           orderBy,
           checkOutAt: new Date(),
+
+          checkOutLatitude,
+          checkOutLongitude,
+          checkOutGpsAccuracy,
+          checkOutDistanceMeters,
+
           status: "check-out",
           isAdminNotificationRead: shouldNotify ? false : visit.isAdminNotificationRead,
           isSalesmanNotificationRead: shouldNotify ? false : visit.isSalesmanNotificationRead,
@@ -446,6 +494,11 @@ export const getVisitById = async (req: Request, res: Response) => {
         orderBy: visitsTable.orderBy,
         checkInImage: visitsTable.checkInImage,
         checkInImageId: visitsTable.checkInImageId,
+
+        checkInDistanceMeters: visitsTable.checkInDistanceMeters,
+        checkInGpsAccuracy: visitsTable.checkInGpsAccuracy,
+        checkOutDistanceMeters: visitsTable.checkOutDistanceMeters,
+        checkOutGpsAccuracy: visitsTable.checkOutGpsAccuracy,
 
         approvalStatus: visitsTable.approvalStatus,
         approvedBy: visitsTable.approvedBy,

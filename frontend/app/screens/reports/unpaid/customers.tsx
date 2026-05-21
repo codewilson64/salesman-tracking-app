@@ -46,7 +46,7 @@ const CustomersScreen = () => {
   
   const onRefresh = async () => {
     setRefreshing(true);
-      await queryClient.invalidateQueries({ queryKey: ["transactions", "outstanding"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", "unpaid"] });
     setRefreshing(false);
   };
 

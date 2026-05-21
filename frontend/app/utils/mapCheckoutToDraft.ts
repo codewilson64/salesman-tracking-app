@@ -69,7 +69,6 @@ export const mapCheckoutToDraft = (
     orderBy,
     notes: data.notes || "",
 
-    // ✅ ADD THESE
     totalAmount,
     paidAmount,
     paymentStatus,

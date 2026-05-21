@@ -36,6 +36,15 @@ const approval_status = [
   { label: "Reject", value: "rejected" },
 ];
 
+const getGpsAccuracyLabel = (accuracy?: number | null) => {
+  if (accuracy == null) return "-";
+
+  if (accuracy <= 10) return `Excellent`;
+  if (accuracy <= 20) return `Good`;
+
+  return `Poor`;
+};
+
 const SalesVisitDetail = () => {
   const {
     control,
@@ -249,6 +258,41 @@ const SalesVisitDetail = () => {
             </Text>
           </View>
         </View>
+
+        {/* Check In Distance */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">
+              Check In Distance & Location Quality
+            </Text>
+
+            <Text className="text-lg font-medium">
+              {visit.checkInDistanceMeters != null
+                ? `${visit.checkInDistanceMeters} m`
+                : "-"}
+              {" / "}
+              {getGpsAccuracyLabel(visit.checkInGpsAccuracy)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Check Out Distance */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+          <View>
+            <Text className="text-gray-500 text-sm">
+              Check Out Distance & Location Quality
+            </Text>
+
+            <Text className="text-lg font-medium">
+              {visit.checkOutDistanceMeters != null
+                ? `${visit.checkOutDistanceMeters} m`
+                : "-"}
+              {" / "}
+              {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)}
+            </Text>
+          </View>
+        </View>
+
 
         {/* Shop Name */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">

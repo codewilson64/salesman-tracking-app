@@ -24,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import back from '../../assets/globalIcons/back.png'
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useCurrentLocation } from "../../hooks/location/useCurrentLocation";
 
 const VisitList = () => {
   const router = useRouter();
@@ -33,6 +34,8 @@ const VisitList = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const { mutateAsync, isPending } = useCheckoutVisit();
+
+  const { getCurrentLocation } = useCurrentLocation();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -72,6 +75,8 @@ const VisitList = () => {
           style: "destructive",
           onPress: async () => {
             try {
+              const location = await getCurrentLocation();
+
               const mappedProducts = products.map((p) => ({
                 productId: p.productId,
                 quantity: Number(p.quantity),
@@ -88,6 +93,9 @@ const VisitList = () => {
                 paymentType,
                 paidAmount,
                 notes,
+                checkOutLatitude: location.latitude,
+                checkOutLongitude: location.longitude,
+                checkOutGpsAccuracy: location.gpsAccuracy,
               });
 
               resetDraft(visitIdFromItem);

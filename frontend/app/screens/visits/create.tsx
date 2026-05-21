@@ -15,9 +15,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { useState } from "react";
 
-
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import back from '../../assets/globalIcons/back.png'
+
 import { visitSchema } from "../../libs/visit.schema";
 import { useCreateVisit } from "../../hooks/visit/useCreateVisit";
 import { useGetAllArea } from "../../hooks/area/useGetAllAreas";
@@ -26,6 +26,8 @@ import { useGetCustomersByArea } from "../../hooks/area/useGetCustomersByArea";
 import { Customer } from "../../types/customer";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { Area } from "../../types/area";
+import { useCheckInDistance } from "../../hooks/location/useCheckInDistance";
+import { useCurrentLocation } from "../../hooks/location/useCurrentLocation";
 
 type FormData = z.infer<typeof visitSchema>;
 
@@ -36,7 +38,7 @@ export default function CreateVisitScreen() {
     setError,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(visitSchema),
   });
@@ -46,6 +48,8 @@ export default function CreateVisitScreen() {
 
   const { data: areas } = useGetAllArea();
   const { mutateAsync, isPending } = useCreateVisit();
+
+  const { getCurrentLocation } = useCurrentLocation();
   
   const pickImage = async () => {
     const uri = await takePhoto();
@@ -70,19 +74,39 @@ export default function CreateVisitScreen() {
     (c: Customer) => c.id === selectedCustomerId
   );
 
+  const { distance: checkInDistance } = useCheckInDistance({
+    latitude: selectedCustomer?.latitude,
+    longitude: selectedCustomer?.longitude,
+  });
+
+  const MAX_CHECK_IN_DISTANCE = 1000; // 1 km
+
+  const isTooFar = checkInDistance != null && checkInDistance > MAX_CHECK_IN_DISTANCE;
+
+  const isCheckInDisabled = isSubmitting || checkInDistance == null || isTooFar;
+
   /* ================= SUBMIT ================= */
 
   const onSubmit = async (data: FormData) => {
     try {
-      await mutateAsync({ data, image });
+      const location = await getCurrentLocation();
+
+      const payload = {
+        ...data,
+        checkInLatitude: location.latitude,
+        checkInLongitude: location.longitude,
+        checkInGpsAccuracy: location.gpsAccuracy ?? undefined,
+      };
+
+      await mutateAsync({ data: payload, image });
       router.back();
-    } catch (err: any) {
+    } 
+    catch (err: any) {
       setError("root", {
-        message: err?.response?.data?.message || "Create failed",
+        message: err?.response?.data?.message || err?.message || "Create failed",
       });
     }
   };
-
   /* ================= RENDER ================= */
 
   return (
@@ -214,18 +238,50 @@ export default function CreateVisitScreen() {
                 </Text>
               </View>
             </View>
-
             
+            <View>
+              <Text className="mb-2">
+                Check in distance
+              </Text>
+
+              <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
+                <Text
+                  className={
+                    isTooFar
+                      ? "text-red-500"
+                      : checkInDistance != null
+                      ? "text-gray-700"
+                      : "text-gray-500 italic"
+                  }
+                >
+                  {checkInDistance != null
+                    ? `${checkInDistance} m`
+                    : selectedCustomerId
+                    ? "Waiting for GPS location..."
+                    : ""}
+                </Text>
+              </View>
+
+              {isTooFar && (
+                <Text className="text-red-500 mt-2">
+                  Cannot check in. You are more than 1 km away from customer location.
+                </Text>
+              )}
+            </View>
           </View>
 
           {/* SUBMIT */}
           <Pressable
             onPress={handleSubmit(onSubmit)}
-            disabled={isPending}
-            className="bg-black rounded-lg p-4 mt-8"
+            disabled={isCheckInDisabled}
+            className={`rounded-lg p-4 mt-8 ${
+              isCheckInDisabled
+                ? "bg-gray-400"
+                : "bg-black"
+            }`}
           >
             <Text className="text-white text-center font-semibold">
-              {isPending ? "Checking in..." : "Check In"}
+              {isSubmitting ? "Checking in..." : "Check In"}
             </Text>
           </Pressable>
 

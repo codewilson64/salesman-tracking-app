@@ -19,6 +19,10 @@ export const checkoutVisitSchema = z.object({
   paidAmount: z.coerce.number().optional(),
   paymentType: z.enum(paymentTypes).nullable().optional(),
   notes: z.string().min(1, "Notes is required"),
+
+  checkOutLatitude: z.number().optional(),
+  checkOutLongitude: z.number().optional(),
+  checkOutGpsAccuracy: z.number().nullable().optional(),
 })
 .superRefine((data, ctx) => {
   if (data.result === "new order") {

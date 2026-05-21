@@ -55,6 +55,11 @@ export type Visit = {
   notes?: string;
   orderBy: string;
 
+  checkInDistanceMeters: number;
+  checkOutDistanceMeters: number;
+  checkInGpsAccuracy: number;
+  checkOutGpsAccuracy: number;
+
   approvalStatus: string;
   approveBy: string;
   rejectionReason: string;
