@@ -4,6 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "build:ios-ipa": "eas build -p ios",
     "build:android-aab": "eas build -p android --profile production",
     "build:android-apk": "eas build -p android --profile preview",
     "android": "expo start --android",

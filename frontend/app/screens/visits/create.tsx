@@ -47,7 +47,7 @@ export default function CreateVisitScreen() {
   const [image, setImage] = useState<string | null>(null);
 
   const { data: areas } = useGetAllArea();
-  const { mutateAsync, isPending } = useCreateVisit();
+  const { mutateAsync } = useCreateVisit();
 
   const { getCurrentLocation } = useCurrentLocation();
   
@@ -74,16 +74,15 @@ export default function CreateVisitScreen() {
     (c: Customer) => c.id === selectedCustomerId
   );
 
-  const { distance: checkInDistance } = useCheckInDistance({
+  const { distance, isLoading: isDistanceLoading, error: distanceError } = useCheckInDistance({
     latitude: selectedCustomer?.latitude,
     longitude: selectedCustomer?.longitude,
   });
 
-  const MAX_CHECK_IN_DISTANCE = 1000; // 1 km
+  const MAX_CHECK_IN_DISTANCE = 100; // 100 m
+  const isTooFar = distance != null && distance > MAX_CHECK_IN_DISTANCE;
+  const isCheckInDisabled = isSubmitting || distance == null || isTooFar || isDistanceLoading;
 
-  const isTooFar = checkInDistance != null && checkInDistance > MAX_CHECK_IN_DISTANCE;
-
-  const isCheckInDisabled = isSubmitting || checkInDistance == null || isTooFar;
 
   /* ================= SUBMIT ================= */
 
@@ -245,26 +244,24 @@ export default function CreateVisitScreen() {
               </Text>
 
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
-                <Text
-                  className={
-                    isTooFar
-                      ? "text-red-500"
-                      : checkInDistance != null
-                      ? "text-gray-700"
-                      : "text-gray-500 italic"
-                  }
-                >
-                  {checkInDistance != null
-                    ? `${checkInDistance} m`
-                    : selectedCustomerId
-                    ? "Waiting for GPS location..."
+                <Text className={isTooFar ? "text-red-500" : "text-gray-700"}>
+                  {isDistanceLoading 
+                    ? "Getting GPS location..." 
+                    : distance != null 
+                    ? `${distance} m` 
+                    : selectedCustomerId 
+                    ? "Waiting for GPS..." 
                     : ""}
                 </Text>
               </View>
 
+              {distanceError && (
+                <Text className="text-red-500 mt-2">{distanceError}</Text>
+              )}
+
               {isTooFar && (
                 <Text className="text-red-500 mt-2">
-                  Cannot check in. You are more than 1 km away from customer location.
+                  Cannot check in. You are more than 100 m away from customer location.
                 </Text>
               )}
             </View>

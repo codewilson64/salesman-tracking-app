@@ -6,13 +6,18 @@ export const groupVisitsByDate = (visits: Visit[]) => {
   visits.forEach((visit) => {
     if (!visit.checkInAt) return;
 
-    const date = new Date(visit.checkInAt).toLocaleDateString("en-CA");
+    const d = new Date(visit.checkInAt);
+
+    const date =
+      `${d.getFullYear()}-` +
+      `${String(d.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(d.getDate()).padStart(2, "0")}`;
 
     visitCountByDate[date] = (visitCountByDate[date] || 0) + 1;
   });
 
   const dateList = Object.keys(visitCountByDate).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    (a, b) => b.localeCompare(a)
   );
 
   return { visitCountByDate, dateList };

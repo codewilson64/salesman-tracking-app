@@ -436,12 +436,13 @@ export const getAllVisits = async (req: Request, res: Response) => {
         customerName: customersTable.customerName,
         shopName: customersTable.shopName,
         address: customersTable.address,
+        latitude: customersTable.latitude,    
+        longitude: customersTable.longitude,
 
         areaId: areasTable.id,
         areaName: areasTable.name,
         city: areasTable.city,
 
-        // ✅ FIX: from usersTable
         salesmanId: usersTable.id,
         salesmanName: usersTable.name,
         salesmanImage: usersTable.profileImage,

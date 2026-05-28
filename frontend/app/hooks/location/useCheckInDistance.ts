@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import * as Location from "expo-location";
 
 type Props = {
@@ -6,74 +6,79 @@ type Props = {
   longitude?: number | null;
 };
 
-export const useCheckInDistance = ({
-  latitude,
-  longitude,
-}: Props) => {
+export const useCheckInDistance = ({ latitude, longitude }: Props) => {
   const [distance, setDistance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const calculateDistance = async () => {
+  const calculateDistance = useCallback(async (retryCount = 0) => {
+    if (latitude == null || longitude == null) {
       setDistance(null);
+      setError(null);
+      return;
+    }
 
-      if (latitude == null || longitude == null) {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        setError("Location permission denied");
         return;
       }
 
-      try {
-        setIsLoading(true);
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
 
-        const permission = await Location.requestForegroundPermissionsAsync();
+      const toRad = (value: number) => (value * Math.PI) / 180;
 
-        if (!permission.granted) return;
+      const lat1 = location.coords.latitude;
+      const lon1 = location.coords.longitude;
+      const lat2 = Number(latitude);
+      const lon2 = Number(longitude);
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+      const R = 6371000; // meters
 
-        const toRad = (value: number) => (value * Math.PI) / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
 
-        const lat1 = location.coords.latitude;
-        const lon1 = location.coords.longitude;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
-        const lat2 = Number(latitude);
-        const lon2 = Number(longitude);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        const R = 6371000;
+      const calculatedDistance = Math.round(R * c);
+    
+      setDistance(calculatedDistance);
+      setError(null);
+      return calculatedDistance;
+    } 
+    catch (err: unknown) {
+      console.error("Distance calculation error:", err);
 
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
+      let errorMessage = "Failed to get current location. Please try again.";
 
-        const a =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(toRad(lat1)) *
-            Math.cos(toRad(lat2)) *
-            Math.sin(dLon / 2) ** 2;
-
-        const c =
-          2 *
-          Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1 - a)
-          );
-
-        setDistance(Math.round(R * c));
-
-      } catch (err) {
-        console.log(err);
-
-      } finally {
-        setIsLoading(false);
+      if (err instanceof Error && retryCount === 0) {
+        console.log("Retrying location fetch...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        return calculateDistance(1);
       }
-    };
 
-    calculateDistance();
-
+      setError(errorMessage);
+      setDistance(null);
+      return null;
+    } 
+    finally {
+      setIsLoading(false);
+    }
   }, [latitude, longitude]);
 
-  return {
-    distance,
-    isLoading,
-  };
+  useEffect(() => {
+    calculateDistance();
+  }, [calculateDistance]);
+
+  return { distance, isLoading, error, calculateDistance };
 };
