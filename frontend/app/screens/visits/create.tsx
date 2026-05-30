@@ -79,7 +79,7 @@ export default function CreateVisitScreen() {
     longitude: selectedCustomer?.longitude,
   });
 
-  const MAX_CHECK_IN_DISTANCE = 100; // 100 m
+  const MAX_CHECK_IN_DISTANCE = 100;
   const isTooFar = distance != null && distance > MAX_CHECK_IN_DISTANCE;
   const isCheckInDisabled = isSubmitting || distance == null || isTooFar || isDistanceLoading;
 

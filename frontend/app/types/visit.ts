@@ -23,6 +23,7 @@ export type TransactionItem = {
 
 export type Visit = {
   id: string;
+  date: string;
   areaId: string;
   areaName: string;
   customerId: string;

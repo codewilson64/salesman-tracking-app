@@ -23,8 +23,6 @@ const AreaScreen = () => {
 
   const { data: areas = [], isLoading, isError } = useGetAllArea();
 
-  const { expanded, toggle } = useExpand();
-
   const groupedAreas = useMemo(() => {
     return groupAreasBySalesman(areas as Area[]);
   }, [areas]);
@@ -70,13 +68,18 @@ const AreaScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => {
-          const isExpanded = expanded[item.salesmanId] ?? false
-
           return (
             <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
-              {/* SALESMAN HEADER - COLLAPSIBLE */}
+              {/* SALESMAN HEADER */}
               <Pressable
-                onPress={() => toggle(item.salesmanId)}
+                onPress={() => router.push({
+                    pathname: "screens/areas/list",
+                    params: {
+                      salesmanId: item.salesmanId,
+                      salesmanName: item.salesmanName,
+                    },
+                  })
+                }
                 className="flex-row items-center justify-between py-3 px-1 active:opacity-70"
               >
                 <View className="flex-row items-center flex-1">
@@ -103,37 +106,12 @@ const AreaScreen = () => {
                 {/* Chevron Icon */}
                 <View className="ml-2">
                   <MaterialIcons 
-                    name={isExpanded ? "keyboard-arrow-down" : "keyboard-arrow-right"} 
+                    name="keyboard-arrow-right"
                     size={24} 
                     color="black" 
                   />
                 </View>
               </Pressable>
-
-              {/* AREAS LIST - Only shown when expanded */}
-              {isExpanded && (
-                <View className="pl-1">
-                  {item.areas.map((area, index) => (
-                    <Pressable
-                      key={area.id}
-                      onPress={() => router.push(`screens/areas/${area.id}`)}
-                      className="flex-row items-center py-4 border-b border-gray-200 last:border-b-0"
-                    >
-                      {/* NUMBER */}
-                      <Text className="w-6 font-bold text-black mt-0.5">
-                        {index + 1}.
-                      </Text>
-
-                      {/* AREA INFO */}
-                      <View className="flex-1">
-                        <Text className="font-semibold capitalize">
-                          {area.areaName} | {area.day}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
             </View>
           );
         }}

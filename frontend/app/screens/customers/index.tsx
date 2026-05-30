@@ -16,14 +16,12 @@ import back from '../../assets/globalIcons/back.png'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { groupCustomersBySalesman } from "../../utils/groupBy/sales";
-import { useExpand } from "../../hooks/useExpand";
+
 
 const CustomerScreen = () => {
   const router = useRouter();
 
   const { data: customers = [], isLoading, isError } = useGetAllCustomer();
-
-  const { expanded, toggle } = useExpand();
 
   const groupedCustomers = useMemo(() => {
     return groupCustomersBySalesman(customers as Customer[]);
@@ -71,13 +69,18 @@ const CustomerScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => {
-          const isExpanded = expanded[item.salesmanId] ?? false
-
           return (
             <View className="p-2 mb-3 bg-white rounded-xl shadow-sm overflow-hidden">
-              {/* SALESMAN HEADER - COLLAPSIBLE */}
+              {/* SALESMAN HEADER */}
               <Pressable
-                onPress={() => toggle(item.salesmanId)}
+                onPress={() => router.push({
+                    pathname: "screens/customers/list",
+                    params: {
+                      salesmanId: item.salesmanId,
+                      salesmanName: item.salesmanName,
+                    },
+                  })
+                }
                 className="flex-row items-center justify-between py-3 px-1 active:opacity-70"
               >
                 <View className="flex-row items-center flex-1">
@@ -104,40 +107,12 @@ const CustomerScreen = () => {
                 {/* Chevron Icon */}
                 <View className="ml-2">
                   <MaterialIcons 
-                    name={isExpanded ? "keyboard-arrow-down" : "keyboard-arrow-right"} 
+                    name="keyboard-arrow-right"
                     size={24} 
                     color="black" 
                   />
                 </View>
               </Pressable>
-
-              {/* CUSTOMER LIST - Only shown when expanded */}
-              {isExpanded && (
-                <View className="pl-1">
-                  {item.customers.map((customer, index) => (
-                    <Pressable
-                      key={customer.id}
-                      onPress={() => router.push(`screens/customers/${customer.id}`)}
-                      className="flex-row items-start py-4 border-b border-gray-200 last:border-b-0"
-                    >
-                      {/* NUMBER */}
-                      <Text className="w-6 font-bold text-black mt-0.5">
-                        {index + 1}.
-                      </Text>
-
-                      {/* CUSTOMER INFO */}
-                      <View className="flex-1 pr-2 gap-1">
-                        <Text className="font-semibold capitalize">
-                          {customer.shopName}
-                        </Text>
-                        <Text className="text-gray-700 text-sm">
-                          {customer.address}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
             </View>
           );
         }}

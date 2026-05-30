@@ -1,4 +1,4 @@
-import { Alert, GestureResponderEvent, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, GestureResponderEvent, Pressable, Text, View } from "react-native";
 import { formatTime } from "../../helper/formatTime";
 import { getResultStyle } from "../../helper/resultStyle";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -13,6 +13,7 @@ type VisitItemProps = {
   drafts: Record<string, VisitDraft>;
   isPending: boolean;
   handleCheckout: (visitId: string) => void;
+  setIsCalculatingCheckout: (value: boolean) => void;
 };
 
 export const VisitItem = ({
@@ -21,8 +22,10 @@ export const VisitItem = ({
   drafts,
   isPending,
   handleCheckout,
+  setIsCalculatingCheckout
 }: VisitItemProps) => {
   const router = useRouter();
+  const resultStyle = getResultStyle(item.visitResult);
 
   const { 
     distance: checkOutDistance, 
@@ -40,20 +43,24 @@ export const VisitItem = ({
   const handleCheckoutPress = async (e: GestureResponderEvent) => {
     e.stopPropagation();
 
-    const newDistance = await calculateDistance();
+    try {
+      setIsCalculatingCheckout(true);
 
-    if (newDistance == null || newDistance > MAX_CHECK_OUT_DISTANCE) {
-      Alert.alert(
-        "Cannot Checkout",
-        `You are ${newDistance ?? '?'} meters away.\n\nMaximum allowed: ${MAX_CHECK_OUT_DISTANCE} meters.`
-      );
-      return;
+      const newDistance = await calculateDistance();
+
+      if (newDistance == null || newDistance > MAX_CHECK_OUT_DISTANCE) {
+        Alert.alert(
+          "Cannot Checkout",
+          `You are ${newDistance ?? "?"} meters away.\n\nMaximum allowed: ${MAX_CHECK_OUT_DISTANCE} meters.`
+        );
+        return;
+      }
+
+      handleCheckout(item.id);
+    } finally {
+      setIsCalculatingCheckout(false);
     }
-
-    handleCheckout(item.id);
   };
-
-  const resultStyle = getResultStyle(item.visitResult);
 
   return (
     <Pressable 
