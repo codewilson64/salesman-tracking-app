@@ -173,7 +173,7 @@ const VisitList = () => {
           <ActivityIndicator size="large" color="white" />
 
           <Text className="text-white text-lg font-semibold mt-4">
-            Checking out...
+            Loading...
           </Text>
         </View>
       )}

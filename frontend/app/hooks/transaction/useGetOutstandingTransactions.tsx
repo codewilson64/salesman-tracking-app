@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAuthStore } from "../../stores/authStore";
 import { getOutstandingTransactions } from "../../services/transaction/transactionService";
+import { Transaction } from "../../types/transaction";
 
 export const useGetOutstandingTransactions = (filters: {
   startDate?: string; 
@@ -8,7 +9,7 @@ export const useGetOutstandingTransactions = (filters: {
 }) => {
   const user = useAuthStore((state) => state.user);
 
-  return useQuery({
+  return useQuery<Transaction[]>({
     queryKey: ["transactions", "unpaid", user?.id, filters],
     queryFn: () => getOutstandingTransactions(filters),
     staleTime: 1000 * 60 * 5,

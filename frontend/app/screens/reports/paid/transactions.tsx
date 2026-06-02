@@ -17,12 +17,16 @@ import { formatTime } from "../../../helper/formatTime";
 
 import back from "../../../assets/globalIcons/back.png";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import filterIcon from "../../../assets/globalIcons/filter.png";
 
-import type { Transaction } from "../../../types/transaction";
+import DateFilterModal from "../../../components/modal/DateFilterModal";
 import { useGetUnreadPaidTransactions } from "../../../hooks/notification/transactions-menus/useGetUnreadPaidTransactions";
+import { useDateFilter } from "../../../hooks/useDateFilter";
 
 const TransactionsScreen = () => {
   const router = useRouter();
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { customerId, shopName } = useLocalSearchParams<{
     customerId: string;
@@ -53,15 +57,28 @@ const TransactionsScreen = () => {
 
   const filtered = useMemo(() => {
     return transactions.filter(
-      (t: Transaction) => t.customerId === customerId
+      (t) => t.customerId === customerId
     );
   }, [transactions, customerId]);
 
+  const {
+    filteredData,
+    filter,
+    setDateRange,
+    resetFilter,
+    hasActiveFilter,
+  } = useDateFilter({
+    data: filtered,
+    getDate: (transaction) => transaction.checkInAt,
+  });
+
   const sorted = useMemo(() => {
-    return [...filtered].sort(
-      (a, b) => new Date(b.checkInAt).getTime() - new Date(a.checkInAt).getTime()
+    return [...filteredData].sort(
+      (a, b) =>
+        new Date(b.checkInAt).getTime() -
+        new Date(a.checkInAt).getTime()
     );
-  }, [filtered]);
+  }, [filteredData]);
 
   if (isLoading) {
     return (
@@ -84,15 +101,47 @@ const TransactionsScreen = () => {
   return (
     <SafeAreaView className="flex-1 p-4 bg-gray-100">
       {/* HEADER */}
-      <View className="flex-row items-center mb-4">
-        <Pressable onPress={() => router.back()} className="mr-3 p-2">
-          <Image source={back} className="w-6 h-6" />
-        </Pressable>
+      <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center">
+          <Pressable onPress={() => router.back()} className="mr-3 p-2">
+            <Image source={back} className="w-6 h-6" />
+          </Pressable>
 
-        <Text className="text-2xl font-bold">
-          {shopName || "Transactions"}
-        </Text>
+          <Text className="text-2xl font-bold">
+            {shopName || "Transactions"}
+          </Text>
+        </View>
+
+        <Pressable
+          onPress={() => setModalVisible(true)}
+          className="p-2 relative"
+        >
+          <Image
+            source={filterIcon}
+            className="w-6 h-6"
+            resizeMode="contain"
+          />
+
+          {hasActiveFilter && (
+            <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
+          )}
+        </Pressable>
       </View>
+
+      {hasActiveFilter && (
+        <View className="bg-blue-50 p-3 rounded-xl mb-4 flex-row justify-between items-center">
+          <Text className="text-blue-700 text-sm">
+            {filter.startDate?.toLocaleDateString("id-ID")} —{" "}
+            {filter.endDate?.toLocaleDateString("id-ID")}
+          </Text>
+
+          <Pressable onPress={resetFilter}>
+            <Text className="text-blue-600 font-semibold">
+              Reset
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <FlatList
         data={sorted}
@@ -148,6 +197,13 @@ const TransactionsScreen = () => {
             </Pressable>
           )}
         } 
+      />
+
+      <DateFilterModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onApply={setDateRange}
+        initialFilter={filter}
       />
     </SafeAreaView>
   );

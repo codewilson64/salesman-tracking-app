@@ -1,15 +1,16 @@
 import { Text, FlatList, Pressable, View, ActivityIndicator, Image } from "react-native";
+import { useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Visit } from "../../types/visit";
 import { useGetAllVisits } from "../../hooks/visit/useGetAllVisits";
-import { useDateFilteredVisits } from "../../hooks/visit/useDateFilteredVisits";  // ← New
 
 import back from '../../assets/globalIcons/back.png';
 import filterIcon from '../../assets/globalIcons/filter.png';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from "react";
-import DateFilterModal from "../../components/DateFilterModal";
+import DateFilterModal from "../../components/modal/DateFilterModal";
+
+import { useDateFilter } from "../../hooks/useDateFilter";
+import { groupVisitsByDate } from "../../utils/visitDateFilter";
 
 const DateListScreen = () => {
   const router = useRouter();
@@ -18,13 +19,19 @@ const DateListScreen = () => {
   const { data: visits = [], isLoading, isError } = useGetAllVisits({});
 
   const {
-    dateList,
-    visitCountByDate,
+    filteredData,
     filter,
     setDateRange,
     resetFilter,
     hasActiveFilter,
-  } = useDateFilteredVisits(visits as Visit[]);
+  } = useDateFilter({
+    data: visits,
+    getDate: (visit) => visit.checkInAt,
+  });
+
+  const { dateList, visitCountByDate } = useMemo(
+    () => groupVisitsByDate(filteredData), [filteredData]
+  );
 
   if (isLoading) {
     return (

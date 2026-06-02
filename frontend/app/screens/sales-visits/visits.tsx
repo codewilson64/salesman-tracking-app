@@ -20,6 +20,10 @@ import { getStartEndOfDay } from "../../utils/date";
 import { formatTime } from "../../helper/formatTime";
 import { getResultStyle } from "../../helper/resultStyle";
 
+import VisitFilterModal from "../../components/modal/VisitFilterModal"; 
+
+type FilterOption = "all" | "new order" | "follow-up" | "shop closed" | "checking in";
+
 const VisitsListScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -30,6 +34,8 @@ const VisitsListScreen = () => {
   }>();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -51,6 +57,14 @@ const VisitsListScreen = () => {
       (visit) => visit.salesmanId === salesmanId
     );
   }, [visits, salesmanId]);
+
+  const filteredVisits = useMemo(() => {
+    if (activeFilter === "all") return salesmanVisits;
+    if (activeFilter === "checking in") {
+      return salesmanVisits.filter((visit) => !visit.visitResult);
+    }
+    return salesmanVisits.filter((visit) => visit.visitResult === activeFilter);
+  }, [salesmanVisits, activeFilter]);
 
   const salesman = salesmanVisits[0];
 
@@ -75,27 +89,38 @@ const VisitsListScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-100 p-4">
       {/* HEADER */}
-      <View className="flex-row items-center mb-4">
-        <Pressable
-          onPress={() => router.back()}
-          className="mr-3 p-2"
-        >
-          <Image
-            source={back}
-            className="w-6 h-6"
-            resizeMode="contain"
-          />
-        </Pressable>
+      <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center">
+          <Pressable onPress={() => router.back()} className="mr-3 p-2">
+            <Image source={back} className="w-6 h-6" resizeMode="contain" />
+          </Pressable>
 
-        <View>
           <Text className="text-2xl font-bold capitalize">
             {salesman?.salesmanName ?? "Salesman"}
           </Text>
         </View>
+
+        {/* Filter Button */}
+        <Pressable
+          onPress={() => setModalVisible(true)}
+          className="bg-white px-5 py-2.5 rounded-2xl flex-row items-center gap-2 shadow-sm border border-gray-200"
+        >
+          <Text className="font-semibold text-gray-700">
+            {activeFilter === "all"
+              ? "All"
+              : activeFilter === "new order"
+              ? "New Order"
+              : activeFilter === "follow-up"
+              ? "Follow-up"
+              : activeFilter === "shop closed"
+              ? "Shop Closed"
+              : "Checking In"}
+          </Text>
+        </Pressable>
       </View>
 
       <FlatList
-        data={salesmanVisits}
+        data={filteredVisits}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -109,16 +134,13 @@ const VisitsListScreen = () => {
         }
         renderItem={({ item, index }) => {
           const style = getResultStyle(item.visitResult);
-
           return (
             <Pressable
               onPress={() => router.push(`screens/sales-visits/${item.id}`)}
               className="bg-white rounded-xl p-4 mb-3 shadow-sm"
             >
               <View className="flex-row items-start">
-                <Text className="w-6 font-bold">
-                  {index + 1}.
-                </Text>
+                <Text className="w-6 font-bold">{index + 1}.</Text>
 
                 <View className="flex-1">
                   <Text className="font-semibold text-base capitalize">
@@ -154,6 +176,19 @@ const VisitsListScreen = () => {
             </Pressable>
           );
         }}
+        ListEmptyComponent={
+          <View className="py-10 items-center">
+            <Text className="text-gray-500">No visits found for this filter.</Text>
+          </View>
+        }
+      />
+
+      {/* Use the separate modal component */}
+      <VisitFilterModal
+        visible={modalVisible}
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+        onClose={() => setModalVisible(false)}
       />
     </SafeAreaView>
   );

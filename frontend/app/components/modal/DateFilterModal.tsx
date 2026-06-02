@@ -1,15 +1,13 @@
-// components/DateFilterModal.tsx
 import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Modal,
   Pressable,
-  StatusBar,
   Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { DateFilter } from "../hooks/visit/useDateFilteredVisits";
+import { DateFilter } from "../../hooks/useDateFilter";
 
 type DateFilterModalProps = {
   visible: boolean;
@@ -62,6 +60,7 @@ const DateFilterModal = ({
       setError(validationError);
       return;
     }
+
     onApply(startDate, endDate);
     onClose();
   };
@@ -78,7 +77,7 @@ const DateFilterModal = ({
       transparent
       animationType="slide"
       onRequestClose={onClose}
-      statusBarTranslucent={true}        // Important for Android
+      statusBarTranslucent={true} // Important for Android
     >
       {/* Full Screen Overlay */}
       <View className="flex-1 bg-black/60 justify-end">
