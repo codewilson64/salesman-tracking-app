@@ -15,7 +15,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFF",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/logo.png"
       },
       "package": "com.codewilson64.salesteamtracker",
