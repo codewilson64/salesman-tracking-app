@@ -5,12 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
+    "scheme": "salesteamtracker",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.codewilson64.salesteamtracker",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Sales Team Tracker to access your camera to take photos of clients or products.",
+        "NSPhotoLibraryUsageDescription": "Allow Sales Team Tracker to access your photo library to select and upload images.",
+        "NSPhotoLibraryAddUsageDescription": "Allow Sales Team Tracker to save photos to your library.",
+        "NSLocationWhenInUseUsageDescription": "Allow Sales Team Tracker to use your location to track sales visits and improve accuracy."
       }
     },
     "android": {
