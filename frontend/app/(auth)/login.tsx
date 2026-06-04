@@ -34,6 +34,7 @@ export default function LoginScreen() {
 
   const onSubmit = async (data: TloginSchema) => {
     try {
+      console.log("EMAIL:", JSON.stringify(data.email));
       await login(data);
       router.replace("/home");
     } catch (error: any) {
