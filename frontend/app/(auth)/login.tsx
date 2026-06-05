@@ -16,6 +16,10 @@ import { useAuthStore } from "../stores/authStore";
 import { Link, useRouter } from "expo-router";
 import { loginSchema, TloginSchema } from "../libs/auth.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
+
+const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function LoginScreen() {
   const {
@@ -33,15 +37,34 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: TloginSchema) => {
-    try {
-      console.log("EMAIL:", JSON.stringify(data.email));
-      await login(data);
-      router.replace("/home");
-    } catch (error: any) {
-      console.error(error.response?.data);
-      const message = error.response?.data?.error || "An error occurred";
+    const maxWaitMs = 60000;
+    const startTime = Date.now();
 
-      setError("root", { type: "server", message });
+    try {
+      while (true) {
+        try {
+          await login(data);
+          router.replace("/home");
+          return;
+        } catch (error: unknown) {
+          if (!axios.isAxiosError(error)) throw error;
+
+          const isNetworkError = !error.response;
+
+          if (!isNetworkError) throw error;
+          if (Date.now() - startTime > maxWaitMs) throw error;
+
+          await sleep(5000);
+        }
+      }
+    } catch (error: unknown) {
+      let message = "Unable to connect to server. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.error ?? message;
+      }
+
+      setError("root", {type: "server", message});
     }
   };
 
@@ -136,8 +159,11 @@ export default function LoginScreen() {
 
           {/* LOGIN BUTTON */}
           <Pressable
+            disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}
-            className="bg-black rounded-lg p-4"
+            className={`rounded-lg p-4 ${
+              isSubmitting ? "bg-gray-400" : "bg-black"
+            }`}
           >
             <Text className="text-white text-center font-semibold">
               {isSubmitting ? "Logging in..." : "Log in"}
