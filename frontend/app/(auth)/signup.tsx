@@ -14,6 +14,11 @@ export default function SignupScreen() {
     formState: { errors, isSubmitting },
   } = useForm<TsignUpSchema>({
     resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      companyName: "",
+    },
   });
 
   const router = useRouter()
@@ -52,12 +57,16 @@ export default function SignupScreen() {
           </Text>
 
           {/* EMAIL */}
+          <View className="mb-4">
+            <Text className="mb-2 font-normal text-gray-700">
+              Email
+            </Text>
+
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                placeholder="Email"
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
@@ -70,14 +79,19 @@ export default function SignupScreen() {
               {errors.email.message}
             </Text>
           )}
+          </View>
 
           {/* PASSWORD */}
+          <View className="mb-4">
+            <Text className="mb-2 font-normal text-gray-700">
+              Password
+            </Text>
+
           <Controller
             control={control}
             name="password"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                placeholder="Password"
                 secureTextEntry
                 value={value}
                 onChangeText={onChange}
@@ -90,14 +104,19 @@ export default function SignupScreen() {
               {errors.password.message}
             </Text>
           )}
+          </View>
 
           {/* COMPANY */}
+          <View className="mb-4">
+            <Text className="mb-2 font-normal text-gray-700">
+              Company Name
+            </Text>
+
           <Controller
             control={control}
             name="companyName"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                placeholder="Company name"
                 value={value}
                 onChangeText={onChange}
                 className="border border-gray-300 rounded-lg p-4 mb-4"
@@ -109,6 +128,7 @@ export default function SignupScreen() {
               {errors.companyName.message}
             </Text>
           )}
+          </View>
 
           {/* BUTTON */}
           <Pressable

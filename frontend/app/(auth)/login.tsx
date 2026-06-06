@@ -18,9 +18,6 @@ import { loginSchema, TloginSchema } from "../libs/auth.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 
-const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function LoginScreen() {
   const {
     control,
@@ -29,6 +26,10 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm<TloginSchema>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   const router = useRouter();
@@ -37,34 +38,18 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: TloginSchema) => {
-    const maxWaitMs = 60000;
-    const startTime = Date.now();
-
     try {
-      while (true) {
-        try {
-          await login(data);
-          router.replace("/home");
-          return;
-        } catch (error: unknown) {
-          if (!axios.isAxiosError(error)) throw error;
-
-          const isNetworkError = !error.response;
-
-          if (!isNetworkError) throw error;
-          if (Date.now() - startTime > maxWaitMs) throw error;
-
-          await sleep(5000);
-        }
-      }
-    } catch (error: unknown) {
+      await login(data);
+      router.replace("/home");
+    } 
+    catch (error: unknown) {
       let message = "Unable to connect to server. Please try again.";
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.error ?? message;
       }
 
-      setError("root", {type: "server", message});
+      setError("root", { type: "server", message });
     }
   };
 
@@ -171,17 +156,17 @@ export default function LoginScreen() {
           </Pressable>
 
           {/* SIGN UP */}
-          <Text className="text-black text-center mt-4">
+          {/* <Text className="text-black text-center mt-4">
             Don't have an account?{" "}
             <Link href="/signup">
               <Text className="underline text-blue-500 font-semibold">
                 Sign up
               </Text>
             </Link>
-          </Text>
+          </Text> */}
         
           {/* Forgot password */}
-          <Text className="text-center mt-3">
+          <Text className="text-center mt-8">
             <Link href="/forgot-password">
               <Text className="text-blue-500 underline font-semibold">Forgot Password?</Text>
             </Link>

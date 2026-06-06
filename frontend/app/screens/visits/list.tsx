@@ -27,6 +27,7 @@ const VisitList = () => {
   const router = useRouter();
   const { date } = useLocalSearchParams();
   const [isCalculatingCheckout, setIsCalculatingCheckout] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -73,6 +74,8 @@ const VisitList = () => {
           style: "destructive",
           onPress: async () => {
             try {
+              setIsCheckingOut(true);
+
               const location = await getCurrentLocation();
 
               const mappedProducts = products.map((p) => ({
@@ -99,8 +102,12 @@ const VisitList = () => {
               resetDraft(visitIdFromItem);
 
               Alert.alert("Success", "Visit checked out successfully");
-            } catch (err) {
+            } 
+            catch (err) {
               Alert.alert("Error", "Checkout failed");
+            }
+            finally {
+              setIsCheckingOut(false);
             }
           },
         },
@@ -168,12 +175,12 @@ const VisitList = () => {
         )}
       />
 
-      {isCalculatingCheckout && (
+      {(isCalculatingCheckout || isCheckingOut) && (
         <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
           <ActivityIndicator size="large" color="white" />
 
           <Text className="text-white text-lg font-semibold mt-4">
-            Loading...
+            {isCheckingOut ? "Checking out..." : "Loading..."}
           </Text>
         </View>
       )}

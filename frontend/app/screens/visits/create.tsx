@@ -6,6 +6,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +46,7 @@ export default function CreateVisitScreen() {
 
   const router = useRouter();
   const [image, setImage] = useState<string | null>(null);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
 
   const { data: areas } = useGetAllArea();
   const { mutateAsync } = useCreateVisit();
@@ -88,6 +90,8 @@ export default function CreateVisitScreen() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsCheckingIn(true);
+
       const location = await getCurrentLocation();
 
       const payload = {
@@ -104,6 +108,9 @@ export default function CreateVisitScreen() {
       setError("root", {
         message: err?.response?.data?.message || err?.message || "Create failed",
       });
+    }
+    finally {
+      setIsCheckingIn(false)
     }
   };
   /* ================= RENDER ================= */
@@ -289,6 +296,16 @@ export default function CreateVisitScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {isCheckingIn && (
+        <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
+          <ActivityIndicator size="large" color="white" />
+
+          <Text className="text-white text-lg font-semibold mt-4">
+            Checking in...
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
