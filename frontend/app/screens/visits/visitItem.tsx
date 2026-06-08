@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, GestureResponderEvent, Pressable, Text, View } from "react-native";
+import { Alert, GestureResponderEvent, Pressable, Text, View } from "react-native";
 import { formatTime } from "../../helper/formatTime";
 import { getResultStyle } from "../../helper/resultStyle";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";

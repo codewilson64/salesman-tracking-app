@@ -76,14 +76,14 @@ export default function CreateVisitScreen() {
     (c: Customer) => c.id === selectedCustomerId
   );
 
-  const { distance, isLoading: isDistanceLoading, error: distanceError } = useCheckInDistance({
+  const { distance, isLoading: isDistanceLoading, error: distanceError, calculateDistance } = useCheckInDistance({
     latitude: selectedCustomer?.latitude,
     longitude: selectedCustomer?.longitude,
   });
 
   const MAX_CHECK_IN_DISTANCE = 100;
   const isTooFar = distance != null && distance > MAX_CHECK_IN_DISTANCE;
-  const isCheckInDisabled = isSubmitting || distance == null || isTooFar || isDistanceLoading;
+  const isCheckInDisabled = isSubmitting || isDistanceLoading || isCheckingIn || !selectedCustomerId;
 
 
   /* ================= SUBMIT ================= */
@@ -91,6 +91,11 @@ export default function CreateVisitScreen() {
   const onSubmit = async (data: FormData) => {
     try {
       setIsCheckingIn(true);
+
+      const newDistance = await calculateDistance();
+
+      if (newDistance == null) return;
+      if (newDistance > MAX_CHECK_IN_DISTANCE) return;
 
       const location = await getCurrentLocation();
 
@@ -257,7 +262,7 @@ export default function CreateVisitScreen() {
                     : distance != null 
                     ? `${distance} m` 
                     : selectedCustomerId 
-                    ? "Waiting for GPS..." 
+                    ? "Distance will be checked when you press Check In" 
                     : ""}
                 </Text>
               </View>

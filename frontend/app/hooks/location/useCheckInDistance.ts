@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import * as Location from "expo-location";
 
 type Props = {
@@ -15,22 +15,42 @@ export const useCheckInDistance = ({ latitude, longitude }: Props) => {
     if (latitude == null || longitude == null) {
       setDistance(null);
       setError(null);
-      return;
+      return null;
     }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) {
-        setError("Location permission denied");
-        return;
+      const existingPermission = await Location.getForegroundPermissionsAsync();
+
+      let finalPermission = existingPermission;
+
+      if (existingPermission.status === "undetermined") {
+        finalPermission = await Location.requestForegroundPermissionsAsync();
+      }
+
+      if (!finalPermission.granted) {
+        setError("Location permission denied. Please enable location in settings.");
+        setDistance(null);
+        return null;
       }
 
       const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+        accuracy: Location.Accuracy.Highest,
       });
+
+      const gpsAccuracy = location.coords.accuracy;
+
+      if (gpsAccuracy == null || gpsAccuracy > 50) {
+        setError(
+          `Your GPS is not accurate enough (${Math.round(
+            gpsAccuracy ?? 0
+          )} m). Please enable Precise Location in your iphone settings and try again.`
+        );
+        setDistance(null);
+        return null;
+      }
 
       const toRad = (value: number) => (value * Math.PI) / 180;
 
@@ -76,9 +96,6 @@ export const useCheckInDistance = ({ latitude, longitude }: Props) => {
     }
   }, [latitude, longitude]);
 
-  useEffect(() => {
-    calculateDistance();
-  }, [calculateDistance]);
 
   return { distance, isLoading, error, calculateDistance };
 };

@@ -26,14 +26,13 @@ import { VisitItem } from "./visitItem";
 const VisitList = () => {
   const router = useRouter();
   const { date } = useLocalSearchParams();
+
   const [isCalculatingCheckout, setIsCalculatingCheckout] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-
-  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
+  const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCheckoutVisit();
-
   const { getCurrentLocation } = useCurrentLocation();
 
   const onRefresh = async () => {
