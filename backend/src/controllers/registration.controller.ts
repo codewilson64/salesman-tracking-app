@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "../index.js";
-import { companyRegistrationsTable, usersTable } from "../db/schemas";
+import { usersTable } from "../db/schemas/users.js";
+import { companyRegistrationsTable } from "../db/schemas/companyRegistrations.js";
 
 export const registerCompany = async (req: Request, res: Response) => {
   const {
