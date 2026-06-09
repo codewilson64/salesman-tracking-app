@@ -1,8 +1,8 @@
 import { pgTable, uuid, timestamp, text, pgEnum, varchar, boolean, doublePrecision } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies";
-import { areasTable } from "./areas";
-import { customersTable } from "./customers";
-import { usersTable } from "./users";
+import { companiesTable } from "./companies.js";
+import { areasTable } from "./areas.js";
+import { customersTable } from "./customers.js";
+import { usersTable } from "./users.js";
 
 export const visitResultEnum = pgEnum("visit_result_enum", [
   "new order",
