@@ -2,12 +2,16 @@ import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useAppUpdateChecker } from "./hooks/app-version/useAppUpdateChecker";
+import { AppUpdateModal } from "./components/modal/AppUpdateModal";
 
 const queryClient = new QueryClient();
 
 const RootLayout = () => {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
+
+  const { updateInfo, dismissUpdate } = useAppUpdateChecker();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -31,6 +35,16 @@ const RootLayout = () => {
           <Stack.Screen name="screens/sales-visits" options={{ headerShown: false }}/>
           <Stack.Screen name="screens/reports" options={{ headerShown: false }}/>
         </Stack>
+
+        {updateInfo && (
+          <AppUpdateModal
+            visible={!!updateInfo}
+            type={updateInfo.type}
+            message={updateInfo.message}
+            updateUrl={updateInfo.updateUrl}
+            onDismiss={dismissUpdate}
+          />
+        )}
       </SafeAreaProvider>
     </QueryClientProvider>
   );
