@@ -21,7 +21,7 @@ import { useGetTransactionById } from "../../../../hooks/transaction/useGetTrans
 import { useUpdateTransactionPayment } from "../../../../hooks/transaction/useUpdateTransaction";
 import { TUpdateTransactionPaymentInput } from "../../../../libs/updateTransactionPayment.schema";
 
-import { formatTime } from "../../../../helper/formatTime";
+import { formatDate, formatTime } from "../../../../helper/formatTime";
 import { FormInput } from "../../../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../../../components/areaInputForm/FormSelectModal";
 import { useAuthStore } from "../../../../stores/authStore";
@@ -175,6 +175,16 @@ const TransactionDetailScreen = () => {
                 {transaction.transactionType}
               </Text>
             </View>
+
+            {/* DUE DATE */}
+            {transaction.transactionType === "credit" && (
+              <View>
+                <Text className="text-gray-500">Due date</Text>
+                <Text className="font-semibold capitalize">
+                  {formatDate(transaction.dueDate)}
+                </Text>
+              </View>
+            )}
 
             {/* Payment Status */}
             <View>

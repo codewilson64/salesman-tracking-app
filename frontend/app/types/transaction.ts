@@ -16,6 +16,7 @@ export type Transaction = {
   remainingAmount: number;
   transactionType: "cash" | "credit";
   paymentStatus: "unpaid" | "partial";
+  dueDate: string;
   checkInAt: string;
   paidAt: string;
 }

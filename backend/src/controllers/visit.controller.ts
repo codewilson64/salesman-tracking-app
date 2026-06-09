@@ -495,6 +495,7 @@ export const getVisitById = async (req: Request, res: Response) => {
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
         orderBy: visitsTable.orderBy,
+        dueDate: visitsTable.dueDate,
         checkInImage: visitsTable.checkInImage,
         checkInImageId: visitsTable.checkInImageId,
 

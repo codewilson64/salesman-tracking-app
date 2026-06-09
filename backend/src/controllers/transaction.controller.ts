@@ -59,6 +59,7 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
 
         visitId: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
+        dueDate: visitsTable.dueDate,
 
         customerId: customersTable.id,
         customerName: customersTable.customerName,
@@ -196,6 +197,7 @@ export const getTransactionById = async (req: Request, res: Response) => {
         salesmanName: usersTable.name,
 
         checkInAt: visitsTable.checkInAt,
+        dueDate: visitsTable.dueDate,
       })
       .from(transactionsTable)
       .leftJoin(visitsTable, eq(transactionsTable.visitId, visitsTable.id))

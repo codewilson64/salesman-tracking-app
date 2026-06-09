@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { formatTime } from "../../../helper/formatTime";
+import { formatDate, formatTime } from "../../../helper/formatTime";
 
 import back from "../../../assets/globalIcons/back.png";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -176,8 +176,11 @@ const TransactionsScreen = () => {
                       Rp {Number(item.finalAmount).toLocaleString()}
                   </Text>
 
-                  <Text className="text-gray-500 text-sm">
+                  <Text className="text-gray-700 text-sm">
                     {formatTime(item.checkInAt)}
+                  </Text>
+                  <Text className="text-gray-700 text-sm">
+                    Due: {formatDate(item.dueDate)}
                   </Text>
                 </View>
               </View>
