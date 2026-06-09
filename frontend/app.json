@@ -53,6 +53,9 @@
           "imageWidth": 200
         }
       ],
+      [
+        "./plugins/withMonitoringTool"
+      ],
       "expo-font",
       "@react-native-community/datetimepicker"
     ],
