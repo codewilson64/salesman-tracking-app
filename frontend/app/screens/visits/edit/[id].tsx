@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import back from '../../../assets/globalIcons/back.png'
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCheckoutVisit } from "../../../hooks/visit/useCheckoutVisit";
@@ -18,21 +18,22 @@ import { checkoutVisitSchema, TCheckoutVisit } from "../../../libs/checkout.sche
 import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../../components/areaInputForm/FormInput";
 import { useVisitDraftStore } from "../../../stores/visitStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { mapCheckoutToDraft } from "../../../utils/mapCheckoutToDraft";
 import { ProductFieldItem } from "../../../components/ProductFieldItem";
+import { PaymentType, TransactionType, VisitResult } from "../../../types/visitDraft";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-const results = ["new order", "follow-up", "shop closed"];
-const transactionTypes = ["cash", "credit"];
+const results: VisitResult[] = ["new order", "follow-up", "shop closed"];
+const transactionTypes: TransactionType[] = ["cash", "credit"];
+const paymentTypes: PaymentType[] = ["cash", "transfer"];
+
+type SelectOption<T extends string> = {
+  value: T;
+};
 
 const CheckoutVisit = () => {
-  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-
-  const {isPending } = useCheckoutVisit();
-  const { data: products } = useGetAllProduct()
-
-  const { setDraft, getDraft } = useVisitDraftStore();
 
   const {
     control,
@@ -49,10 +50,20 @@ const CheckoutVisit = () => {
       products: [],
       paidAmount: 0,
       paymentType: null,
+      dueDate: undefined,
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const router = useRouter();
+
+  const [showDueDatePicker, setShowDueDatePicker] = useState(false);
+
+  const { isPending } = useCheckoutVisit();
+  const { data: products } = useGetAllProduct()
+
+  const { setDraft, getDraft } = useVisitDraftStore();
+
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "products",
   });
@@ -66,22 +77,22 @@ const CheckoutVisit = () => {
 
     if (draft) {
       reset({
-        result: draft.result as any,
-        transactionType: draft.transactionType ?? undefined,
+        id,
+        result: draft.result ?? undefined,
+        transactionType: draft.transactionType,
         products: draft.products.map((p) => ({
           productId: p.productId,
           quantity: p.quantity,
           discount: p.discount,
         })),
-        orderBy: draft.orderBy || "",
-        paymentType: draft.paymentType || null,
-        paidAmount: draft.paidAmount || 0,
-        notes: draft.notes || "",
+        orderBy: draft.orderBy,
+        paymentType: draft.paymentType,
+        paidAmount: draft.paidAmount,
+        notes: draft.notes,
+        dueDate: draft.dueDate
       });
-
-      replace(draft.products);
     }
-  }, [id]);
+  }, [id, getDraft, reset]);
 
    /* ================= WATCH AREA ================= */
 
@@ -135,8 +146,8 @@ const CheckoutVisit = () => {
                   control={control}
                   name="result"
                   label="Visit Result"
-                  options={results.map((r) => ({ value: r }))}
-                  getLabel={(item: { value: string }) => item.value}
+                  options={results.map((value) => ({ value }))}
+                  getLabel={(item: SelectOption<VisitResult>) => item.value}
                   errors={errors}
               />
 
@@ -146,8 +157,8 @@ const CheckoutVisit = () => {
                     control={control}
                     name="transactionType"
                     label="Transaction Type"
-                    options={transactionTypes.map((t) => ({ value: t }))}
-                    getLabel={(item: { value: string }) => item.value}
+                    options={transactionTypes.map((value) => ({ value }))}
+                    getLabel={(item: SelectOption<TransactionType>) => item.value}
                     errors={errors}
                   />
 
@@ -199,11 +210,8 @@ const CheckoutVisit = () => {
                       control={control}
                       name="paymentType"
                       label="Payment Method"
-                      options={[
-                        { value: "cash" },
-                        { value: "transfer" },
-                      ]}
-                      getLabel={(item: { value: string }) => item.value}
+                      options={paymentTypes.map((value) => ({ value }))}
+                      getLabel={(item: SelectOption<PaymentType>) => item.value}
                       errors={errors}
                     />
                   )}
@@ -216,6 +224,54 @@ const CheckoutVisit = () => {
                         name="paidAmount"
                         label="Paid Amount"
                         keyboardType="numeric"
+                      />
+
+                      {/* Due Date */}
+                      <Controller
+                        control={control}
+                        name="dueDate"
+                        render={({ field: { value, onChange } }) => (
+                          <View>
+                            <Text className="mb-2 font-normal">Due Date</Text>
+
+                            <Pressable
+                              onPress={() => setShowDueDatePicker(true)}
+                              className="border border-gray-300 rounded-lg px-4 py-3"
+                            >
+                              <Text className={value ? "text-black" : "text-gray-400"}>
+                                {value
+                                  ? new Date(value).toLocaleDateString("id-ID", {
+                                      day: "2-digit",
+                                      month: "long",
+                                      year: "numeric",
+                                    })
+                                  : "Select due date"}
+                              </Text>
+                            </Pressable>
+
+                            {errors.dueDate && (
+                              <Text className="text-red-500 mt-1">
+                                {errors.dueDate.message}
+                              </Text>
+                            )}
+
+                            {showDueDatePicker && (
+                              <DateTimePicker
+                                value={value ? new Date(value) : new Date()}
+                                mode="date"
+                                display={Platform.OS === "ios" ? "spinner" : "default"}
+                                minimumDate={new Date()}
+                                onChange={(event, selectedDate) => {
+                                  setShowDueDatePicker(false);
+
+                                  if (selectedDate) {
+                                    onChange(selectedDate.toISOString());
+                                  }
+                                }}
+                              />
+                            )}
+                          </View>
+                        )}
                       />
 
                       {Number(paidAmount) > 0 && (

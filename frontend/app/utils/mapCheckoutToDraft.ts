@@ -68,6 +68,7 @@ export const mapCheckoutToDraft = (
     products: mappedProducts,
     orderBy,
     notes: data.notes || "",
+    dueDate: data.dueDate ?? null,
 
     totalAmount,
     paidAmount,

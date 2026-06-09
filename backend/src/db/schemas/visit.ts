@@ -1,8 +1,8 @@
 import { pgTable, uuid, timestamp, text, pgEnum, varchar, boolean, doublePrecision } from "drizzle-orm/pg-core";
-import { companiesTable } from "./companies.js";
-import { areasTable } from "./areas.js";
-import { customersTable } from "./customers.js";
-import { usersTable } from "./users.js";
+import { companiesTable } from "./companies";
+import { areasTable } from "./areas";
+import { customersTable } from "./customers";
+import { usersTable } from "./users";
 
 export const visitResultEnum = pgEnum("visit_result_enum", [
   "new order",
@@ -42,6 +42,7 @@ export const visitsTable = pgTable("visits", {
   checkOutAt: timestamp("check_out_at"),
   notes: text("notes"),
   orderBy: varchar("order_by", { length: 255 }),
+  dueDate: timestamp("due_date"),
   
   checkInImage: varchar("check_in_image", { length: 500 }),
   checkInImageId: varchar("check_in_image_id", { length: 255 }),

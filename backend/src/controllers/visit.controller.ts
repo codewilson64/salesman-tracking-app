@@ -152,6 +152,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       transactionType, 
       products, 
       orderBy, 
+      dueDate,
       paymentType, 
       paidAmount,
       checkOutLatitude,
@@ -247,6 +248,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           notes,
           orderBy,
           checkOutAt: new Date(),
+          dueDate: dueDate ? new Date(dueDate) : null,
 
           checkOutLatitude,
           checkOutLongitude,

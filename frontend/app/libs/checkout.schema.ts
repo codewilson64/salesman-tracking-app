@@ -16,6 +16,7 @@ export const checkoutVisitSchema = z.object({
   transactionType: z.enum(transactionTypes).nullable().optional(),
   products: z.array(transactionItemSchema).optional(),
   orderBy: z.string().optional(),
+  dueDate: z.string().nullable().optional(),
   paidAmount: z.coerce.number().optional(),
   paymentType: z.enum(paymentTypes).nullable().optional(),
   notes: z.string().min(1, "Notes is required"),
@@ -66,6 +67,13 @@ export const checkoutVisitSchema = z.object({
       });
     }
 
+    if (data.transactionType === "credit" && !data.dueDate) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Due date is required for credit transaction",
+        path: ["dueDate"],
+      });
+    }
   }
 });
   

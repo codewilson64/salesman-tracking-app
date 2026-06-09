@@ -12,6 +12,7 @@ const defaultDraft: VisitDraft = {
   paymentType: null,      
   orderBy: "",
   notes: "",
+  dueDate: null,
 };
 
 export const useVisitDraftStore = create<VisitDraftState>()(

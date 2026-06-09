@@ -61,7 +61,7 @@ const VisitList = () => {
       return;
     }
 
-    const { result, transactionType, orderBy, notes, products, paidAmount, paymentType } = draft;
+    const { result, transactionType, orderBy, dueDate, notes, products, paidAmount, paymentType } = draft;
 
     Alert.alert(
       "Confirm Checkout",
@@ -90,6 +90,7 @@ const VisitList = () => {
                 transactionType: transactionType as "cash" | "credit",
                 products: mappedProducts,
                 orderBy,
+                dueDate,
                 paymentType,
                 paidAmount,
                 notes,

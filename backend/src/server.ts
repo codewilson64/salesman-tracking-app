@@ -36,6 +36,14 @@ app.use('/api/delete-account', accountRoute)
 app.use('/api/notifications', notificationRoute)
 app.use("/api/company-registration", companyRegistrationRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+app.get("/", (req, res) => {
+  res.json({ message: "API is running" });
 });
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+  });
+}
+
+export default app;
