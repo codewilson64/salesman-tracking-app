@@ -1,20 +1,35 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
 import { Menus } from "../constants/menu";
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Navbar from "../components/Navbar";
+import { useMonitoringDisclosureStore } from "../stores/useMonitoringDisclosureStore";
+import { MonitoringDisclosureModal } from "../components/modal/MonitoringDisclosureModal";
 
 const Home = () => {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
-  const filteredMenu = Menus.filter((item) =>
-    item.roles.includes(user?.role || "")
-  );
+  const filteredMenu = Menus.filter((item) => item.roles.includes(user?.role || ""));
+
+  const hasAccepted = useMonitoringDisclosureStore((state) => state.hasAccepted);
+  const isLoading = useMonitoringDisclosureStore((state) => state.isLoading);
+  const loadDisclosureStatus = useMonitoringDisclosureStore((state) => state.loadDisclosureStatus);
+  const acceptDisclosure = useMonitoringDisclosureStore((state) => state.acceptDisclosure);
+
+  useEffect(() => {
+    loadDisclosureStatus();
+  }, [loadDisclosureStatus]);
+
+  const handleDenyDisclosure = () => {
+    Alert.alert(
+      "Disclosure Required",
+      "This app uses location and photo proof for work visit verification. Please accept the disclosure to continue using visit features."
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -55,6 +70,12 @@ const Home = () => {
           </View>
         ))}
       </View>
+
+      <MonitoringDisclosureModal
+        visible={!isLoading && !hasAccepted}
+        onAccept={acceptDisclosure}
+        onDeny={handleDenyDisclosure}
+      />
     </SafeAreaView>
   );
 };
