@@ -34,17 +34,11 @@ export const useMonitoringDisclosureStore =
 
     acceptDisclosure: async () => {
       await AsyncStorage.setItem(MONITORING_DISCLOSURE_KEY, "accepted");
-
-      set({
-        hasAccepted: true,
-      });
+      set({hasAccepted: true});
     },
 
     resetDisclosure: async () => {
       await AsyncStorage.removeItem(MONITORING_DISCLOSURE_KEY);
-
-      set({
-        hasAccepted: false,
-      });
+      set({hasAccepted: false});
     },
   }));

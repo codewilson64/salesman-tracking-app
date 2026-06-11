@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../stores/authStore";
 import { useRouter } from "expo-router";
@@ -29,6 +29,18 @@ const Home = () => {
       "Disclosure Required",
       "This app uses location and photo proof for work visit verification. Please accept the disclosure to continue using visit features."
     );
+  };
+
+  const handleCreateVisit = () => {
+      // if (hasActiveVisit) {
+      //   Alert.alert(
+      //     "Finish Visit First",
+      //     "Please checkout your current visit before adding a new one."
+      //   );
+      //   return;
+      // }
+  
+      router.push("screens/visits/create");
   };
 
   return (
@@ -70,6 +82,15 @@ const Home = () => {
           </View>
         ))}
       </View>
+
+      {user?.role === "salesman" && (
+        <Pressable
+          onPress={handleCreateVisit}
+          className="absolute bottom-6 right-6 bg-black w-16 h-16 rounded-full items-center justify-center shadow-lg active:opacity-80"
+        >
+          <MaterialIcons name="add" size={32} color="white" />
+        </Pressable>
+      )}
 
       <MonitoringDisclosureModal
         visible={!isLoading && !hasAccepted}
