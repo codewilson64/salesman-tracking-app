@@ -54,6 +54,14 @@
         }
       ],
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/visit_notification.png",
+          "color": "#000000",
+          "defaultChannel": "field_activity"
+        }
+      ],
+      [
         "./plugins/withMonitoringTool"
       ],
       "expo-font",

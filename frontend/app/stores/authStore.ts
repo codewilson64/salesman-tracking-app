@@ -10,11 +10,19 @@ type User = {
   email: string;
   role: string;
   companyId: string;
-  profileImage: string;
+  profileImage: string | null;
+};
+
+type Company = {
+  id: string;
+  name: string;
+  subscriptionStatus: "pending" | "active" | "inactive" | "expired";
+  subscriptionEndDate?: string | null;
 };
 
 type AuthState = {
   user: User | null;
+  company: Company | null;
   accessToken: string | null;
   refreshToken: string | null;
 
@@ -22,9 +30,9 @@ type AuthState = {
   isLoading: boolean;
 
   login: (data: TloginSchema) => Promise<void>;
-  signup: (data: TsignUpSchema) => Promise<void>;
+  signup: (data: TsignUpSchema) => Promise<{ message: string }>;
   logout: () => void;
-  
+
   setAccessToken: (token: string) => void;
   setHydrated: () => void;
 };
@@ -33,6 +41,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      company: null,
       accessToken: null,
       refreshToken: null,
       isHydrated: false,
@@ -42,8 +51,10 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (data) => {
         const res = await loginUser(data);
+
         set({
           user: res.user,
+          company: res.company ?? null,
           accessToken: res.accessToken,
           refreshToken: res.refreshToken,
         });
@@ -51,15 +62,23 @@ export const useAuthStore = create<AuthState>()(
 
       signup: async (data) => {
         const res = await signupUser(data);
+
         set({
-          user: res.user,
-          accessToken: res.accessToken,
+          user: null,
+          company: null,
+          accessToken: null,
+          refreshToken: null,
         });
+
+        return {
+          message: res.message,
+        };
       },
 
       logout: () => {
         set({
           user: null,
+          company: null,
           accessToken: null,
           refreshToken: null,
         });

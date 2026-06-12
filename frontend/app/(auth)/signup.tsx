@@ -5,6 +5,8 @@ import { useAuthStore } from "../stores/authStore";
 import { Link, useRouter } from "expo-router";
 import { signUpSchema, TsignUpSchema } from "../libs/auth.schema";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignupScreen() {
   const {
@@ -22,17 +24,34 @@ export default function SignupScreen() {
   });
 
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
 
   const signup = useAuthStore((state) => state.signup);
 
   const onSubmit = async (data: TsignUpSchema) => {
     try {
-      await signup(data)
-      router.replace('/home')
+      const res = await signup(data)
+      router.replace({
+        pathname: "/pending-activation",
+        params: {
+          message: res.message,
+        },
+    });
     } 
-    catch (error: any) {
-      console.error(error.response.data);
-      const message = error?.response?.data?.error || "An error occurred";
+    catch (error: unknown) {
+      const message =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "error" in error.response.data &&
+        typeof error.response.data.error === "string"
+          ? error.response.data.error
+          : "An error occurred";
 
       setError("root", { type: "server", message });
     }
@@ -70,7 +89,7 @@ export default function SignupScreen() {
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
-                className="border border-gray-300 rounded-lg p-4 mb-4"
+                className="border border-gray-300 rounded-lg p-4 mb-1"
               />
             )}
           />
@@ -91,12 +110,26 @@ export default function SignupScreen() {
             control={control}
             name="password"
             render={({ field: { onChange, value } }) => (
-              <TextInput
-                secureTextEntry
-                value={value}
-                onChangeText={onChange}
-                className="border border-gray-300 rounded-lg p-4 mb-4"
-              />
+              <View className="relative mb-1">
+                <TextInput
+                  secureTextEntry={!showPassword}
+                  value={value}
+                  onChangeText={onChange}
+                  className="border border-gray-300 rounded-lg p-4 pr-12"
+                />
+
+                <Pressable
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-4"
+                  hitSlop={10}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="gray"
+                  />
+                </Pressable>
+              </View>
             )}
           />
           {errors.password && (
@@ -119,7 +152,7 @@ export default function SignupScreen() {
               <TextInput
                 value={value}
                 onChangeText={onChange}
-                className="border border-gray-300 rounded-lg p-4 mb-4"
+                className="border border-gray-300 rounded-lg p-4 mb-1"
               />
             )}
           />

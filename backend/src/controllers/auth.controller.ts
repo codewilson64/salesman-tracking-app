@@ -54,6 +54,7 @@ export const signup = async (req: Request, res: Response) => {
         .insert(companiesTable)
         .values({
           name: companyName,
+          subscriptionStatus: "pending",
         })
         .returning();
 
@@ -77,18 +78,8 @@ export const signup = async (req: Request, res: Response) => {
 
     const { user, company } = result;
 
-    // Create JWT
-    const payload = {
-      userId: user.id,
-      companyId: user.companyId,
-      role: user.role,
-    };
-
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
-
     return res.status(201).json({
-      message: "Signup successful",
+      message: "Thanks for signing up! Your company account has been created and is waiting for activation.",
       user: {
         id: user.id,
         email: user.email,
@@ -100,9 +91,8 @@ export const signup = async (req: Request, res: Response) => {
       company: {
         id: company.id,
         name: company.name,
+        subscriptionStatus: company.subscriptionStatus,
       },
-      accessToken,
-      refreshToken
     });
 
   } catch (error: unknown) {

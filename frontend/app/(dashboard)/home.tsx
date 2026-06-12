@@ -31,18 +31,6 @@ const Home = () => {
     );
   };
 
-  const handleCreateVisit = () => {
-      // if (hasActiveVisit) {
-      //   Alert.alert(
-      //     "Finish Visit First",
-      //     "Please checkout your current visit before adding a new one."
-      //   );
-      //   return;
-      // }
-  
-      router.push("screens/visits/create");
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <View className="p-4">
@@ -83,14 +71,14 @@ const Home = () => {
         ))}
       </View>
 
-      {user?.role === "salesman" && (
+      {/* {user?.role === "salesman" && (
         <Pressable
           onPress={handleCreateVisit}
           className="absolute bottom-6 right-6 bg-black w-16 h-16 rounded-full items-center justify-center shadow-lg active:opacity-80"
         >
           <MaterialIcons name="add" size={32} color="white" />
         </Pressable>
-      )}
+      )} */}
 
       <MonitoringDisclosureModal
         visible={!isLoading && !hasAccepted}

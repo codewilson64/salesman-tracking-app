@@ -5,7 +5,18 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAppUpdateChecker } from "./hooks/app-version/useAppUpdateChecker";
 import { AppUpdateModal } from "./components/modal/AppUpdateModal";
 
+import * as Notifications from "expo-notifications";
+
 const queryClient = new QueryClient();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const RootLayout = () => {
   const scheme = useColorScheme();
