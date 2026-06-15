@@ -21,14 +21,10 @@ export const useAppUpdateChecker = () => {
       const currentVersion = getCurrentAppVersion();
       const appVersion = await getAppVersion();
 
-      const isBelowMinimum =
-        compareVersions(currentVersion, appVersion.minimumVersion) < 0;
+      const isBelowMinimum = compareVersions(currentVersion, appVersion.minimumVersion) < 0;
+      const isBelowLatest = compareVersions(currentVersion, appVersion.latestVersion) < 0;
 
-      const isBelowLatest =
-        compareVersions(currentVersion, appVersion.latestVersion) < 0;
-
-      const updateUrl =
-        Platform.OS === "ios" ? appVersion.iosUrl : appVersion.androidUrl;
+      const updateUrl = Platform.OS === "ios" ? appVersion.iosUrl : appVersion.androidUrl;
 
       if (isBelowMinimum) {
         setUpdateInfo({

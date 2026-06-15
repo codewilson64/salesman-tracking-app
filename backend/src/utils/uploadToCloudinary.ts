@@ -10,8 +10,16 @@ const uploadToCloudinary = (
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: 'auto',
-        // transformation: [{ width: 800, height: 800, crop: 'limit' }]
+        resource_type: "image",
+        transformation: [
+          {
+            width: 1200,
+            height: 1200,
+            crop: "limit",
+            quality: "auto:good",
+            fetch_format: "auto",
+          },
+        ],
       },
       (error, result) => {
         if (error) {
@@ -23,9 +31,9 @@ const uploadToCloudinary = (
     );
 
     const readableStream = new Readable();
-        readableStream.push(buffer);
-        readableStream.push(null);
-        readableStream.pipe(uploadStream);
+    readableStream.push(buffer);
+    readableStream.push(null);
+    readableStream.pipe(uploadStream);
   });
 };
 

@@ -3,7 +3,6 @@ import {
   Text,
   Pressable,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Image,
   ActivityIndicator,
@@ -125,7 +124,7 @@ export default function CreateVisitScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
@@ -283,11 +282,7 @@ export default function CreateVisitScreen() {
           <Pressable
             onPress={handleSubmit(onSubmit)}
             disabled={isCheckInDisabled}
-            className={`rounded-lg p-4 mt-8 ${
-              isCheckInDisabled
-                ? "bg-gray-400"
-                : "bg-black"
-            }`}
+            className={`rounded-lg p-4 mt-8 ${isCheckInDisabled ? "bg-gray-400" : "bg-black"}`}
           >
             <Text className="text-white text-center font-semibold">
               {isSubmitting ? "Checking in..." : "Check In"}

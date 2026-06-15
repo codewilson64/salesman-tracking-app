@@ -4,43 +4,54 @@ import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { z } from "zod";
 import back from '../../../assets/globalIcons/back.png'
 
+import { z } from "zod";
 import { customerSchema } from "../../../libs/customer.schema";
 import { useUpdateCustomer } from "../../../hooks/customer/useUpdateCustomer";
 import { useGetCustomerById } from "../../../hooks/customer/useGetCustomerById";
 import { useGetAllArea } from "../../../hooks/area/useGetAllAreas";
-import { pickImageFromLibrary } from "../../../utils/pickImage";
+
 import { Area } from "../../../types/area";
 import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../../components/areaInputForm/FormInput";
+import { takePhoto } from "../../../utils/takePhoto";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useGetLocation } from "../../../hooks/location/useGetLocation";
 
 
 type FormData = z.infer<typeof customerSchema>;
 
 export default function EditCustomerScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const { mutateAsync, isPending } = useUpdateCustomer();
-  const { data: customer, isLoading } = useGetCustomerById(id);
-  const { data: areas } = useGetAllArea();
-
   const {
     control,
     handleSubmit,
     reset,
     setError,
+    setValue,
     watch,
     formState: { isDirty, errors },
   } = useForm<FormData>();
+
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+
+  const { mutateAsync, isPending } = useUpdateCustomer();
+  const { data: customer, isLoading } = useGetCustomerById(id);
+  const { data: areas } = useGetAllArea();
 
   const [image, setImage] = useState<string | null>(null);
   const isDisabled = (!isDirty && !image) || isPending;
 
   const pickImage = async () => {
-    const uri = await pickImageFromLibrary();
-      if (uri) setImage(uri);
+    const uri = await takePhoto();
+      if (uri) {
+        setImage(uri);
+        setValue("customerImage", uri, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
   };
 
   useEffect(() => {
@@ -52,6 +63,10 @@ export default function EditCustomerScreen() {
         phone: customer.phone,
         address: customer.address,
         description: customer.description,
+        latitude: customer.latitude,
+        longitude: customer.longitude,
+        customerImage: customer.customerImage,
+        customerImageId: customer.customerImageId,
       });
     }
   }, [customer]);
@@ -61,6 +76,26 @@ export default function EditCustomerScreen() {
   const selectedArea: Area | undefined = areas?.find(
     (a: Area) => a.id === selectedAreaId
   );
+
+  const { getLocation, loading: locationLoading } = useGetLocation();
+
+  const handleGetCoordinate = async () => {
+    const coordinate = await getLocation();
+
+    if (coordinate) {
+      const [lat, lng] = coordinate.split(",").map(Number);
+
+      setValue("latitude", lat, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      setValue("longitude", lng, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -84,7 +119,7 @@ export default function EditCustomerScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
@@ -186,6 +221,31 @@ export default function EditCustomerScreen() {
               label="Description"
               errors={errors}
             />
+
+            <View>
+              <Text className="mb-3">Location pin</Text>
+
+              <Pressable
+                onPress={handleGetCoordinate}
+                className="border border-gray-300 rounded-lg p-4 bg-gray-100 flex-row justify-between items-center"
+              >
+                <Text>
+                  {watch("latitude") && watch("longitude")
+                    ? `${watch("latitude")}, ${watch("longitude")}`
+                    : "Pick location"}
+                </Text>
+
+                {locationLoading ? (
+                  <ActivityIndicator size={22} color="gray" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={22}
+                    color="gray"
+                  />
+                )}
+              </Pressable>
+            </View>
           </View>
 
           {/* BUTTON */}

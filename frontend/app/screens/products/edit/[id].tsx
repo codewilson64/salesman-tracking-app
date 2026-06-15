@@ -63,16 +63,16 @@ export default function EditProductScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <ScrollView
-        contentContainerStyle={{ padding: 24 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior="padding"
+        keyboardVerticalOffset={0}
       >
+        <ScrollView
+          contentContainerStyle={{ padding: 24 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* HEADER */}
         <View className="flex-row items-center mb-8">
           <Pressable onPress={() => router.back()} className="mr-3">

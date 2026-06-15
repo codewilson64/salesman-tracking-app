@@ -19,11 +19,11 @@ export const useCreateVisit = () => {
           if (image) {
             try {
               console.log("Uploading image...", image);
-              imageData = await uploadImage(image, "salesmen/visits"); // first press axios error
-              console.log("VISIT IMAGE:", image);
+              imageData = await uploadImage(image, "salesmen/visits");
+              console.log("VISIT IMAGE DATA:", image);
             } catch (err) {
               console.error("UPLOAD ERROR:", err);
-              throw new Error("Image upload failed");
+              throw new Error("Image upload failed, please try again");
             }
           }
     

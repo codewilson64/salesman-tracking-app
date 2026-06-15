@@ -49,7 +49,7 @@ export default function CreateSalesmanScreen() {
       router.back();
     } catch (err: any) {
       setError("root", {
-        message: err?.response?.data?.message || "Create failed",
+        message: err?.response?.data?.message || "Create failed, please try again",
       });
     }
   };
@@ -59,7 +59,7 @@ export default function CreateSalesmanScreen() {
     <KeyboardAvoidingView
       className="flex-1"
       behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      keyboardVerticalOffset={0}
       >
         <ScrollView 
           contentContainerStyle={{ padding: 24 }}
@@ -159,11 +159,6 @@ export default function CreateSalesmanScreen() {
                     </View>
                   )}
                 </Pressable>
-                {errors.profileImage && (
-                  <Text className="text-red-500 mb-4">
-                    Photo is required
-                  </Text>
-                )}
               </View>
             </View>
 

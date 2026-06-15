@@ -10,7 +10,7 @@ export const salesmanSchema = z.object({
   ),
   address: z.string().optional(),
   phone: z.string().optional(),
-  profileImage: z.string().min(1, "Photo is required"),
+  profileImage: z.string().optional(),
   profileImageId: z.string().optional(),
 });
 

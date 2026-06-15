@@ -97,7 +97,6 @@ export const FormSelectModal = ({
               </View>
             </Modal>
 
-            {/* ✅ CORRECT ERROR HANDLING */}
             {error && (
               <Text className="text-red-500 mt-1">
                 {error.message}

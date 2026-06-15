@@ -34,11 +34,26 @@ export const createCustomer = async (req: Request, res: Response) => {
 
     const companyId = user.companyId;
 
-    // basic validation
     if (!areaId || !customerName || !shopName || !phone) {
       return res.status(400).json({
         message: "Missing required fields",
       });
+    }
+
+    const isSalesman = user.role === "salesman";
+
+    if (isSalesman) {
+      if (latitude == null || longitude == null) {
+        return res.status(400).json({
+          message: "Location is required for salesman",
+        });
+      }
+
+      if (!customerImage) {
+        return res.status(400).json({
+          message: "Photo is required for salesman",
+        });
+      }
     }
 
     // validate area belongs to company
@@ -67,10 +82,10 @@ export const createCustomer = async (req: Request, res: Response) => {
         phone,
         address,
         description,
-        customerImage,
-        customerImageId,
-        latitude,
-        longitude,
+        customerImage: customerImage || null,
+        customerImageId: customerImageId || null,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
       })
       .returning();
 
@@ -214,7 +229,18 @@ export const updateCustomer = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const { areaId, customerName, shopName, phone, address, description, customerImage, customerImageId} = req.body;
+    const { 
+      areaId, 
+      customerName, 
+      shopName, 
+      phone, 
+      address, 
+      description, 
+      latitude,      
+      longitude,
+      customerImage, 
+      customerImageId
+    } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -256,6 +282,8 @@ export const updateCustomer = async (req: Request, res: Response) => {
         phone,
         address,
         description,
+        latitude,
+        longitude,
         customerImage,
         customerImageId,
       })

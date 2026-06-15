@@ -75,12 +75,12 @@ export default function EditAreaScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1">
+      <KeyboardAvoidingView
+        className="flex-1 bg-white"
+        behavior="padding"
+        keyboardVerticalOffset={0}
+      >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
           showsVerticalScrollIndicator={false}
@@ -166,7 +166,7 @@ export default function EditAreaScreen() {
             </Text>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

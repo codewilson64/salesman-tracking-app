@@ -24,7 +24,7 @@ export const transactionsTable = pgTable("transactions", {
     .references(() => companiesTable.id)
     .notNull(),
   visitId: uuid("visit_id")
-    .references(() => visitsTable.id, { onDelete: "cascade" })
+    .references(() => visitsTable.id, { onDelete: "restrict" })
     .notNull(),
   
   transactionType: transactionTypeEnum("transaction_type").notNull(),

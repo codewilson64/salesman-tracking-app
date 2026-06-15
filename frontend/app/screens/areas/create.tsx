@@ -3,7 +3,6 @@ import {
   Text,
   Pressable,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Image,
 } from "react-native";
@@ -21,24 +20,19 @@ import { FormInput } from "../../components/areaInputForm/FormInput";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormMultiSelectModal } from "../../components/areaInputForm/FormMultiSelectModal";
 import { User } from "../../types/user";
+import { useAuthStore } from "../../stores/authStore";
+import { useGetSalesmanById } from "../../hooks/salesman/useGetSalesmanById";
+import { useEffect } from "react";
+import { days } from "../../constants/days";
 
 type FormData = z.infer<typeof areaSchema>;
-
-const days = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-];
 
 export default function CreateAreaScreen() {
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(areaSchema),
@@ -51,8 +45,23 @@ export default function CreateAreaScreen() {
 
   const router = useRouter();
 
-  const { data: salesmen } = useGetAllSalesmen();
+  const user = useAuthStore((state) => state.user);
+
+  const isAdmin = user?.role === "owner";
+  const isSalesman = user?.role === "salesman";
+
+  const { data: salesmen } = useGetAllSalesmen({ enabled: isAdmin });
+  const { data: currentSalesman } = useGetSalesmanById(user?.id, { enabled: isSalesman });
+
   const { mutateAsync, isPending } = useCreateArea();
+
+  useEffect(() => {
+    if (isSalesman && user?.id) {
+      setValue("salesmanId", user.id, {
+        shouldValidate: true,
+      });
+    }
+  }, [isSalesman, user?.id, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -68,7 +77,7 @@ export default function CreateAreaScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
@@ -105,17 +114,30 @@ export default function CreateAreaScreen() {
               errors={errors} 
             />
 
-            <FormSelectModal
-              control={control}
-              name="salesmanId"
-              label="Salesman"
-              options={salesmen?.map((s: User) => ({
-                value: s.id,
-                name: s.name,
-              })) || []}
-              getLabel={(item: User) => item.name}
-              errors={errors}
-            />
+            {isAdmin ? (
+              <FormSelectModal
+                control={control}
+                name="salesmanId"
+                label="Salesman"
+                options={
+                  salesmen?.map((s: User) => ({
+                    value: s.id,
+                    name: s.name,
+                  })) || []
+                }
+                getLabel={(item: { value: string; name: string }) => item.name}
+                errors={errors}
+              />
+            ) : (
+              <View>
+                <Text className="mb-2">Salesman</Text>
+                <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
+                  <Text className="text-gray-700">
+                    {currentSalesman?.name || "Loading salesman..."}
+                  </Text>
+                </View>
+              </View>
+            )}
 
             <FormSelectModal
               control={control}

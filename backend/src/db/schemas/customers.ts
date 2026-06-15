@@ -24,8 +24,8 @@ export const customersTable = pgTable("customers", {
   address: varchar("address", { length: 255 }),
   description: varchar("description", { length: 500 }),
 
-  latitude: doublePrecision("latitude").notNull(),
-  longitude: doublePrecision("longitude").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
 
   customerImage: varchar("customer_image", { length: 500 }),
   customerImageId: varchar("customer_image_id", { length: 255 }),

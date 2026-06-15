@@ -97,7 +97,12 @@ export const createVisit = async (req: Request, res: Response) => {
       });
     }
 
-    // insert visit (check-in)
+    if (customer.latitude == null || customer.longitude == null) {
+      return res.status(400).json({
+        message: "Customer location is not set. Please update customer location before check-in.",
+      });
+    }
+
     const checkInDistanceMeters = haversine(
       customer.latitude,
       customer.longitude,
@@ -232,6 +237,12 @@ export const checkoutVisit = async (req: Request, res: Response) => {
 
       if (!customer) {
         throw new Error("Customer not found");
+      }
+
+      if (customer.latitude == null || customer.longitude == null) {
+        return res.status(400).json({
+          message: "Customer location is not set. Please update customer location before check-in.",
+        });
       }
 
       const checkOutDistanceMeters = haversine(
@@ -635,7 +646,12 @@ export const deleteVisit = async (req: Request, res: Response) => {
     const [transaction] = await db
       .select()
       .from(transactionsTable)
-      .where(eq(transactionsTable.visitId, id));
+      .where(
+        and(
+          eq(transactionsTable.visitId, id),
+          eq(transactionsTable.companyId, user.companyId)
+        )
+      );
 
     if (transaction) {
       return res.status(400).json({

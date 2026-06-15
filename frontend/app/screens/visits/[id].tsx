@@ -100,7 +100,7 @@ const VisitDetail = () => {
   const hasLocation = lat != null && lng != null;
 
   return (
-    <SafeAreaView className="flex-1 pl-4 pr-4 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -108,394 +108,386 @@ const VisitDetail = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#2563EB"]} // optional: Android spinner color
-            tintColor="#2563EB"  // optional: iOS spinner color
+            colors={["#2563EB"]}
+            tintColor="#2563EB"
           />
         }
       >
-      <View className="mb-6">
-        <Pressable
-          onPress={() => router.back()}
-          className="absolute left-0 top-0 p-2 z-10"
-        >
-          <Image
-            source={back}
-            className="w-6 h-6"
-            resizeMode="contain"
-          />
-        </Pressable>
-        
-        <View className="items-center">
+        <View className="mb-6">
           <Image
             source={{
-            uri:
-              visit.checkInImage ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                visit.shopName
-              )}&background=random&size=128`
+              uri:
+                visit.checkInImage ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  visit.shopName
+                )}&background=random&size=128`,
             }}
-            className="w-32 h-32 rounded-full mb-4"
-          /> 
-        </View>
-      </View>
+            className="w-full h-72"
+            resizeMode="cover"
+          />
 
-      {/* Tabs */}
-      <View className="flex-row mb-4 border-b border-gray-200">
-        <Pressable
-          onPress={() => setActiveTab("basic")}
-          className={`flex-1 py-3 ${
-            activeTab === "basic" ? "border-b-2 border-blue-500" : ""
-          }`}
-        >
-          <Text
-            className={`text-center font-medium ${
-              activeTab === "basic" ? "text-blue-500" : "text-gray-400"
-            }`}
+          <Pressable
+            onPress={() => router.back()}
+            className="absolute left-4 top-4 p-2 z-10 bg-white/80 rounded-full"
           >
-            Visit Info
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setActiveTab("transaction")}
-          className={`flex-1 py-3 ${
-            activeTab === "transaction" ? "border-b-2 border-blue-500" : ""
-          }`}
-        >
-          <Text
-            className={`text-center font-medium ${
-              activeTab === "transaction" ? "text-blue-500" : "text-gray-400"
-            }`}
-          >
-            Visit Result
-          </Text>
-        </Pressable>
-      </View>
-
-      {activeTab === "basic" && (
-        <>
-        {/* Status */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Status</Text>
-            <Text className="text-lg font-medium">
-              {visit.status}
-            </Text>
-          </View>
+            <Image source={back} className="w-6 h-6" resizeMode="contain" />
+          </Pressable>
         </View>
 
-        {/* Result */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Result</Text>
-            <Text className="text-lg font-medium capitalize">
-              {visit.visitResult || draft?.result || "-"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Check In */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Check In</Text>
-            <Text className="text-lg font-medium">
-              {formatTime(visit.checkInAt)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Check Out */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Check Out</Text>
-            <Text className="text-lg font-medium">
-              {formatTime(visit.checkOutAt)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Duration */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Duration</Text>
-            <Text className="text-lg font-medium">
-              {formatDuration(visit.duration)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Check In Distance */}
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <View>
-              <Text className="text-gray-500 text-sm">
-                Check In Distance & Location Quality
-              </Text>
-        
-              <Text className="text-lg font-medium">
-                {visit.checkInDistanceMeters != null
-                  ? `${visit.checkInDistanceMeters} m`
-                  : "-"}
-                {" / "}
-                {getGpsAccuracyLabel(visit.checkInGpsAccuracy)}
-              </Text>
-            </View>
-          </View>
-        
-        {/* Check Out Distance */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">
-              Check Out Distance & Location Quality
-            </Text>
-        
-            <Text className="text-lg font-medium">
-              {visit.checkOutDistanceMeters != null
-                ? `${visit.checkOutDistanceMeters} m`
-                : "-"}
-              {" / "}
-              {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Shop Name */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Shop</Text>
-            <Text className="text-lg font-medium">
-              {visit.shopName}
-            </Text>
-          </View>
-        </View>
-
-        {/* Customer */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Customer</Text>
-            <Text className="text-lg font-medium">
-              {visit.customerName}
-            </Text>
-          </View>
-        </View>
-
-        {/* Address */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Address</Text>
-            <Text className="text-lg font-medium">
-              {visit.address}
-            </Text>
-          </View>
-        </View>
-
-        {/* Area */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Area</Text>
-            <Text className="text-lg font-medium">
-              {visit.areaName}
-            </Text>
-          </View>
-        </View>
-        
-        {/* City */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">City</Text>
-            <Text className="text-lg font-medium">
-              {visit.city}
-            </Text>
-          </View>
-        </View>
-
-        {/* MAP */}
-        {hasLocation && (
-          <View className="rounded-lg pt-4 pb-4">          
+        <View className="px-4">
+          {/* Tabs */}
+          <View className="flex-row mb-4 border-b border-gray-200">
             <Pressable
-              onPress={() => openMap(lat, lng)}
-              className="bg-green-600 rounded-lg p-3"
+              onPress={() => setActiveTab("basic")}
+              className={`flex-1 py-3 ${
+                activeTab === "basic" ? "border-b-2 border-blue-500" : ""
+              }`}
             >
-              <Text className="text-white text-center">
-                Open Location
+              <Text
+                className={`text-center font-medium ${
+                  activeTab === "basic" ? "text-blue-500" : "text-gray-400"
+                }`}
+              >
+                Visit Info
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setActiveTab("transaction")}
+              className={`flex-1 py-3 ${
+                activeTab === "transaction" ? "border-b-2 border-blue-500" : ""
+              }`}
+            >
+              <Text
+                className={`text-center font-medium ${
+                  activeTab === "transaction" ? "text-blue-500" : "text-gray-400"
+                }`}
+              >
+                Visit Result
               </Text>
             </Pressable>
           </View>
-        )}
-        </>
-      )}   
 
-      {activeTab === "transaction" && (
-        <>
-        {/* Transaction type */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Transaction type</Text>
-            <Text className="text-lg font-medium capitalize">
-              {transactionType || "-"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Products */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm mb-3">Products</Text>
-
-          {mappedItems.length ? (
-            <View className="bg-gray-50 overflow-hidden">
-              {/* Header */}
-              <View className="flex-row justify-between px-3 py-2 bg-gray-100">
-                <Text className="flex-1 text-xs font-semibold text-gray-500">
-                  Product
-                </Text>
-                <Text className="w-12 text-xs font-semibold text-gray-500 text-right">
-                  Qty
-                </Text>
-                <Text className="w-20 text-xs font-semibold text-gray-500 text-right">
-                  Price
-                </Text>
-                <Text className="w-24 text-xs font-semibold text-gray-500 text-right">
-                  Total
-                </Text>
+          {activeTab === "basic" && (
+            <>
+              {/* Status */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Status</Text>
+                  <Text className="text-lg font-medium">{visit.status}</Text>
+                </View>
               </View>
 
-              {/* Items */}
-              {mappedItems.map((item: any, index: any) => {
-                const product = products?.find((p: Product) => p.id === item.productId);
+              {/* Result */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Result</Text>
+                  <Text className="text-lg font-medium capitalize">
+                    {visit.visitResult || draft?.result || "-"}
+                  </Text>
+                </View>
+              </View>
 
-                return (
-                  <View
-                    key={index}
-                    className="px-3 py-3 border-t border-gray-200"
+              {/* Check In */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Check In</Text>
+                  <Text className="text-lg font-medium">
+                    {formatTime(visit.checkInAt)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Check Out */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Check Out</Text>
+                  <Text className="text-lg font-medium">
+                    {formatTime(visit.checkOutAt)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Duration */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Duration</Text>
+                  <Text className="text-lg font-medium">
+                    {formatDuration(visit.duration)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Check In Distance */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">
+                    Check In Distance & Location Quality
+                  </Text>
+
+                  <Text className="text-lg font-medium">
+                    {visit.checkInDistanceMeters != null
+                      ? `${visit.checkInDistanceMeters} m`
+                      : "-"}
+                    {" / "}
+                    {getGpsAccuracyLabel(visit.checkInGpsAccuracy)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Check Out Distance */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">
+                    Check Out Distance & Location Quality
+                  </Text>
+
+                  <Text className="text-lg font-medium">
+                    {visit.checkOutDistanceMeters != null
+                      ? `${visit.checkOutDistanceMeters} m`
+                      : "-"}
+                    {" / "}
+                    {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Shop Name */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Shop</Text>
+                  <Text className="text-lg font-medium">{visit.shopName}</Text>
+                </View>
+              </View>
+
+              {/* Customer */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Customer</Text>
+                  <Text className="text-lg font-medium">
+                    {visit.customerName}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Address */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Address</Text>
+                  <Text className="text-lg font-medium">{visit.address}</Text>
+                </View>
+              </View>
+
+              {/* Area */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Area</Text>
+                  <Text className="text-lg font-medium">{visit.areaName}</Text>
+                </View>
+              </View>
+
+              {/* City */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">City</Text>
+                  <Text className="text-lg font-medium">{visit.city}</Text>
+                </View>
+              </View>
+
+              {/* MAP */}
+              {hasLocation && (
+                <View className="rounded-lg pt-4 pb-4">
+                  <Pressable
+                    onPress={() => openMap(lat, lng)}
+                    className="bg-green-600 rounded-lg p-3"
                   >
-                    <View className="flex-row justify-between">
-                      <Text className="flex-1 text-sm font-medium text-gray-800">
-                        {product?.name}
-                      </Text>
+                    <Text className="text-white text-center">
+                      Open Location
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </>
+          )}
 
-                      <Text className="w-12 text-sm text-right text-gray-700">
-                        {item.quantity}
-                      </Text>
+          {activeTab === "transaction" && (
+            <>
+              {/* Transaction type */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">
+                    Transaction type
+                  </Text>
+                  <Text className="text-lg font-medium capitalize">
+                    {transactionType || "-"}
+                  </Text>
+                </View>
+              </View>
 
-                      <View className="w-20 items-end">
+              {/* Products */}
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm mb-3">Products</Text>
+
+                {mappedItems.length ? (
+                  <View className="bg-gray-50 overflow-hidden">
+                    {/* Header */}
+                    <View className="flex-row justify-between px-3 py-2 bg-gray-100">
+                      <Text className="flex-1 text-xs font-semibold text-gray-500">
+                        Product
+                      </Text>
+                      <Text className="w-12 text-xs font-semibold text-gray-500 text-right">
+                        Qty
+                      </Text>
+                      <Text className="w-20 text-xs font-semibold text-gray-500 text-right">
+                        Price
+                      </Text>
+                      <Text className="w-24 text-xs font-semibold text-gray-500 text-right">
+                        Total
+                      </Text>
+                    </View>
+
+                    {/* Items */}
+                    {mappedItems.map((item: any, index: any) => {
+                      const product = products?.find(
+                        (p: Product) => p.id === item.productId
+                      );
+
+                      return (
+                        <View
+                          key={index}
+                          className="px-3 py-3 border-t border-gray-200"
+                        >
+                          <View className="flex-row justify-between">
+                            <Text className="flex-1 text-sm font-medium text-gray-800">
+                              {product?.name}
+                            </Text>
+
+                            <Text className="w-12 text-sm text-right text-gray-700">
+                              {item.quantity}
+                            </Text>
+
+                            <View className="w-20 items-end">
+                              <Text className="text-sm text-gray-700">
+                                Rp {Number(item.price).toLocaleString()}
+                              </Text>
+
+                              <Text className="text-xs text-red-500">
+                                - Rp {Number(item.discount).toLocaleString()}
+                              </Text>
+                            </View>
+
+                            <Text className="w-24 text-sm text-right font-semibold text-gray-900">
+                              Rp{" "}
+                              {Number(item.totalAfterDiscount).toLocaleString()}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+
+                    {/* Summary */}
+                    <View className="px-3 py-3 border-t border-gray-300 bg-white">
+                      <View className="flex-row justify-between mb-1">
+                        <Text className="text-sm text-gray-500">Subtotal</Text>
                         <Text className="text-sm text-gray-700">
-                          Rp {Number(item.price).toLocaleString()}
-                        </Text>
-
-                        <Text className="text-xs text-red-500">
-                          - Rp {Number(item.discount).toLocaleString()}
+                          Rp {Number(subtotal).toLocaleString()}
                         </Text>
                       </View>
 
-                      <Text className="w-24 text-sm text-right font-semibold text-gray-900">
-                        Rp {Number(item.totalAfterDiscount).toLocaleString()}
-                      </Text>
+                      <View className="flex-row justify-between mb-1">
+                        <Text className="text-sm text-gray-500">Discount</Text>
+                        <Text className="text-sm text-red-500">
+                          - Rp {Number(totalDiscount).toLocaleString()}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row justify-between mt-2">
+                        <Text className="text-base font-semibold text-gray-800">
+                          Total
+                        </Text>
+                        <Text className="text-base font-bold text-gray-900">
+                          Rp {Number(finalAmount).toLocaleString()}
+                        </Text>
+                      </View>
                     </View>
                   </View>
+                ) : (
+                  <Text className="text-gray-400 text-sm">No products</Text>
                 )}
-              )}
-            
-              {/* Summary */}
-              <View className="px-3 py-3 border-t border-gray-300 bg-white">
-                <View className="flex-row justify-between mb-1">
-                  <Text className="text-sm text-gray-500">Subtotal</Text>
-                  <Text className="text-sm text-gray-700">
-                    Rp {Number(subtotal).toLocaleString()}
-                  </Text>
-                </View>
+              </View>
 
-                <View className="flex-row justify-between mb-1">
-                  <Text className="text-sm text-gray-500">Discount</Text>
-                  <Text className="text-sm text-red-500">
-                    - Rp {Number(totalDiscount).toLocaleString()}
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between mt-2">
-                  <Text className="text-base font-semibold text-gray-800">
-                    Total
-                  </Text>
-                  <Text className="text-base font-bold text-gray-900">
-                    Rp {Number(finalAmount).toLocaleString()}
+              {/* Payment Status */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Payment Status</Text>
+                  <Text
+                    className={`text-lg font-medium capitalize ${
+                      paymentStatus === "paid"
+                        ? "text-green-600"
+                        : paymentStatus === "partial"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {paymentStatus || "-"}
                   </Text>
                 </View>
               </View>
-            </View>
-          ) : (
-            <Text className="text-gray-400 text-sm">No products</Text>
+
+              {/* Paid Amount */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Paid Amount</Text>
+                  <Text className="text-lg font-medium">
+                    Rp {Number(paidAmount).toLocaleString()}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Payment Type */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Payment Type</Text>
+                  <Text className="text-lg font-medium capitalize">
+                    {paymentType || "-"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Order by */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Order by</Text>
+                  <Text className="text-lg font-medium">
+                    {visit.orderBy || draft?.orderBy || "-"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Notes */}
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View>
+                  <Text className="text-gray-500 text-sm">Notes</Text>
+                  <Text className="text-lg font-medium">
+                    {visit.notes || draft?.notes || "-"}
+                  </Text>
+                </View>
+              </View>
+            </>
           )}
-        </View>
 
-        {/* Payment Status */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Payment Status</Text>
-            <Text
-              className={`text-lg font-medium capitalize ${
-                paymentStatus === "paid"
-                  ? "text-green-600"
-                  : paymentStatus === "partial"
-                  ? "text-yellow-600"
-                  : "text-red-600"
-              }`}
-            >
-              {paymentStatus || "-"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Paid Amount */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Paid Amount</Text>
-            <Text className="text-lg font-medium">
-               Rp {Number(paidAmount).toLocaleString()}
-            </Text>
-          </View>
-        </View>
-
-        {/* Payment Type */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Payment Type</Text>
-            <Text className="text-lg font-medium capitalize">
-               {paymentType || "-"}
-            </Text>
-          </View>
-        </View>
-        
-        {/* Order by */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Order by</Text>
-            <Text className="text-lg font-medium">
-              {visit.orderBy || draft?.orderBy || "-"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Notes */}
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <View>
-            <Text className="text-gray-500 text-sm">Notes</Text>
-            <Text className="text-lg font-medium">
-              {visit.notes || draft?.notes || "-"}
-            </Text>
-          </View>
-        </View>
-        </>
-      )}
-
-      {/* Button */}
-        <View className="mt-6">
+          {/* Button */}
+          <View className="mt-6">
             <Pressable
               onPress={handleDelete}
               disabled={isPending}
               className="bg-red-600 rounded-lg p-4"
             >
-            <Text className="text-white text-center font-semibold">
+              <Text className="text-white text-center font-semibold">
                 Delete Visit
-            </Text>
+              </Text>
             </Pressable>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

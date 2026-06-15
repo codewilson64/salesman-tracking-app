@@ -79,32 +79,46 @@ const CustomerDetail = () => {
   const hasLocation = lat != null && lng != null;
 
   return (
-    <SafeAreaView className="flex-1 p-4 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-      {/* INFO */}
-      <View className="mb-6 relative">
+        <View className="mb-6 relative">
+          <Image
+            source={{
+              uri: customer.customerImage
+                ? customer.customerImage
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    customer.shopName
+                  )}&background=random&size=128`,
+            }}
+            className="w-full h-72"
+            resizeMode="cover"
+          />
+
           <Pressable
             onPress={() => router.back()}
-            className="absolute left-0 top-0 p-2 z-10"
+            className="absolute left-4 top-4 p-2 z-10 bg-white/80 rounded-full"
           >
             <Image source={back} className="w-6 h-6" resizeMode="contain" />
           </Pressable>
 
           {/* Dots */}
-          <View className="absolute right-0 top-0 z-20">
+          <View className="absolute right-4 top-4 z-20">
             <Pressable
               onPress={() => setShowMenu(!showMenu)}
-              className="p-2"
+              className="p-2 bg-white/80 rounded-full"
             >
               <Image source={dots} className="w-6 h-6" resizeMode="contain" />
             </Pressable>
 
             {showMenu && (
-              <View className="absolute top-10 right-0 bg-white rounded-xl border border-gray-200 shadow w-36 overflow-hidden">
-                <Pressable onPress={handleEdit} className="px-4 py-3 border-b border-gray-100">
+              <View className="absolute top-12 right-0 bg-white rounded-xl border border-gray-200 shadow w-36 overflow-hidden">
+                <Pressable
+                  onPress={handleEdit}
+                  className="px-4 py-3 border-b border-gray-100"
+                >
                   <Text>Edit</Text>
                 </Pressable>
 
@@ -120,92 +134,76 @@ const CustomerDetail = () => {
               </View>
             )}
           </View>
-        
-        <View className="items-center">
-          <Image
-            source={{
-              uri: customer.customerImage
-                ? customer.customerImage
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    customer.shopName
-                  )}&background=random&size=128`,
-            }}
-            className="w-32 h-32 rounded-full mb-4"
-          /> 
-        </View>
-      </View>
-
-      <View>
-        {/* SALESMAN */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Salesman</Text>
-          <Text className="text-lg font-medium capitalize">
-            {customer.salesmanName || "-"}
-          </Text>
         </View>
 
-        {/* AREA */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Area</Text>
-          <Text className="text-lg font-medium capitalize">
-            {customer.areaName || "-"}
-          </Text>
-        </View>
-
-        {/* CUSTOMER NAME */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Customer Name</Text>
-          <Text className="text-lg font-medium capitalize">
-            {customer.customerName}
-          </Text>
-        </View>
-
-        {/* SHOP NAME */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Shop Name</Text>
-          <Text className="text-lg font-medium capitalize">
-            {customer.shopName}
-          </Text>
-        </View>
-
-        {/* PHONE */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Phone</Text>
-          <Text className="text-lg font-medium">
-            {customer.phone}
-          </Text>
-        </View>
-
-        {/* ADDRESS */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Address</Text>
-          <Text className="text-lg font-medium">
-            {customer.address || "-"}
-          </Text>
-        </View>
-
-        {/* DESCRIPTION */}
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Description</Text>
-          <Text className="text-lg font-medium">
-            {customer.description || "-"}
-          </Text>
-        </View>
-
-        {/* MAP */}
-        {hasLocation && (
-          <View className="pt-4 pb-4 rounded-lg">
-            <Pressable
-              onPress={() => openMap(lat, lng)}
-              className="bg-green-600 rounded-lg p-3"
-            >
-              <Text className="text-white text-center">
-                Open Location
-              </Text>
-            </Pressable>
+        {/* CONTENT WITH LEFT/RIGHT PADDING */}
+        <View className="px-4">
+          {/* SALESMAN */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Salesman</Text>
+            <Text className="text-lg font-medium capitalize">
+              {customer.salesmanName || "-"}
+            </Text>
           </View>
-        )}
-      </View>
+
+          {/* AREA */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Area</Text>
+            <Text className="text-lg font-medium capitalize">
+              {customer.areaName || "-"}
+            </Text>
+          </View>
+
+          {/* CUSTOMER NAME */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Customer Name</Text>
+            <Text className="text-lg font-medium capitalize">
+              {customer.customerName}
+            </Text>
+          </View>
+
+          {/* SHOP NAME */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Shop Name</Text>
+            <Text className="text-lg font-medium capitalize">
+              {customer.shopName}
+            </Text>
+          </View>
+
+          {/* PHONE */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Phone</Text>
+            <Text className="text-lg font-medium">{customer.phone}</Text>
+          </View>
+
+          {/* ADDRESS */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Address</Text>
+            <Text className="text-lg font-medium">
+              {customer.address || "-"}
+            </Text>
+          </View>
+
+          {/* DESCRIPTION */}
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm">Description</Text>
+            <Text className="text-lg font-medium">
+              {customer.description || "-"}
+            </Text>
+          </View>
+
+          {/* MAP */}
+          {hasLocation && (
+            <View className="pt-4 pb-4 rounded-lg">
+              <Pressable
+                onPress={() => openMap(lat, lng)}
+                className="bg-green-600 rounded-lg p-3"
+              >
+                <Text className="text-white text-center">Open Location</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

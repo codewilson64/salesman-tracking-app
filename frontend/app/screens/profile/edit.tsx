@@ -148,7 +148,7 @@ export default function EditProfileScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        keyboardVerticalOffset={0}
       >
           <ScrollView
             contentContainerStyle={{ padding: 24 }}

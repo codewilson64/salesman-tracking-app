@@ -3,7 +3,6 @@ import {
   Text,
   Pressable,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Image,
   ActivityIndicator,
@@ -23,6 +22,7 @@ import { takePhoto } from "../../utils/takePhoto";
 import { Area } from "../../types/area";
 import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 import { FormInput } from "../../components/areaInputForm/FormInput";
+import { useAuthStore } from "../../stores/authStore";
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -75,8 +75,24 @@ export default function CreateCustomerScreen() {
 
   /* ================= SUBMIT ================= */
 
+  const user = useAuthStore((state) => state.user);
+  const isSalesman = user?.role === "salesman";
+
   const onSubmit = async (data: FormData) => {
     try {
+      if (isSalesman) {
+        if (data.latitude == null || data.longitude == null) {
+          setError("latitude", { message: "Location is required" });
+          setError("longitude", { message: "Location is required" });
+          return;
+        }
+
+        if (!image) {
+          setError("customerImage", { message: "Photo is required" });
+          return;
+        }
+      }
+
       await mutateAsync({ data, image });
       router.back();
     } catch (err: any) {
@@ -102,7 +118,7 @@ export default function CreateCustomerScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           contentContainerStyle={{ padding: 24 }}
