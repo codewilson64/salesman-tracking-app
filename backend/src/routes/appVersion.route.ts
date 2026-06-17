@@ -7,7 +7,7 @@ router.get("/", (req, res) => {
     latestVersion: "1.0.0",
     minimumVersion: "1.0.0",
     message: "A new update is available with bug fixes and improvements.",
-    iosUrl: "https://apps.apple.com/app/your-app-id",
+    iosUrl: "https://testflight.apple.com/join/svFrzVHd",
     androidUrl: "https://salesteamtracker.vercel.app/downloads/android",
   });
 });
