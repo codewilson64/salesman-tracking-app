@@ -156,14 +156,14 @@ export default function LoginScreen() {
           </Pressable>
 
           {/* SIGN UP */}
-          <Text className="text-black text-center mt-4">
+          {/* <Text className="text-black text-center mt-4">
             Don't have an account?{" "}
             <Link href="/signup">
               <Text className="underline text-blue-500 font-semibold">
                 Sign up
               </Text>
             </Link>
-          </Text>
+          </Text> */}
         
           {/* Forgot password */}
           <Text className="text-center mt-8">

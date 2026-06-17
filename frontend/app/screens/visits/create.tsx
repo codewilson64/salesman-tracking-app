@@ -28,6 +28,7 @@ import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal"
 import { Area } from "../../types/area";
 import { useCheckInDistance } from "../../hooks/location/useCheckInDistance";
 import { useCurrentLocation } from "../../hooks/location/useCurrentLocation";
+import { pickImageFromLibrary } from "../../utils/pickImage";
 
 type FormData = z.infer<typeof visitSchema>;
 

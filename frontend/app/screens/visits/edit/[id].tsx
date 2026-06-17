@@ -23,6 +23,8 @@ import { mapCheckoutToDraft } from "../../../utils/mapCheckoutToDraft";
 import { ProductFieldItem } from "../../../components/ProductFieldItem";
 import { PaymentType, TransactionType, VisitResult } from "../../../types/visitDraft";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Product } from "../../../types/product";
+import { Ionicons } from "@expo/vector-icons";
 
 const results: VisitResult[] = ["new order", "follow-up", "shop closed"];
 const transactionTypes: TransactionType[] = ["cash", "credit"];
@@ -53,10 +55,11 @@ const CheckoutVisit = () => {
       dueDate: undefined,
     },
   });
-
+  
   const router = useRouter();
 
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
 
   const { isPending } = useCheckoutVisit();
   const { data: products } = useGetAllProduct()
@@ -99,6 +102,7 @@ const CheckoutVisit = () => {
   const selectedResult = watch("result");
   const selectedTransactionType = watch("transactionType");
   const paidAmount = watch("paidAmount");  
+  const addedProducts = watch("products") || [];
 
    /* ================= SUBMIT ================= */
 
@@ -118,7 +122,7 @@ const CheckoutVisit = () => {
         <KeyboardAvoidingView
           className="flex-1"
           behavior="padding"
-          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+          keyboardVerticalOffset={0}
         >
           <ScrollView 
             showsVerticalScrollIndicator={false}
@@ -164,17 +168,21 @@ const CheckoutVisit = () => {
 
                   {/* ADD PRODUCT BUTTON */}
                   <Pressable
-                    onPress={() =>
-                      append({
-                        productId: "",
-                        quantity: 1,
-                        discount: 0,
-                      })
-                    }
+                    onPress={() => setShowProductModal(true)}
                     className="bg-green-600 p-3 rounded-lg"
                   >
                     <Text className="text-white text-center">Add Product</Text>
                   </Pressable>
+
+                  <ProductFieldItem
+                    visible={showProductModal}
+                    products={products}
+                    onClose={() => setShowProductModal(false)}
+                    onSave={(product) => {
+                      append(product);
+                      setShowProductModal(false);
+                    }}
+                  />
 
                   {errors.products && (
                     <Text className="text-red-500">
@@ -182,19 +190,62 @@ const CheckoutVisit = () => {
                     </Text>
                   )}
 
-                  {/* PRODUCT LIST */}
-                  {fields.map((field, index) => (
-                    <ProductFieldItem
-                      key={field.id}
-                      field={field}
-                      index={index}
-                      control={control}
-                      watch={watch}
-                      products={products}
-                      remove={remove}
-                      errors={errors}
-                    />
-                  ))}
+                  {/* ADDED PRODUCT LIST */}
+                  <View className="gap-3">
+                    {fields.map((field, index) => {
+                      const item = addedProducts[index];
+
+                      if (!item) return null;
+
+                      const selectedProduct = products?.find(
+                        (p: Product) => p.id === item.productId
+                      );
+
+                      const price = selectedProduct?.price || 0;
+                      const unit = selectedProduct?.unit || "-";
+                      const quantity = Number(item.quantity || 0);
+                      const discount = Number(item.discount || 0);
+                      const total = price * quantity - discount;
+
+                      return (
+                        <View
+                          key={field.id}
+                          className="border border-gray-300 rounded-lg p-3 bg-gray-50"
+                        >
+                          <View className="flex-row justify-between">
+                            <View className="flex-1">
+                              <Text className="font-semibold text-base">
+                                {selectedProduct?.name || "Unknown Product"}
+                              </Text>
+
+                              <Text className="text-gray-600 mt-1">
+                                Quantity: {quantity} {unit}
+                              </Text>
+
+                              <Text className="text-gray-600">
+                                Price / {unit}: {price}
+                              </Text>
+
+                              <Text className="text-gray-600">
+                                Discount: {discount}
+                              </Text>
+
+                              <Text className="font-semibold mt-1">
+                                Total: {total}
+                              </Text>
+                            </View>
+
+                            <Pressable
+                              onPress={() => remove(index)}
+                              className="self-start"
+                            >
+                              <Ionicons name="trash-outline" size={18} color="red" />
+                            </Pressable>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
 
                   {/* ORDER BY */}
                   <FormInput

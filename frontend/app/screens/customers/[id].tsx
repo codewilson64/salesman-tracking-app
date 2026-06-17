@@ -93,7 +93,7 @@ const CustomerDetail = () => {
                     customer.shopName
                   )}&background=random&size=128`,
             }}
-            className="w-full h-72"
+            className="w-full h-96"
             resizeMode="cover"
           />
 

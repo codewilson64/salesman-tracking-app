@@ -47,7 +47,7 @@ export const FormMultiSelectModal = ({
 
             <Modal visible={visible} transparent animationType="fade">
               <View className="flex-1 justify-center items-center bg-black/40">
-                <View className="bg-white w-[90%] max-h-[75%] rounded-2xl py-7">
+                <View className="bg-white w-[90%] max-h-[50%] rounded-2xl py-7">
 
                   <Text className="text-lg font-bold mb-4 text-center">
                     Select {label}

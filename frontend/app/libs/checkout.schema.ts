@@ -4,11 +4,12 @@ export const results = ["new order", "follow-up", "shop closed"] as const;
 export const transactionTypes = ["cash", "credit"] as const;
 export const paymentTypes = ["cash", "transfer"] as const;
 
-const transactionItemSchema = z.object({
+export const transactionItemSchema = z.object({
   productId: z.uuid("Please choose a product"),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
   discount: z.coerce.number().min(0).default(0),
 });
+
 
 export const checkoutVisitSchema = z.object({
   id: z.uuid().optional(),
@@ -34,7 +35,7 @@ export const checkoutVisitSchema = z.object({
         path: ["transactionType"],
       });
     }
-
+    
     if (!data.products || data.products.length === 0) {
       ctx.addIssue({
         code: "custom",
@@ -42,7 +43,7 @@ export const checkoutVisitSchema = z.object({
         path: ["products"],
       });
     }
-
+    
     if (!data.orderBy) {
       ctx.addIssue({
         code: "custom",
@@ -50,7 +51,7 @@ export const checkoutVisitSchema = z.object({
         path: ["orderBy"],
       });
     }
-
+    
     if (data.transactionType === "cash" && !data.paymentType) {
       ctx.addIssue({
         code: "custom",
@@ -58,7 +59,7 @@ export const checkoutVisitSchema = z.object({
         path: ["paymentType"],
       });
     }
-
+    
     if (data.transactionType === "credit" && Number(data.paidAmount) > 0 && !data.paymentType) {
       ctx.addIssue({
         code: "custom",
@@ -66,7 +67,7 @@ export const checkoutVisitSchema = z.object({
         path: ["paymentType"],
       });
     }
-
+    
     if (data.transactionType === "credit" && !data.dueDate) {
       ctx.addIssue({
         code: "custom",
@@ -76,6 +77,7 @@ export const checkoutVisitSchema = z.object({
     }
   }
 });
-  
 
+export type TTransactionItemInput = z.input<typeof transactionItemSchema>;
+export type TTransactionItem = z.output<typeof transactionItemSchema>;
 export type TCheckoutVisit = z.input<typeof checkoutVisitSchema>;

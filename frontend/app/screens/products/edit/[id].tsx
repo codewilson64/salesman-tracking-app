@@ -9,6 +9,8 @@ import { useGetProductById } from "../../../hooks/product/useGetProductById";
 import { pickImageFromLibrary } from "../../../utils/pickImage";
 import back from '../../../assets/globalIcons/back.png'
 import { SafeAreaView } from "react-native-safe-area-context";
+import { FormSelectModal } from "../../../components/areaInputForm/FormSelectModal";
+import { isProductUnit, units } from "../../../constants/units";
 
 type FormData = z.infer<typeof productSchema>;
 
@@ -39,7 +41,8 @@ export default function EditProductScreen() {
       reset({
         name: product.name ?? "",
         description: product.description ?? "",
-        price: product.price ?? "",
+        price: product.price ?? 0,
+        unit: isProductUnit(product.unit) ? product.unit : "pcs",
       });
     }
   }, [product, reset]);
@@ -171,6 +174,16 @@ export default function EditProductScreen() {
               </Text>
             )}
           </View>
+
+          {/* UNIT */}
+          <FormSelectModal
+            control={control}
+            name="unit"
+            label="Unit"
+            options={units.map((u) => ({ value: u }))}
+            getLabel={(item: { value: string }) => item.value}
+            errors={errors}
+          />
         </View>
 
         {/* BUTTON */}

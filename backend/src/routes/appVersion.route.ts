@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
     minimumVersion: "1.0.0",
     message: "A new update is available with bug fixes and improvements.",
     iosUrl: "https://apps.apple.com/app/your-app-id",
-    androidUrl: "https://play.google.com/store/apps/details?id=com.codewilson64.salesteamtracker",
+    androidUrl: "https://salesteamtracker.vercel.app/downloads/android",
   });
 });
 

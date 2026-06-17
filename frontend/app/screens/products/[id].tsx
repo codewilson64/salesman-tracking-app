@@ -152,6 +152,14 @@ const ProductDetail = () => {
             </View>
         </View>
 
+        {/* Unit */}
+        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <View>
+            <Text className="text-gray-500 text-sm">Unit</Text>
+            <Text className="text-lg font-medium">{product.unit}</Text>
+            </View>
+        </View>
+
         {/* Desc */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>

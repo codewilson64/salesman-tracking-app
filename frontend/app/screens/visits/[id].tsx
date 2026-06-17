@@ -122,7 +122,7 @@ const VisitDetail = () => {
                   visit.shopName
                 )}&background=random&size=128`,
             }}
-            className="w-full h-72"
+            className="w-full h-96"
             resizeMode="cover"
           />
 
@@ -222,15 +222,15 @@ const VisitDetail = () => {
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">
-                    Check In Distance & Location Quality
+                    Check In Distance
                   </Text>
 
                   <Text className="text-lg font-medium">
                     {visit.checkInDistanceMeters != null
                       ? `${visit.checkInDistanceMeters} m`
                       : "-"}
-                    {" / "}
-                    {getGpsAccuracyLabel(visit.checkInGpsAccuracy)}
+                    {/* {" / "} */}
+                    {/* {getGpsAccuracyLabel(visit.checkInGpsAccuracy)} */}
                   </Text>
                 </View>
               </View>
@@ -239,15 +239,15 @@ const VisitDetail = () => {
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">
-                    Check Out Distance & Location Quality
+                    Check Out Distance
                   </Text>
 
                   <Text className="text-lg font-medium">
                     {visit.checkOutDistanceMeters != null
                       ? `${visit.checkOutDistanceMeters} m`
                       : "-"}
-                    {" / "}
-                    {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)}
+                    {/* {" / "} */}
+                    {/* {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)} */}
                   </Text>
                 </View>
               </View>

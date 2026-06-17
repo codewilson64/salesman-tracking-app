@@ -13,6 +13,8 @@ import { FormInput } from "../../components/areaInputForm/FormInput";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import back from '../../assets/globalIcons/back.png'
+import { units } from "../../constants/units";
+import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
 
 export default function CreateProductScreen() {
   const {
@@ -99,6 +101,15 @@ export default function CreateProductScreen() {
               name="price" 
               label="Price" 
               errors={errors} 
+            />
+
+            <FormSelectModal
+              control={control}
+              name="unit"
+              label="Unit"
+              options={units.map((u) => ({ value: u }))}
+              getLabel={(item: { value: string }) => item.value}
+              errors={errors}
             />
 
             {/* IMAGE */}

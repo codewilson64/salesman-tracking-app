@@ -18,6 +18,7 @@ import { FormInput } from "../../../components/areaInputForm/FormInput";
 import { takePhoto } from "../../../utils/takePhoto";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useGetLocation } from "../../../hooks/location/useGetLocation";
+import { pickImageFromLibrary } from "../../../utils/pickImage";
 
 
 type FormData = z.infer<typeof customerSchema>;

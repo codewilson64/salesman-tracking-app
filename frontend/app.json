@@ -61,9 +61,6 @@
           "defaultChannel": "field_activity"
         }
       ],
-      [
-        "./plugins/withMonitoringTool"
-      ],
       "expo-font",
       "@react-native-community/datetimepicker"
     ],

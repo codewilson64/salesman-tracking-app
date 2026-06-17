@@ -24,7 +24,6 @@ export const FormSelectModal = ({
       control={control}
       name={name}
       render={({ field: { value, onChange }, fieldState: { error } }) => {
-        // ✅ Safe usage (not conditional)
         useEffect(() => {
           if (visible) {
             setTempValue(value);
@@ -37,7 +36,6 @@ export const FormSelectModal = ({
           <View>
             <Text className="mb-3">{label}</Text>
 
-            {/* SELECT BUTTON */}
             <Pressable
               onPress={() => setVisible(true)}
               className="border border-gray-300 rounded-lg p-4"
@@ -47,10 +45,9 @@ export const FormSelectModal = ({
               </Text>
             </Pressable>
 
-            {/* MODAL */}
             <Modal visible={visible} transparent animationType="fade">
               <View className="flex-1 justify-center items-center bg-black/40">
-                <View className="bg-white w-[90%] max-h-[75%] rounded-2xl py-7">
+                <View className="bg-white w-[90%] max-h-[50%] rounded-2xl py-7">
 
                   <Text className="text-lg font-bold mb-4 text-center">
                     Select {label}

@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, productImage, productImageId } = req.body;
+    const { name, description, price, unit, productImage, productImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -13,7 +13,6 @@ export const createProduct = async (req: Request, res: Response) => {
       role: string;
     };
 
-    // auth check
     if (!user?.companyId) {
       return res.status(401).json({
         message: "Unauthorized",
@@ -22,20 +21,19 @@ export const createProduct = async (req: Request, res: Response) => {
 
     const companyId = user.companyId;
 
-    // validation
     if (!name) {
       return res.status(400).json({
         message: "Product name is required",
       });
     }
 
-    // insert
     const [product] = await db
       .insert(productsTable)
       .values({
         name,
         description,
         price,
+        unit,
         companyId,
         productImage,
         productImageId,
@@ -77,6 +75,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
         name: productsTable.name,
         description: productsTable.description,
         price: productsTable.price,
+        unit: productsTable.unit,
         productImage: productsTable.productImage,
       })
       .from(productsTable)
@@ -113,6 +112,7 @@ export const getProductById = async (req: Request, res: Response) => {
         name: productsTable.name,
         description: productsTable.description,
         price: productsTable.price,
+        unit: productsTable.unit,
         productImage: productsTable.productImage,
         productImageId: productsTable.productImageId,
       })
@@ -148,7 +148,7 @@ export const getProductById = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, description, price, productImage, productImageId } = req.body;
+    const { name, description, price, unit, productImage, productImageId } = req.body;
 
     const user = req.user as {
       userId: string;
@@ -162,6 +162,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         name,
         description,
         price,
+        unit,
         productImage,
         productImageId,
       })

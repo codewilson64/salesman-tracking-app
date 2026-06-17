@@ -15,21 +15,21 @@ const Home = () => {
 
   const filteredMenu = Menus.filter((item) => item.roles.includes(user?.role || ""));
 
-  const hasAccepted = useMonitoringDisclosureStore((state) => state.hasAccepted);
-  const isLoading = useMonitoringDisclosureStore((state) => state.isLoading);
-  const loadDisclosureStatus = useMonitoringDisclosureStore((state) => state.loadDisclosureStatus);
-  const acceptDisclosure = useMonitoringDisclosureStore((state) => state.acceptDisclosure);
+  // const hasAccepted = useMonitoringDisclosureStore((state) => state.hasAccepted);
+  // const isLoading = useMonitoringDisclosureStore((state) => state.isLoading);
+  // const loadDisclosureStatus = useMonitoringDisclosureStore((state) => state.loadDisclosureStatus);
+  // const acceptDisclosure = useMonitoringDisclosureStore((state) => state.acceptDisclosure);
 
-  useEffect(() => {
-    loadDisclosureStatus();
-  }, [loadDisclosureStatus]);
+  // useEffect(() => {
+  //   loadDisclosureStatus();
+  // }, [loadDisclosureStatus]);
 
-  const handleDenyDisclosure = () => {
-    Alert.alert(
-      "Disclosure Required",
-      "This app uses location and photo proof for work visit verification. Please accept the disclosure to continue using visit features."
-    );
-  };
+  // const handleDenyDisclosure = () => {
+  //   Alert.alert(
+  //     "Disclosure Required",
+  //     "This app uses location and photo proof for work visit verification. Please accept the disclosure to continue using visit features."
+  //   );
+  // };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -80,11 +80,11 @@ const Home = () => {
         </Pressable>
       )} */}
 
-      <MonitoringDisclosureModal
+      {/* <MonitoringDisclosureModal
         visible={!isLoading && !hasAccepted}
         onAccept={acceptDisclosure}
         onDeny={handleDenyDisclosure}
-      />
+      /> */}
     </SafeAreaView>
   );
 };
