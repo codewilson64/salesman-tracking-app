@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar, useColorScheme } from "react-native";
@@ -5,24 +6,24 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAppUpdateChecker } from "./hooks/app-version/useAppUpdateChecker";
 import { AppUpdateModal } from "./components/modal/AppUpdateModal";
 
-import * as Notifications from "expo-notifications";
+import { initOfflineVisitDb } from "./db/offlineVisits";
+import { initOfflineCatalogDb } from "./db/offlineCatalog/initOfflineCatalogDb";
 
 const queryClient = new QueryClient();
-
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowBanner: true,
-//     shouldShowList: true,
-//     shouldPlaySound: false,
-//     shouldSetBadge: false,
-//   }),
-// });
 
 const RootLayout = () => {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
   const { updateInfo, dismissUpdate } = useAppUpdateChecker();
+
+  // useEffect(() => {
+  //   initOfflineVisitDb();
+  // }, []);
+
+  // useEffect(() => {
+  //   initOfflineCatalogDb();
+  // }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

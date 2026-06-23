@@ -324,6 +324,7 @@ export const getCustomersByArea = async (req: Request, res: Response) => {
         customerImage: customersTable.customerImage,
         customerImageId: customersTable.customerImageId,
 
+        areaId: customersTable.areaId,
         areaName: areasTable.name,
         city: areasTable.city,
 

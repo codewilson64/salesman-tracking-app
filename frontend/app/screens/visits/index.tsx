@@ -1,7 +1,6 @@
-import { Text, FlatList, Pressable, View, ActivityIndicator, Image, Alert } from "react-native";
+import { Text, FlatList, Pressable, View, ActivityIndicator, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Visit } from "../../types/visit";
 import { useGetAllVisits } from "../../hooks/visit/useGetAllVisits";
 import { useMemo, useState } from "react";
 import { groupVisitsByDate } from "../../utils/visitDateFilter";
@@ -32,20 +31,6 @@ const DateListScreen = () => {
   const { dateList, visitCountByDate } = useMemo(
     () => groupVisitsByDate(filteredData), [filteredData]
   );
-
-  const hasActiveVisit = visits?.some((v: Visit) => v.checkOutAt === null);
-
-  const handleCreateVisit = () => {
-      if (hasActiveVisit) {
-        Alert.alert(
-          "Finish Visit First",
-          "Please checkout your current visit before adding a new one."
-        );
-        return;
-      }
-  
-      router.push("screens/visits/create");
-    };
 
   if (isLoading) {
     return (
@@ -142,16 +127,6 @@ const DateListScreen = () => {
           );
         }}
       />
-
-      {/* CREATE BUTTON */}
-      <Pressable
-        onPress={handleCreateVisit}
-        className="bg-black rounded-lg p-4 mb-4"
-      >
-        <Text className="text-white text-center font-semibold">
-          + Add Visit
-        </Text>
-      </Pressable>
     </SafeAreaView>
   );
 };
