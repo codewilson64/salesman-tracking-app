@@ -59,7 +59,7 @@ const AreaScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">List of areas</Text>
+        <Text className="text-2xl font-bold">Daftar Kawasan / Area</Text>
       </View>
 
       <FlatList
@@ -123,7 +123,7 @@ const AreaScreen = () => {
         className="bg-black rounded-lg p-4 mb-4"
       >
         <Text className="text-white text-center font-semibold">
-          + Add Area
+          + Tambah Area
         </Text>
       </Pressable>
     </SafeAreaView>

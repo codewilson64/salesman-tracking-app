@@ -41,7 +41,7 @@ export const FormSelectModal = ({
               className="border border-gray-300 rounded-lg p-4"
             >
               <Text>
-                {selected ? getLabel(selected) : `Select ${label}`}
+                {selected ? getLabel(selected) : `Pilih ${label}`}
               </Text>
             </Pressable>
 
@@ -50,7 +50,7 @@ export const FormSelectModal = ({
                 <View className="bg-white w-[90%] max-h-[50%] rounded-2xl py-7">
 
                   <Text className="text-lg font-bold mb-4 text-center">
-                    Select {label}
+                    Pilih {label}
                   </Text>
 
                   <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>

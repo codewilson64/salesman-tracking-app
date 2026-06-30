@@ -78,7 +78,7 @@ const AreaDetail = () => {
         </Pressable>
 
         <Text className="text-2xl font-bold flex-1">
-          Area Detail
+          Detail Area
         </Text>
 
         {/* Dots */}
@@ -129,7 +129,7 @@ const AreaDetail = () => {
         {/* Price */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
-            <Text className="text-gray-500 text-sm">City</Text>
+            <Text className="text-gray-500 text-sm">Kota</Text>
             <Text className="text-lg font-medium">{area.city}</Text>
           </View>
         </View>
@@ -137,13 +137,13 @@ const AreaDetail = () => {
         {/* Desc */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
-            <Text className="text-gray-500 text-sm">Day</Text>
+            <Text className="text-gray-500 text-sm">Hari</Text>
             <Text className="text-lg font-medium">{area.day}</Text>
           </View>
         </View>
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
           <View>
-            <Text className="text-gray-500 text-sm">Weeks</Text>
+            <Text className="text-gray-500 text-sm">Minggu</Text>
             <Text className="text-lg font-medium">
               {area.weeks?.length
                 ? area.weeks.map((w: number) => `Week ${w}`).join(", ")

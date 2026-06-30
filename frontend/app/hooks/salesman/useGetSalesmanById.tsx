@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSalesmanById } from "../../services/Salesmen/salesmenService";
 
 
-export const useGetSalesmanById = (id: string | undefined, options: { enabled?: boolean }) => {
+export const useGetSalesmanById = (id: string | undefined, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["salesman", id],
     queryFn: () => getSalesmanById(id as string),

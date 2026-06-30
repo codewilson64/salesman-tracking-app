@@ -85,61 +85,61 @@ const TransactionDetailScreen = () => {
               <Image source={back} className="w-6 h-6" />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Transaction Detail</Text>
+            <Text className="text-2xl font-bold">Detail Transaksi</Text>
           </View>
 
           <View className="gap-4">
-            {/* Name */}
+            {/* Salesman */}
             <View>
-              <Text className="text-gray-500">Salesman</Text>
+              <Text className="text-gray-500 mb-1">Salesman</Text>
               <Text className="font-semibold">
                 {transaction.salesmanName}
               </Text>
             </View>
 
-            {/* Date of visit */}
+            {/* Tanggal Kunjungan */}
             <View>
-              <Text className="text-gray-500">Date of visit</Text>
+              <Text className="text-gray-500 mb-1">Tanggal Kunjungan</Text>
               <Text className="font-semibold">
                 {formatTime(transaction.checkInAt)}
               </Text>
             </View>
 
-            {/* SHOP NAME */}
+            {/* Toko */}
             <View>
-              <Text className="text-gray-500">Shop</Text>
+              <Text className="text-gray-500 mb-1">Toko</Text>
               <Text className="font-semibold">
                 {transaction.shopName}
               </Text>
             </View>
 
-            {/* TRANSACTION TYPE */}
+            {/* Tipe Transaksi */}
             <View>
-              <Text className="text-gray-500">Transaction Type</Text>
+              <Text className="text-gray-500 mb-1">Tipe Transaksi</Text>
               <Text className="font-semibold capitalize">
                 {transaction.transactionType}
               </Text>
             </View>
 
-            {/* Payment Status */}
+            {/* Status Pembayaran */}
             <View>
-              <Text className="text-gray-500">Payment Status</Text>
+              <Text className="text-gray-500 mb-1">Status Pembayaran</Text>
               <Text className="font-semibold capitalize">
                 {transaction.paymentStatus}
               </Text>
             </View>
 
-            {/* Paid at */}
+            {/* Tanggal Pembayaran */}
             <View>
-              <Text className="text-gray-500">Paid At</Text>
-              <Text className="font-semibold capitalize">
+              <Text className="text-gray-500 mb-1">Tanggal Pembayaran</Text>
+              <Text className="font-semibold">
                 {formatTime(transaction.paidAt)}
               </Text>
             </View>
 
-            {/* FINAL AMOUNT */}
+            {/* Total Transaksi */}
             <View>
-              <Text className="text-gray-500 mb-1">Final Amount</Text>
+              <Text className="text-gray-500 mb-1">Total Transaksi</Text>
               <View className="p-3 bg-gray-100 rounded-lg">
                 <Text className="font-semibold">
                   Rp {Number(transaction.finalAmount).toLocaleString()}
@@ -147,9 +147,9 @@ const TransactionDetailScreen = () => {
               </View>
             </View>
 
-            {/* REMAINING */}
+            {/* Sisa Tagihan */}
             <View>
-              <Text className="text-gray-500 mb-1">Remaining</Text>
+              <Text className="text-gray-500 mb-1">Sisa Tagihan</Text>
               <View className="p-3 bg-gray-100 rounded-lg">
                 <Text className="font-semibold text-red-500">
                   Rp {Number(transaction.remainingAmount).toLocaleString()}
@@ -168,7 +168,7 @@ const TransactionDetailScreen = () => {
             >
               <View className="flex-row items-center flex-1">
                 <Text className="font-normal text-blue-600 text-lg underline">
-                  See visit detail
+                  Lihat Detail Kunjungan
                 </Text>
               </View>
             </TouchableOpacity>

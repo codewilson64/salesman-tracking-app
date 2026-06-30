@@ -189,7 +189,7 @@ export default function EditProfileScreen() {
             <FormInput
               control={control}
               name="name"
-              label="Name"
+              label="Nama"
               errors={errors}
             />
 
@@ -205,7 +205,7 @@ export default function EditProfileScreen() {
             <FormInput
               control={control}
               name="address"
-              label="Address"
+              label="Alamat"
               errors={errors}
             />
 
@@ -213,7 +213,7 @@ export default function EditProfileScreen() {
             <FormInput
               control={control}
               name="phone"
-              label="Phone"
+              label="No HP"
               errors={errors}
             />
 

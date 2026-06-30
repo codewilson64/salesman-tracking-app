@@ -2,7 +2,6 @@ import {
   Text,
   Pressable,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   View,
   Image,
@@ -27,7 +26,7 @@ import { FormSelectModal } from "../../../../components/areaInputForm/FormSelect
 import { useAuthStore } from "../../../../stores/authStore";
 import { useMarkUnpaidTransactionAsRead } from "../../../../hooks/notification/transactions-menus/useMarkUnpaidTransactionAsRead";
 
-const paymentMethods = ["cash", "transfer"];
+const paymentMethods = ["Tunai", "Transfer"];
 
 const TransactionDetailScreen = () => {
   const router = useRouter();
@@ -140,13 +139,13 @@ const TransactionDetailScreen = () => {
               <Image source={back} className="w-6 h-6" />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Transaction Detail</Text>
+            <Text className="text-2xl font-bold">Detail Transaksi</Text>
           </View>
 
           <View className="gap-4">
             {/* Name */}
             <View>
-              <Text className="text-gray-500">Salesman</Text>
+              <Text className="text-gray-500 mb-1">Salesman</Text>
               <Text className="font-semibold">
                 {transaction.salesmanName}
               </Text>
@@ -154,7 +153,7 @@ const TransactionDetailScreen = () => {
 
             {/* Date of visit */}
             <View>
-              <Text className="text-gray-500">Date of visit</Text>
+              <Text className="text-gray-500 mb-1">Tanggal Kunjungan</Text>
               <Text className="font-semibold">
                 {formatTime(transaction.checkInAt)}
               </Text>
@@ -162,7 +161,7 @@ const TransactionDetailScreen = () => {
 
             {/* SHOP NAME */}
             <View>
-              <Text className="text-gray-500">Shop</Text>
+              <Text className="text-gray-500 mb-1">Toko</Text>
               <Text className="font-semibold">
                 {transaction.shopName}
               </Text>
@@ -170,16 +169,16 @@ const TransactionDetailScreen = () => {
 
             {/* TRANSACTION TYPE */}
             <View>
-              <Text className="text-gray-500">Transaction Type</Text>
+              <Text className="text-gray-500 mb-1">Tipe Transaksi</Text>
               <Text className="font-semibold capitalize">
                 {transaction.transactionType}
               </Text>
             </View>
 
             {/* DUE DATE */}
-            {transaction.transactionType === "credit" && (
+            {transaction.transactionType === "Kredit" && (
               <View>
-                <Text className="text-gray-500">Due date</Text>
+                <Text className="text-gray-500 mb-1">Tanggal Jatuh Tempo</Text>
                 <Text className="font-semibold capitalize">
                   {formatDate(transaction.dueDate)}
                 </Text>
@@ -188,7 +187,7 @@ const TransactionDetailScreen = () => {
 
             {/* Payment Status */}
             <View>
-              <Text className="text-gray-500">Payment Status</Text>
+              <Text className="text-gray-500 mb-1">Status Pembayaran</Text>
               <Text className="font-semibold capitalize">
                 {transaction.paymentStatus}
               </Text>
@@ -196,7 +195,7 @@ const TransactionDetailScreen = () => {
 
             {/* FINAL AMOUNT */}
             <View>
-              <Text className="text-gray-500 mb-1">Final Amount</Text>
+              <Text className="text-gray-500 mb-1">Total Transaksi</Text>
               <View className="p-3 bg-gray-100 rounded-lg">
                 <Text className="font-semibold">
                   Rp {Number(transaction.finalAmount).toLocaleString()}
@@ -206,7 +205,7 @@ const TransactionDetailScreen = () => {
 
             {/* REMAINING */}
             <View>
-              <Text className="text-gray-500 mb-1">Remaining</Text>
+              <Text className="text-gray-500 mb-1">Sisa Tagihan</Text>
               <View className="p-3 bg-gray-100 rounded-lg">
                 <Text className="font-semibold text-red-500">
                   Rp {Number(transaction.remainingAmount).toLocaleString()}
@@ -225,19 +224,19 @@ const TransactionDetailScreen = () => {
             >
               <View className="flex-row items-center flex-1">
                 <Text className="font-normal text-blue-600 text-lg underline">
-                  See visit detail
+                  Lihat Detail Kunjungan
                 </Text>
               </View>
             </TouchableOpacity>
 
             {/* PAYMENT SECTION */}
-            {transaction.transactionType === "credit" && transaction.remainingAmount > 0 && (
+            {transaction.transactionType === "Kredit" && transaction.remainingAmount > 0 && (
               <>
                 {user?.role === "salesman" && (
                   <FormInput
                     control={control}
                     name="paidAmount"
-                    label="Pay Amount"
+                    label="Jumlah Pembayaran"
                     keyboardType="numeric"
                   />
                 )}
@@ -245,8 +244,8 @@ const TransactionDetailScreen = () => {
                 {/* PREVIEW AFTER PAYMENT */}
                 {Number(paidAmount) > 0 && (
                   <View className="p-3 bg-green-50 rounded-lg">
-                    <Text className="text-green-700 font-medium">
-                      Remaining after payment:
+                    <Text className="text-green-700 font-medium mb-1">
+                      Sisa Setelah Pembayaran:
                     </Text>
                     <Text className="text-green-700 font-bold">
                       Rp {Math.max(0, remainingAfterPayment).toLocaleString()}
@@ -258,7 +257,7 @@ const TransactionDetailScreen = () => {
                   <FormSelectModal
                     control={control}
                     name="paymentType"
-                    label="Payment Method"
+                    label="Metode Pembayaran"
                     options={paymentMethods.map((p) => ({ value: p }))}
                     getLabel={(item: { value: string }) => item.value}
                     errors={errors}
@@ -271,7 +270,7 @@ const TransactionDetailScreen = () => {
             {transaction.remainingAmount === 0 && (
               <View className="p-4 bg-green-100 rounded-lg">
                 <Text className="text-green-700 font-semibold text-center">
-                  Fully Paid
+                  Lunas
                 </Text>
               </View>
             )}

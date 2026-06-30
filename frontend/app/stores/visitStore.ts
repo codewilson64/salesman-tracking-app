@@ -7,7 +7,10 @@ import { VisitDraft, VisitDraftState } from "../types/visitDraft";
 const defaultDraft: VisitDraft = {
   result: null,
   transactionType: null,
+
   products: [],
+  consignmentItems: [],
+  
   paidAmount: 0,         
   paymentType: null,      
   orderBy: "",

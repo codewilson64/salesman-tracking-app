@@ -75,7 +75,7 @@ export default function CreateProductScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Create product</Text>
+            <Text className="text-2xl font-bold">Buat produk</Text>
           </View>
 
           <View className="gap-y-6">
@@ -83,7 +83,7 @@ export default function CreateProductScreen() {
             <FormInput 
               control={control} 
               name="name" 
-              label="Name" 
+              label="Nama produk" 
               errors={errors} 
             />
 
@@ -91,7 +91,7 @@ export default function CreateProductScreen() {
             <FormInput 
               control={control} 
               name="description" 
-              label="Description" 
+              label="Deskripsi produk" 
               errors={errors} 
             />
 
@@ -99,14 +99,14 @@ export default function CreateProductScreen() {
             <FormInput 
               control={control} 
               name="price" 
-              label="Price" 
+              label="Harga" 
               errors={errors} 
             />
 
             <FormSelectModal
               control={control}
               name="unit"
-              label="Unit"
+              label="Satuan unit"
               options={units.map((u) => ({ value: u }))}
               getLabel={(item: { value: string }) => item.value}
               errors={errors}
@@ -114,7 +114,7 @@ export default function CreateProductScreen() {
 
             {/* IMAGE */}
             <View>
-              <Text className="mb-3 text-gray-700">Photo</Text>
+              <Text className="mb-3">Foto produk</Text>
                 <Pressable
                   onPress={pickImage}
                   className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-6 overflow-hidden"
@@ -155,7 +155,7 @@ export default function CreateProductScreen() {
               className="bg-black rounded-lg p-4 mt-8"
             >
               <Text className="text-white text-center font-semibold">
-                {isPending ? "Creating..." : "Create Product"}
+                {isPending ? "Creating..." : "Save"}
               </Text>
             </Pressable>
 

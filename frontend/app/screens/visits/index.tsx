@@ -57,7 +57,7 @@ const DateListScreen = () => {
           <Pressable onPress={() => router.back()} className="mr-3 p-2">
             <Image source={back} className="w-6 h-6" resizeMode="contain" />
           </Pressable>
-          <Text className="text-2xl font-bold">Sales visits overview</Text>
+          <Text className="text-2xl font-bold">Daftar Kunjungan</Text>
         </View>
 
         <Pressable
@@ -111,8 +111,7 @@ const DateListScreen = () => {
               <View>
                 <Text className="text-lg font-bold">{formatted}</Text>
                 <Text className="text-gray-500">
-                  {visitCountByDate[item]} visit
-                  {visitCountByDate[item] !== 1 ? "s" : ""}
+                  {visitCountByDate[item]} kunjungan
                 </Text>
               </View>
 

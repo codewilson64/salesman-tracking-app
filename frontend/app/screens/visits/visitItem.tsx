@@ -1,4 +1,4 @@
-import { Alert, GestureResponderEvent, Pressable, Text, View } from "react-native";
+import { Alert, GestureResponderEvent, Image, Pressable, Text, View } from "react-native";
 import { formatTime } from "../../helper/formatTime";
 import { getResultStyle } from "../../helper/resultStyle";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -72,6 +72,18 @@ export const VisitItem = ({
         {index + 1}.
       </Text>
 
+      <Image
+        source={{
+          uri: item.checkInImage
+            ? item.checkInImage
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  item.shopName || "Visit"
+              )}&background=random&size=128`,
+        }}
+        className="w-20 h-20 rounded-lg mr-3 bg-gray-200"
+        resizeMode="cover"
+      />
+
       {/* VISIT INFO */}
       <View className="flex-1">
         <Text className="font-semibold capitalize mb-2">
@@ -90,7 +102,7 @@ export const VisitItem = ({
 
         {item.notes && (
           <Text className="text-sm mt-2" numberOfLines={2}>
-            Notes: {item.notes}
+            {item.notes}
           </Text>
         )}
 

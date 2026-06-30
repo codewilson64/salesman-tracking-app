@@ -96,21 +96,21 @@ export default function CreateAreaScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Create area</Text>
+            <Text className="text-2xl font-bold">Buat Area</Text>
           </View>
 
           <View className="gap-y-6">
             <FormInput 
               control={control} 
               name="name" 
-              label="Area Name" 
+              label="Nama Area" 
               errors={errors} 
             />
 
             <FormInput 
               control={control} 
               name="city" 
-              label="City" 
+              label="Kota" 
               errors={errors} 
             />
 
@@ -142,7 +142,7 @@ export default function CreateAreaScreen() {
             <FormSelectModal
               control={control}
               name="day"
-              label="Day"
+              label="Hari"
               options={days.map((d) => ({ value: d }))}
               getLabel={(item: { value: string }) => item.value}
               errors={errors}
@@ -151,7 +151,7 @@ export default function CreateAreaScreen() {
             <FormMultiSelectModal
               control={control}
               name="weeks"
-              label="Weeks"
+              label="Minggu"
               options={[1, 2, 3, 4, 5]}
               errors={errors}
             />
@@ -164,7 +164,7 @@ export default function CreateAreaScreen() {
             className="bg-black rounded-lg p-4 mt-8"
           >
             <Text className="text-white text-center font-semibold">
-              {isPending ? "Creating..." : "Create Area"}
+              {isPending ? "Creating..." : "Save"}
             </Text>
           </Pressable>
 

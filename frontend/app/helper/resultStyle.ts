@@ -1,18 +1,28 @@
 export const getResultStyle = (result?: string) => {
   switch (result) {
-    case "new order":
+    case "Order Baru":
       return {
-        bg: "bg-green-300",
+        bg: "bg-green-200",
         text: "text-green-700",
       };
-    case "follow-up":
+    case "Titip Baru":
       return {
-        bg: "bg-yellow-300",
+        bg: "bg-purple-200",
+        text: "text-purple-700",
+      };
+    case "Update Titipan":
+      return {
+        bg: "bg-indigo-200",
+        text: "text-indigo-700",
+      };
+    case "Follow Up":
+      return {
+        bg: "bg-yellow-200",
         text: "text-yellow-700",
       };
-    case "shop closed":
+    case "Tutup Toko":
       return {
-        bg: "bg-red-300",
+        bg: "bg-red-200",
         text: "text-red-700",
       };
     default:

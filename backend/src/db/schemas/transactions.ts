@@ -3,19 +3,19 @@ import { companiesTable } from "./companies.js";
 import { visitsTable } from "./visit.js";
 
 export const transactionTypeEnum = pgEnum("transaction_type_enum", [
-  "cash",
-  "credit",
+  "Tunai",
+  "Kredit",
 ]);
 
 export const paymentStatusEnum = pgEnum("payment_status_enum", [
-  "paid",
-  "partial",
-  "unpaid",
+  "Lunas",
+  "Bayar Sebagian",
+  "Belum Lunas",
 ]);
 
 export const paymentTypeEnum = pgEnum("payment_type_enum", [
-  "cash",
-  "transfer",
+  "Tunai",
+  "Transfer",
 ]);
 
 export const transactionsTable = pgTable("transactions", {

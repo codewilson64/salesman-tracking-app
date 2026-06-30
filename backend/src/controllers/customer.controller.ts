@@ -131,6 +131,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       .select({
         id: customersTable.id,
         customerName: customersTable.customerName,
+        customerImage: customersTable.customerImage,
         shopName: customersTable.shopName,
         phone: customersTable.phone,
         address: customersTable.address,

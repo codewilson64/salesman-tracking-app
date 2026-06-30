@@ -1,20 +1,21 @@
 type Transaction = {
   transactionId: string;
-  transactionType: "cash" | "credit";
+  transactionType: "Tunai" | "Kredit";
   totalAmount: string;
   totalDiscount: string;
   finalAmount: string;
   items: TransactionItem[]
 
-  paymentStatus: "paid" | "partial" | "unpaid"
+  paymentStatus: "Lunas" | "Belum Lunas" | "Bayar Sebagian",
   paidAmount: number,
-  paymentType: "cash" | "transfer"
+  paymentType: "Tunai" | "Transfer"
 };
 
 export type TransactionItem = {
   transactionId: string;
   productId: string;
   productName: string;
+  unit: string;
   quantity: number;
   price: string;
   discount: number;
@@ -43,6 +44,13 @@ export type Visit = {
   visitResult?: string;
   duration: number;
   transactions: Transaction[];
+  consignmentItems?: {
+    productId: string;
+    productName: string;
+    quantity: number;
+    price: string | number;
+    totalAmount: string | number;
+  }[];
   transactionItems: TransactionItem[];
   transactionType?: string;
   totalAmount?: number;

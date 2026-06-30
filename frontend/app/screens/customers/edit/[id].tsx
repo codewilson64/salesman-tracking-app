@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
+import { View, Text, Pressable, ActivityIndicator, KeyboardAvoidingView, ScrollView, Image } from "react-native";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -137,7 +137,7 @@ export default function EditCustomerScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Edit Customer</Text>
+            <Text className="text-2xl font-bold">Edit Pelanggan</Text>
           </View>
 
           <View className="gap-y-6">
@@ -179,7 +179,7 @@ export default function EditCustomerScreen() {
 
             {/* SALESMAN (AUTO) */}
             <View>
-              <Text className="mb-3 text-gray-700">Salesman</Text>
+              <Text className="mb-3">Salesman</Text>
               <View className="border border-gray-300 rounded-lg p-4 bg-gray-100">
                 <Text className="text-gray-700 capitalize">
                   {selectedArea?.salesmanName || "Select area first"}
@@ -191,40 +191,40 @@ export default function EditCustomerScreen() {
             <FormInput
               control={control}
               name="customerName"
-              label="Customer Name"
+              label="Nama pelanggan"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="shopName"
-              label="Shop Name"
+              label="Nama toko"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="phone"
-              label="Phone"
+              label="No HP"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="address"
-              label="Address"
+              label="Alamat"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="description"
-              label="Description"
+              label="Deskripsi"
               errors={errors}
             />
 
             <View>
-              <Text className="mb-3">Location pin</Text>
+              <Text className="mb-3">Titik lokasi</Text>
 
               <Pressable
                 onPress={handleGetCoordinate}

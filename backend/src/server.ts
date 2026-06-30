@@ -14,6 +14,7 @@ import accountRoute from './routes/account.route.js'
 import notificationRoute from './routes/notification.route.js'
 import companyRegistrationRoutes from "./routes/registration.route.js";
 import appVersionRoute from "./routes/appVersion.route.js";
+import consignmentRoute from "./routes/consignment.route.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/delete-account', accountRoute)
 app.use('/api/notifications', notificationRoute)
 app.use("/api/company-registration", companyRegistrationRoutes);
 app.use("/api/app-version", appVersionRoute);
+app.use("/api/consignments", consignmentRoute);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

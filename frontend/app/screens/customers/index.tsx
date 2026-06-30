@@ -60,7 +60,7 @@ const CustomerScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">List of customers</Text>
+        <Text className="text-2xl font-bold">Daftar Pelanggan</Text>
       </View>
 
       <FlatList
@@ -99,7 +99,7 @@ const CustomerScreen = () => {
                       {item.salesmanName}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {item.customers.length} customer{item.customers.length !== 1 ? 's' : ''}
+                      {item.customers.length} pelanggan
                     </Text>
                   </View>
                 </View>
@@ -124,7 +124,7 @@ const CustomerScreen = () => {
         className="bg-black rounded-lg p-4 mb-4"
       >
         <Text className="text-white text-center font-semibold">
-          + Add Customer
+          + Tambah Pelanggan
         </Text>
       </Pressable>
     </SafeAreaView>

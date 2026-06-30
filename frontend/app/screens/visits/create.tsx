@@ -144,12 +144,12 @@ export default function CreateVisitScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Create visit</Text>
+            <Text className="text-2xl font-bold">Check In Kunjungan</Text>
           </View>
 
           {/* IMAGE */}
-          <View>
-              <Text className="mb-3 text-gray-700">Check in photo</Text>
+          <View className="mb-6">
+              <Text className="mb-3">Foto Check In</Text>
                 <Pressable
                   onPress={pickImage}
                   className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-2 overflow-hidden"
@@ -197,7 +197,7 @@ export default function CreateVisitScreen() {
             <FormSelectModal
               control={control}
               name="areaId"
-              label="Area"
+              label="Kawasan / Area"
               options={
                 areas?.map((a: Area) => ({
                   value: a.id,
@@ -215,7 +215,7 @@ export default function CreateVisitScreen() {
             <FormSelectModal
               control={control}
               name="customerId"
-              label="Customer"
+              label="Toko"
               options={
                 customers?.map((c: Customer) => ({
                   value: c.id,
@@ -229,7 +229,7 @@ export default function CreateVisitScreen() {
 
             {/* AUTO-FILL ADDRESS */}
             <View>
-              <Text className="mb-2">Address</Text>
+              <Text className="mb-2">Alamat</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
                 <Text className="text-gray-700">
                   {selectedCustomer?.address || ""}
@@ -239,7 +239,7 @@ export default function CreateVisitScreen() {
             
             {/* AUTO-FILL COORDINATE */}
             <View>
-              <Text className="mb-2">Location pin</Text>
+              <Text className="mb-2">Titik Lokasi</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
                 <Text className="text-gray-700">
                   {selectedCustomer?.latitude != null &&
@@ -252,7 +252,7 @@ export default function CreateVisitScreen() {
             
             <View>
               <Text className="mb-2">
-                Check in distance
+                Jarak Check In
               </Text>
 
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
@@ -262,7 +262,7 @@ export default function CreateVisitScreen() {
                     : distance != null 
                     ? `${distance} m` 
                     : selectedCustomerId 
-                    ? "Distance will be checked when you press Check In" 
+                    ? "" 
                     : ""}
                 </Text>
               </View>
@@ -273,7 +273,7 @@ export default function CreateVisitScreen() {
 
               {isTooFar && (
                 <Text className="text-red-500 mt-2">
-                  Cannot check in. You are more than 100 m away from customer location.
+                  Check-in gagal. Anda berada lebih dari 100 meter dari lokasi toko.
                 </Text>
               )}
             </View>

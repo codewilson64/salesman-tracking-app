@@ -5,9 +5,11 @@ import { customersTable } from "./customers.js";
 import { usersTable } from "./users.js";
 
 export const visitResultEnum = pgEnum("visit_result_enum", [
-  "new order",
-  "follow-up",
-  "shop closed",
+  "Order Baru",
+  "Titip Baru",
+  "Update Titipan",
+  "Follow Up",
+  "Tutup Toko",
 ]);
 
 export const visitStatusEnum = pgEnum("visit_status", [

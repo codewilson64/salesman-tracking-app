@@ -119,7 +119,7 @@ export default function EditSalesmanScreen() {
             <FormInput 
               control={control} 
               name="name" 
-              label="Name" 
+              label="Nama" 
               errors={errors} 
             />
 
@@ -127,7 +127,7 @@ export default function EditSalesmanScreen() {
             <FormInput 
               control={control} 
               name="address" 
-              label="Address" 
+              label="Alamat" 
               errors={errors} 
             />
 
@@ -135,7 +135,7 @@ export default function EditSalesmanScreen() {
             <FormInput 
               control={control} 
               name="phone" 
-              label="Phone" 
+              label="No HP" 
               errors={errors} 
             />
           </View>

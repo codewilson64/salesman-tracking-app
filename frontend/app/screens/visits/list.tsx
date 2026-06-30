@@ -50,6 +50,15 @@ const VisitList = () => {
     endDate,
   });
 
+  const sortedVisits = useMemo(() => {
+    return [...visits].sort((a, b) => {
+      const timeA = new Date(a.checkOutAt ?? a.checkInAt ?? 0).getTime();
+      const timeB = new Date(b.checkOutAt ?? b.checkInAt ?? 0).getTime();
+
+      return timeB - timeA;
+    });
+  }, [visits]);
+
   const drafts = useVisitDraftStore((state) => state.drafts);
   const resetDraft = useVisitDraftStore((state) => state.resetDraft);
   
@@ -61,7 +70,7 @@ const VisitList = () => {
       return;
     }
 
-    const { result, transactionType, orderBy, dueDate, notes, products, paidAmount, paymentType } = draft;
+    const { result, transactionType, orderBy, dueDate, notes, products, consignmentItems, paidAmount, paymentType } = draft;
 
     Alert.alert(
       "Confirm Checkout",
@@ -84,11 +93,20 @@ const VisitList = () => {
                 discount: Number(p.discount || 0),
               }));
 
+              const mappedConsignmentItems = consignmentItems.map((item) => ({
+                productId: item.productId,
+                currentStock: Number(item.currentStock || 0),
+                remainingStock: Number(item.remainingStock || 0),
+                addedStock: Number(item.addedStock || 0),
+                returnedStock: Number(item.returnedStock || 0),
+              }));
+
               await mutateAsync({
                 id: visitIdFromItem,
-                result: result as "new order" | "follow-up" | "shop closed",
-                transactionType: transactionType as "cash" | "credit",
+                result: result as "Order Baru" | "Titip Baru" | "Update Titipan" | "Follow Up" | "Tutup Toko",
+                transactionType: transactionType as "Tunai" | "Kredit",
                 products: mappedProducts,
+                consignmentItems: mappedConsignmentItems,
                 orderBy,
                 dueDate,
                 paymentType,
@@ -103,8 +121,13 @@ const VisitList = () => {
 
               Alert.alert("Success", "Visit checked out successfully");
             } 
-            catch (err) {
-              Alert.alert("Error", "Checkout failed");
+            catch (err: any) {
+              console.log("CHECKOUT ERROR:", err?.response?.data || err);
+
+              Alert.alert(
+                "Error",
+                err?.response?.data?.message || "Checkout failed"
+              );
             }
             finally {
               setIsCheckingOut(false);
@@ -147,11 +170,11 @@ const VisitList = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">Your visit</Text>
+        <Text className="text-2xl font-bold">Daftar Kunjungan</Text>
       </View>
 
       <FlatList
-        data={visits}
+        data={sortedVisits}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}

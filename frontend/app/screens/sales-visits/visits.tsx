@@ -22,7 +22,7 @@ import { getResultStyle } from "../../helper/resultStyle";
 
 import VisitFilterModal from "../../components/modal/VisitFilterModal"; 
 
-type FilterOption = "all" | "new order" | "follow-up" | "shop closed" | "checking in";
+type FilterOption = "all" | "Order Baru" | "Titip Baru" | "Update Titipan" | "Follow Up" | "Tutup Toko" | "checking in";
 
 const VisitsListScreen = () => {
   const router = useRouter();
@@ -53,9 +53,14 @@ const VisitsListScreen = () => {
   });
 
   const salesmanVisits = useMemo(() => {
-    return (visits as Visit[]).filter(
-      (visit) => visit.salesmanId === salesmanId
-    );
+    return (visits as Visit[])
+      .filter((visit) => visit.salesmanId === salesmanId)
+      .sort((a, b) => {
+        const timeA = new Date(a.checkOutAt ?? a.checkInAt ?? 0).getTime();
+        const timeB = new Date(b.checkOutAt ?? b.checkInAt ?? 0).getTime();
+
+        return timeB - timeA;
+      });
   }, [visits, salesmanId]);
 
   const filteredVisits = useMemo(() => {
@@ -108,12 +113,16 @@ const VisitsListScreen = () => {
           <Text className="font-semibold text-gray-700">
             {activeFilter === "all"
               ? "All"
-              : activeFilter === "new order"
-              ? "New Order"
-              : activeFilter === "follow-up"
-              ? "Follow-up"
-              : activeFilter === "shop closed"
-              ? "Shop Closed"
+              : activeFilter === "Order Baru"
+              ? "Order Baru"
+              : activeFilter === "Titip Baru"
+              ? "Titip Baru"
+              : activeFilter === "Update Titipan"
+              ? "Update Titipan"
+              : activeFilter === "Follow Up"
+              ? "Follow Up"
+              : activeFilter === "Tutup Toko"
+              ? "Tutup Toko"
               : "Checking In"}
           </Text>
         </Pressable>
@@ -141,6 +150,18 @@ const VisitsListScreen = () => {
             >
               <View className="flex-row items-start">
                 <Text className="w-6 font-bold">{index + 1}.</Text>
+
+                <Image
+                  source={{
+                    uri: item.checkInImage
+                      ? item.checkInImage
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          item.shopName || "Visit"
+                        )}&background=random&size=128`,
+                  }}
+                  className="w-20 h-20 rounded-lg mr-3 bg-gray-200"
+                  resizeMode="cover"
+                />
 
                 <View className="flex-1">
                   <Text className="font-semibold text-base capitalize">

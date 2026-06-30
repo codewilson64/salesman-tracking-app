@@ -78,7 +78,7 @@ const SalesmenListScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">Sales visits overview</Text>
+        <Text className="text-2xl font-bold">Daftar Kunjungan Sales</Text>
       </View>
 
       <FlatList
@@ -125,7 +125,7 @@ const SalesmenListScreen = () => {
                       {item.salesmanName}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {item.visits.length} visit{item.visits.length !== 1 ? 's' : ''}
+                      {item.visits.length} kunjungan
                     </Text>
                   </View>
                 </View>

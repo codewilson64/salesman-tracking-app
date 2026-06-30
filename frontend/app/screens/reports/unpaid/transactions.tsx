@@ -180,7 +180,7 @@ const TransactionsScreen = () => {
                     {formatTime(item.checkInAt)}
                   </Text>
                   <Text className="text-gray-700 text-sm">
-                    Due: {formatDate(item.dueDate)}
+                    Jatuh Tempo: {formatDate(item.dueDate)}
                   </Text>
                 </View>
               </View>
@@ -189,9 +189,9 @@ const TransactionsScreen = () => {
               <View className="items-end mr-2">
                 <Text
                   className={`text-sm capitalize ${
-                    item.paymentStatus === "partial"
+                    item.paymentStatus === "Bayar Sebagian"
                       ? "text-yellow-500"
-                      : item.paymentStatus === "unpaid"
+                      : item.paymentStatus === "Belum Lunas"
                       ? "text-red-500"
                       : "text-green-500"
                   }`}

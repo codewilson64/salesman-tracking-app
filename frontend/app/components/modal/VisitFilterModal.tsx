@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Modal, TouchableOpacity, Platform } from "react-native";
 
-type FilterOption = "all" | "new order" | "follow-up" | "shop closed" | "checking in";
+type FilterOption = "all" | "Order Baru" | "Titip Baru" | "Update Titipan" | "Follow Up" | "Tutup Toko" | "checking in";
 
 interface VisitFilterModalProps {
   visible: boolean;
@@ -18,9 +18,11 @@ const VisitFilterModal = ({
 }: VisitFilterModalProps) => {
   const filterOptions = [
     { label: "All Visits", value: "all" as const },
-    { label: "New Order", value: "new order" as const },
-    { label: "Follow-up", value: "follow-up" as const },
-    { label: "Shop Closed", value: "shop closed" as const },
+    { label: "Order Baru", value: "Order Baru" as const },
+    { label: "Titip Baru", value: "Titip Baru" as const },
+    { label: "Update Titipan", value: "Update Titipan" as const },
+    { label: "Follow Up", value: "Follow Up" as const },
+    { label: "Tutup Toko", value: "Tutup Toko" as const },
     { label: "Checking In", value: "checking in" as const },
   ];
 

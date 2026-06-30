@@ -37,7 +37,7 @@ const ProductScreen = () => {
         <Image source={back} className="w-6 h-6" resizeMode="contain" />
       </Pressable>
 
-      <Text className="text-2xl font-bold">List of products</Text>
+      <Text className="text-2xl font-bold">Daftar Produk</Text>
     </View>
 
       <FlatList
@@ -88,7 +88,7 @@ const ProductScreen = () => {
         className="bg-black rounded-lg p-4 mb-4"
       >
         <Text className="text-white text-center font-semibold">
-          + Add Product
+          + Tambah Produk
         </Text>
       </Pressable>
 

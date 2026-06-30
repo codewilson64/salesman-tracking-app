@@ -137,7 +137,7 @@ export default function CreateCustomerScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Create customer</Text>
+            <Text className="text-2xl font-bold">Buat Pelanggan</Text>
           </View>
 
           <View className="gap-y-6">
@@ -161,7 +161,7 @@ export default function CreateCustomerScreen() {
               <Text className="mb-2">Salesman</Text>
               <View className="border border-gray-300 rounded-lg p-3 bg-gray-100">
                 <Text className="text-gray-700 capitalize">
-                  {selectedArea?.salesmanName || "Select area first"}
+                  {selectedArea?.salesmanName || "-"}
                 </Text>
               </View>
             </View>
@@ -170,41 +170,41 @@ export default function CreateCustomerScreen() {
             <FormInput
               control={control}
               name="customerName"
-              label="Customer Name"
+              label="Nama pelanggan"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="shopName"
-              label="Shop Name"
+              label="Nama toko"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="phone"
-              label="Phone"
+              label="No HP"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="address"
-              label="Address"
+              label="Alamat"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="description"
-              label="Description"
+              label="Deskripsi"
               errors={errors}
             />
 
             {/* LOCATION */}
             <View>
-              <Text className="mb-3">Location pin</Text>
+              <Text className="mb-3">Titik lokasi</Text>
 
               <Pressable
                 onPress={handleGetCoordinate}
@@ -213,7 +213,7 @@ export default function CreateCustomerScreen() {
                 <Text>
                   {watch("latitude") && watch("longitude")
                     ? `${watch("latitude")}, ${watch("longitude")}`
-                    : "Pick location"}
+                    : ""}
                 </Text>
 
                 {locationLoading ? (
@@ -236,7 +236,7 @@ export default function CreateCustomerScreen() {
 
             {/* IMAGE */}
             <View>
-              <Text className="mb-3 text-gray-700">Photo</Text>
+              <Text className="mb-3 text-gray-700">Foto</Text>
                 <Pressable
                   onPress={pickImage}
                   className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-1 overflow-hidden"
@@ -285,7 +285,7 @@ export default function CreateCustomerScreen() {
             className="bg-black rounded-lg p-4 mt-8"
           >
             <Text className="text-white text-center font-semibold">
-              {isPending ? "Creating..." : "Create Customer"}
+              {isPending ? "Creating..." : "Save"}
             </Text>
           </Pressable>
 

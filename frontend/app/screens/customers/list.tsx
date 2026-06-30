@@ -85,6 +85,18 @@ const CustomersListScreen = () => {
                 {index + 1}.
               </Text>
 
+              <Image
+                source={{
+                  uri: item.customerImage
+                    ? item.customerImage
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        item.customerName || "Customer"
+                      )}&background=random&size=128`,
+                }}
+                className="w-20 h-20 rounded-lg mr-3 bg-gray-200"
+                resizeMode="cover"
+              />
+
               <View className="flex-1 gap-1">
                 <Text className="font-semibold capitalize">
                   {item.shopName}

@@ -41,7 +41,7 @@ export const FormMultiSelectModal = ({
               className="border border-gray-300 rounded-lg p-4"
             >
               <Text>
-                {value.length ? `Week ${value.join(", ")}` : "Select Weeks"}
+                {value.length ? `Minggu ${value.join(", ")}` : "Pilih Minggu"}
               </Text>
             </Pressable>
 
@@ -50,7 +50,7 @@ export const FormMultiSelectModal = ({
                 <View className="bg-white w-[90%] max-h-[50%] rounded-2xl py-7">
 
                   <Text className="text-lg font-bold mb-4 text-center">
-                    Select {label}
+                    Pilih {label}
                   </Text>
 
                   <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
@@ -65,7 +65,7 @@ export const FormMultiSelectModal = ({
                             isSelected ? "bg-blue-200/40" : ""
                           }`}
                         >
-                          <Text>Week {item}</Text>
+                          <Text>Minggu {item}</Text>
 
                           {isSelected && (
                             <Feather name="check" size={16} />

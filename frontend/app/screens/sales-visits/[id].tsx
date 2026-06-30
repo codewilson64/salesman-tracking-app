@@ -5,66 +5,35 @@ import {
   Image,
   Pressable,
   ScrollView,
-  Alert,
   RefreshControl,
 } from "react-native";
-import z from "zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import back from '../../assets/globalIcons/back.png'
+import back from "../../assets/globalIcons/back.png";
 import { useGetVisitById } from "../../hooks/visit/useGetVisitById";
-import { useDeleteVisit } from "../../hooks/visit/useDeleteVisit";
 import { formatTime } from "../../helper/formatTime";
 import { formatDuration } from "../../helper/formatDuration";
 
 import { openMap } from "../../utils/openMap";
 import { useState } from "react";
-import { FormSelectModal } from "../../components/areaInputForm/FormSelectModal";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useReviewVisit } from "../../hooks/review-visit/useReviewVisit";
-import { reviewVisitSchema } from "../../libs/reviewVisit.schema";
-import { FormInput } from "../../components/areaInputForm/FormInput";
 import { useQueryClient } from "@tanstack/react-query";
 
-type FormData = z.infer<typeof reviewVisitSchema>;
-
-const approval_status = [
-  { label: "Accept", value: "approved" },
-  { label: "Reject", value: "rejected" },
-];
-
-const getGpsAccuracyLabel = (accuracy?: number | null) => {
-  if (accuracy == null) return "-";
-
-  if (accuracy <= 10) return `Excellent`;
-  if (accuracy <= 20) return `Good`;
-
-  return `Poor`;
-};
+import { UpdateTitipanList } from "../../components/visit/UpdateTitipanList";
+import { VisitProductList } from "../../components/visit/ProductList";
+import { useGetAllProduct } from "../../hooks/product/useGetAllProduct";
 
 const SalesVisitDetail = () => {
-  const {
-    control,
-    handleSubmit,
-    setError,
-    watch,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(reviewVisitSchema),
-    defaultValues: {
-      adminNote: "",
-      rejectionReason: "",
-    }
-  });
-
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"info" | "result">("info");
+
+  const { data: products } = useGetAllProduct();
+
+  const { data: visit, isLoading, isError } = useGetVisitById(id);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -72,38 +41,23 @@ const SalesVisitDetail = () => {
     setRefreshing(false);
   };
 
-  const { data: visit, isLoading, isError } = useGetVisitById(id);
-  const { mutateAsync: deleteVisit } = useDeleteVisit();
-  const { mutateAsync, isPending: isReviewing } = useReviewVisit()
+  const visitResult = visit?.visitResult;
 
-  const [activeTab, setActiveTab] = useState<"info" | "result">("info");
+  const isTitip = visitResult === "Titip Baru";
+  const isUpdateTitipan = visitResult === "Update Titipan";
+  const isOrder = visitResult === "Order Baru";
 
-  
-  const handleDelete = () => {
-    Alert.alert(
-      `Delete Visit?`,
-      "Are you sure you want to delete this visit? This action cannot be undone.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteVisit({ id, imageId: visit?.checkInImageId });
-              router.back();
-            } catch (err: any) {
-              const message = err?.response?.data?.message || "Failed to delete visit";
-              Alert.alert("Delete Failed", message);
-            }
-          }
-        },
-      ]
-    );
-  };
+  const transaction = visit?.transactions?.[0];
+
+  const transactionItems = transaction?.items ?? [];
+  const consignmentItems = visit?.consignmentItems ?? [];
+
+  const productItems = isTitip ? consignmentItems : transactionItems;
+
+  const consignmentTotal = consignmentItems.reduce(
+    (sum: number, item: any) => sum + Number(item.totalAmount || 0),
+    0
+  );
 
   if (isLoading) {
     return (
@@ -112,7 +66,7 @@ const SalesVisitDetail = () => {
       </View>
     );
   }
-  
+
   if (isError || !visit) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -120,27 +74,11 @@ const SalesVisitDetail = () => {
       </View>
     );
   }
-  
-  const isReviewed = ["approved", "rejected"].includes(visit.approvalStatus);
 
   const lat = visit.latitude;
   const lng = visit.longitude;
-  
   const hasLocation = lat != null && lng != null;
 
-  /* ================= SUBMIT ================= */
-  
-  const onSubmit = async (data: FormData) => {
-    try {
-      await mutateAsync({ id, data });
-      Alert.alert("Success", "Visit reviewed");
-    } catch (err: any) {
-      setError("root", {
-        message: err?.response?.data?.message || "Create failed",
-      });
-    }
-  };
-  
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView
@@ -155,7 +93,6 @@ const SalesVisitDetail = () => {
           />
         }
       >
-        {/* FULL WIDTH CHECK-IN IMAGE */}
         <View className="mb-6 relative">
           <Image
             source={{
@@ -177,9 +114,7 @@ const SalesVisitDetail = () => {
           </Pressable>
         </View>
 
-        {/* CONTENT WITH LEFT/RIGHT PADDING */}
         <View className="px-4">
-          {/* Tabs */}
           <View className="flex-row mb-4 border-b border-gray-200">
             <Pressable
               onPress={() => setActiveTab("info")}
@@ -192,7 +127,7 @@ const SalesVisitDetail = () => {
                   activeTab === "info" ? "text-blue-500" : "text-gray-400"
                 }`}
               >
-                Visit Info
+                Informasi Kunjungan
               </Text>
             </Pressable>
 
@@ -207,14 +142,13 @@ const SalesVisitDetail = () => {
                   activeTab === "result" ? "text-blue-500" : "text-gray-400"
                 }`}
               >
-                Visit Result
+                Hasil Kunjungan
               </Text>
             </Pressable>
           </View>
 
           {activeTab === "info" && (
             <>
-              {/* Status */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">Status</Text>
@@ -222,17 +156,6 @@ const SalesVisitDetail = () => {
                 </View>
               </View>
 
-              {/* Result */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Result</Text>
-                  <Text className="text-lg font-medium capitalize">
-                    {visit.visitResult || "-"}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Check In */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">Check In</Text>
@@ -242,7 +165,6 @@ const SalesVisitDetail = () => {
                 </View>
               </View>
 
-              {/* Check Out */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">Check Out</Text>
@@ -252,93 +174,78 @@ const SalesVisitDetail = () => {
                 </View>
               </View>
 
-              {/* Duration */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Duration</Text>
+                  <Text className="text-gray-500 text-sm">Durasi</Text>
                   <Text className="text-lg font-medium">
                     {formatDuration(visit.duration)}
                   </Text>
                 </View>
               </View>
 
-              {/* Check In Distance */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">
-                    Check In Distance
+                    Jarak Check In 
                   </Text>
-
                   <Text className="text-lg font-medium">
                     {visit.checkInDistanceMeters != null
                       ? `${visit.checkInDistanceMeters} m`
                       : "-"}
-                    {/* {" / "} */}
-                    {/* {getGpsAccuracyLabel(visit.checkInGpsAccuracy)} */}
                   </Text>
                 </View>
               </View>
 
-              {/* Check Out Distance */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
                   <Text className="text-gray-500 text-sm">
-                    Check Out Distance
+                    Jarak Check Out
                   </Text>
-
                   <Text className="text-lg font-medium">
                     {visit.checkOutDistanceMeters != null
                       ? `${visit.checkOutDistanceMeters} m`
                       : "-"}
-                    {/* {" / "} */}
-                    {/* {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)} */}
                   </Text>
                 </View>
               </View>
 
-              {/* Shop Name */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Shop</Text>
+                  <Text className="text-gray-500 text-sm">Nama Toko</Text>
                   <Text className="text-lg font-medium">{visit.shopName}</Text>
                 </View>
               </View>
 
-              {/* Customer */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Customer</Text>
+                  <Text className="text-gray-500 text-sm">Nama Pelanggan</Text>
                   <Text className="text-lg font-medium">
                     {visit.customerName}
                   </Text>
                 </View>
               </View>
 
-              {/* Address */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Address</Text>
+                  <Text className="text-gray-500 text-sm">Alamat</Text>
                   <Text className="text-lg font-medium">{visit.address}</Text>
                 </View>
               </View>
 
-              {/* Area */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Area</Text>
+                  <Text className="text-gray-500 text-sm">Kawasan / Area</Text>
                   <Text className="text-lg font-medium">{visit.areaName}</Text>
                 </View>
               </View>
 
-              {/* City */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">City</Text>
+                  <Text className="text-gray-500 text-sm">Kota</Text>
                   <Text className="text-lg font-medium">{visit.city}</Text>
                 </View>
               </View>
 
-              {/* MAP */}
               {hasLocation && (
                 <View className="pt-4 pb-4 rounded-lg">
                   <Pressable
@@ -346,7 +253,7 @@ const SalesVisitDetail = () => {
                     className="bg-green-600 rounded-lg p-3"
                   >
                     <Text className="text-white text-center">
-                      Open Location
+                      Lihat Titik Lokasi
                     </Text>
                   </Pressable>
                 </View>
@@ -356,177 +263,114 @@ const SalesVisitDetail = () => {
 
           {activeTab === "result" && (
             <>
-              {/* Transaction type */}
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">
-                    Transaction type
-                  </Text>
-                  <Text className="text-lg font-medium">
-                    {visit.transactions?.[0]?.transactionType || ""}
+                  <Text className="text-gray-500 text-sm">Hasil</Text>
+                  <Text className="text-lg font-medium capitalize">
+                    {visit.visitResult || "-"}
                   </Text>
                 </View>
               </View>
-
-              {/* Products */}
-              <View className="p-4 border-b border-gray-200">
-                <Text className="text-gray-500 text-sm mb-3">Products</Text>
-
-                {visit.transactions?.[0]?.items?.length ? (
-                  <View className="bg-gray-50 overflow-hidden">
-                    {/* Header */}
-                    <View className="flex-row justify-between px-3 py-2 bg-gray-100">
-                      <Text className="flex-1 text-xs font-semibold text-gray-500">
-                        Product
-                      </Text>
-                      <Text className="w-12 text-xs font-semibold text-gray-500 text-right">
-                        Qty
-                      </Text>
-                      <Text className="w-20 text-xs font-semibold text-gray-500 text-right">
-                        Price
-                      </Text>
-                      <Text className="w-24 text-xs font-semibold text-gray-500 text-right">
-                        Total
-                      </Text>
-                    </View>
-
-                    {/* Items */}
-                    {visit.transactions[0].items.map((item, index) => {
-                      return (
-                        <View
-                          key={index}
-                          className="px-3 py-3 border-t border-gray-200"
-                        >
-                          <View className="flex-row justify-between">
-                            <Text className="flex-1 text-sm font-medium text-gray-800">
-                              {item.productName}
-                            </Text>
-
-                            <Text className="w-12 text-sm text-right text-gray-700">
-                              {item.quantity}
-                            </Text>
-
-                            <View className="w-20 items-end">
-                              <Text className="text-sm text-gray-700">
-                                Rp {Number(item.price).toLocaleString()}
-                              </Text>
-
-                              <Text className="text-xs text-red-500">
-                                - Rp {Number(item.discount).toLocaleString()}
-                              </Text>
-                            </View>
-
-                            <Text className="w-24 text-sm text-right font-semibold text-gray-900">
-                              Rp{" "}
-                              {Number(item.totalAfterDiscount).toLocaleString()}
-                            </Text>
-                          </View>
-                        </View>
-                      );
-                    })}
-
-                    {/* Summary */}
-                    <View className="px-3 py-3 border-t border-gray-300 bg-white">
-                      <View className="flex-row justify-between mb-1">
-                        <Text className="text-sm text-gray-500">Subtotal</Text>
-                        <Text className="text-sm text-gray-700">
-                          Rp{" "}
-                          {Number(
-                            visit.transactions?.[0]?.totalAmount || 0
-                          ).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between mb-1">
-                        <Text className="text-sm text-gray-500">Discount</Text>
-                        <Text className="text-sm text-red-500">
-                          - Rp{" "}
-                          {Number(
-                            visit.transactions?.[0]?.totalDiscount || 0
-                          ).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between mt-2">
-                        <Text className="text-base font-semibold text-gray-800">
-                          Total
-                        </Text>
-                        <Text className="text-base font-bold text-gray-900">
-                          Rp{" "}
-                          {Number(
-                            visit.transactions?.[0]?.finalAmount || 0
-                          ).toLocaleString()}
-                        </Text>
-                      </View>
-                    </View>
+              
+              {isOrder && (
+                <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                  <View>
+                    <Text className="text-gray-500 text-sm">
+                      Tipe Transaksi
+                    </Text>
+                    <Text className="text-lg font-medium capitalize">
+                      {transaction?.transactionType || "-"}
+                    </Text>
                   </View>
-                ) : (
-                  <Text className="text-gray-400 text-sm">No products</Text>
-                )}
-              </View>
-
-              {/* Order by */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Order by</Text>
-                  <Text className="text-lg font-medium">
-                    {visit.orderBy || "-"}
-                  </Text>
                 </View>
-              </View>
+              )}
 
-              {/* Notes */}
+              {isUpdateTitipan ? (
+                <UpdateTitipanList 
+                  items={consignmentItems} 
+                  products={products}
+                />
+              ) : (
+                <VisitProductList
+                  items={productItems}
+                  products={products}
+                  isOrder={isOrder}
+                  isTitip={isTitip}
+                  subtotal={
+                    isTitip
+                      ? consignmentTotal
+                      : Number(transaction?.totalAmount || 0)
+                  }
+                  totalDiscount={Number(transaction?.totalDiscount || 0)}
+                  finalAmount={
+                    isTitip
+                      ? consignmentTotal
+                      : Number(transaction?.finalAmount || 0)
+                  }
+                />
+              )}
+
+              {!isUpdateTitipan && (
+                <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                  <View>
+                    <Text className="text-gray-500 text-sm">
+                      {isTitip ? "Dititip Kepada" : "Di Order Oleh"}
+                    </Text>
+                    <Text className="text-lg font-medium">
+                      {visit.orderBy || "-"}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
               <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                 <View>
-                  <Text className="text-gray-500 text-sm">Notes</Text>
+                  <Text className="text-gray-500 text-sm">Keterangan Tambahan</Text>
                   <Text className="text-lg font-medium">
                     {visit.notes || "-"}
                   </Text>
                 </View>
               </View>
 
-              {/* Payment Info */}
-              {visit.transactions?.[0] && (
+              {isOrder && transaction && (
                 <>
-                  {/* Payment Status */}
                   <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                     <View>
                       <Text className="text-gray-500 text-sm">
-                        Payment Status
+                        Status Pembayaran
                       </Text>
                       <Text
                         className={`text-lg font-medium capitalize ${
-                          visit.transactions[0].paymentStatus === "paid"
+                          transaction.paymentStatus === "Lunas"
                             ? "text-green-600"
-                            : visit.transactions[0].paymentStatus === "partial"
+                            : transaction.paymentStatus === "Bayar Sebagian"
                             ? "text-yellow-600"
                             : "text-red-600"
                         }`}
                       >
-                        {visit.transactions[0].paymentStatus || "-"}
+                        {transaction.paymentStatus || "-"}
                       </Text>
                     </View>
                   </View>
 
-                  {/* Payment Type */}
                   <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                     <View>
-                      <Text className="text-gray-500 text-sm">Payment Type</Text>
+                      <Text className="text-gray-500 text-sm">
+                        Metode Pembayaran
+                      </Text>
                       <Text className="text-lg font-medium capitalize">
-                        {visit.transactions[0].paymentType || "-"}
+                        {transaction.paymentType || "-"}
                       </Text>
                     </View>
                   </View>
 
-                  {/* Paid Amount */}
                   <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                     <View>
-                      <Text className="text-gray-500 text-sm">Paid Amount</Text>
+                      <Text className="text-gray-500 text-sm">
+                       Jumlah Pembayaran
+                      </Text>
                       <Text className="text-lg font-medium">
-                        Rp{" "}
-                        {Number(
-                          visit.transactions[0].paidAmount || 0
-                        ).toLocaleString()}
+                        Rp {Number(transaction.paidAmount || 0).toLocaleString()}
                       </Text>
                     </View>
                   </View>
@@ -534,21 +378,6 @@ const SalesVisitDetail = () => {
               )}
             </>
           )}
-
-          {/* Button */}
-          {/* 
-          <View className="mt-6">
-            <Pressable
-              onPress={handleDelete}
-              disabled={isPending}
-              className="bg-red-600 rounded-lg p-4"
-            >
-              <Text className="text-white text-center font-semibold">
-                Delete Visit
-              </Text>
-            </Pressable>
-          </View> 
-          */}
         </View>
       </ScrollView>
     </SafeAreaView>

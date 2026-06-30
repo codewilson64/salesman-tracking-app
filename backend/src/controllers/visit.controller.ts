@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { db } from "../index.js";
-import { and, count, eq, gte, isNull, lte } from "drizzle-orm";
+import { and, eq, gte, isNull, lte } from "drizzle-orm";
 
 import { areasTable } from "../db/schemas/areas.js";
 import { customersTable } from "../db/schemas/customers.js";
@@ -10,6 +10,7 @@ import { transactionItemsTable } from "../db/schemas/transaction_items.js";
 import { usersTable } from "../db/schemas/users.js";
 import { visitsTable } from "../db/schemas/visit.js";
 import { haversine } from "../utils/haversine.js";
+import { consignmentItemsTable } from "../db/schemas/consignment_items.js";
 
 type ProductInput = {
   productId: string;
@@ -156,6 +157,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       notes, 
       transactionType, 
       products, 
+      consignmentItems,
       orderBy, 
       dueDate,
       paymentType, 
@@ -175,31 +177,35 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const validResults = ["new order", "follow-up", "shop closed"];
+    const validResults = ["Order Baru", "Titip Baru", "Update Titipan", "Follow Up", "Tutup Toko"];
 
     if (!result || !validResults.includes(result)) {
       return res.status(400).json({ message: "Invalid visit result" });
     }
 
-    if (!notes) {
-      return res.status(400).json({ message: "Please provide notes" });
-    }
-
-    if (result === "new order") {
-      if (!transactionType) {
+    if (result === "Order Baru" || result === "Titip Baru") {
+      if (result === "Order Baru" && !transactionType) {
         return res.status(400).json({
-          message: "Transaction type is required for new order",
+          message: "Transaction type is required for Order Baru",
         });
       }
 
-      if (!products || !Array.isArray(products) || products.length === 0) {
+      if ((result === "Order Baru" || result === "Titip Baru") && (!products || !Array.isArray(products) || products.length === 0)) {
         return res.status(400).json({
-          message: "Products are required for new order",
+          message: "Products are required",
         });
       }
     }
 
-    if (transactionType === "cash") {
+    if (result === "Update Titipan") {
+      if (!consignmentItems || !Array.isArray(consignmentItems) || consignmentItems.length === 0) {
+        return res.status(400).json({
+          message: "Consignment items are required",
+        });
+      }
+    }
+
+    if (result === "Order Baru" && transactionType === "Tunai") {
       if (!paymentType) {
         return res.status(400).json({
           message: "Payment type is required for cash transaction",
@@ -228,7 +234,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
       }
 
       // update visit
-      const shouldNotify = result === "new order";
+      const shouldNotify = result === "Order Baru" || result === "Titip Baru";
 
       const [customer] = await tx
         .select()
@@ -275,7 +281,7 @@ export const checkoutVisit = async (req: Request, res: Response) => {
 
       let transaction = null;
 
-      if (result === "new order") {
+      if (result === "Order Baru") {
         const totals = products.reduce(
           (acc: Totals, p: ProductInput) => {
             const price = Number(p.price);
@@ -298,20 +304,20 @@ export const checkoutVisit = async (req: Request, res: Response) => {
           }
         );
 
-        let paymentStatus: "paid" | "partial" | "unpaid" = "unpaid";
+        let paymentStatus: "Lunas" | "Bayar Sebagian" | "Belum Lunas" = "Belum Lunas";
         let finalPaidAmount = 0;
         let finalPaymentType = paymentType || null;
 
-        if (transactionType === "cash") {
-          paymentStatus = "paid";
+        if (transactionType === "Tunai") {
+          paymentStatus = "Lunas";
           finalPaidAmount = totals.finalAmount;
         } else {
           const paid = Number(paidAmount || 0);
           finalPaidAmount = paid;
 
-          if (paid === 0) paymentStatus = "unpaid";
-          else if (paid < totals.finalAmount) paymentStatus = "partial";
-          else paymentStatus = "paid";
+          if (paid === 0) paymentStatus = "Belum Lunas";
+          else if (paid < totals.finalAmount) paymentStatus = "Bayar Sebagian";
+          else paymentStatus = "Lunas";
 
           // no payment yet → no method
           if (paid === 0) {
@@ -335,19 +341,19 @@ export const checkoutVisit = async (req: Request, res: Response) => {
             paidAmount: finalPaidAmount.toString(),
             paymentType: finalPaymentType,
 
-            paidAt: paymentStatus === "paid" ? new Date() : null,
+            paidAt: paymentStatus === "Lunas" ? new Date() : null,
 
             adminPaidNotificationRead:
-              paymentStatus === "paid" ? false : true,
+              paymentStatus === "Lunas" ? false : true,
 
             salesmanPaidNotificationRead:
-              paymentStatus === "paid" ? false : true,
+              paymentStatus === "Lunas" ? false : true,
 
             adminUnpaidNotificationRead:
-              paymentStatus !== "paid" ? false : true,
+              paymentStatus !== "Lunas" ? false : true,
 
             salesmanUnpaidNotificationRead:
-              paymentStatus !== "paid" ? false : true,
+              paymentStatus !== "Lunas" ? false : true,
 
             remainingAmount: (
               totals.finalAmount - finalPaidAmount
@@ -381,6 +387,69 @@ export const checkoutVisit = async (req: Request, res: Response) => {
         );
 
         transaction = newTransaction;
+      }
+
+      if (result === "Titip Baru") {
+        await tx.insert(consignmentItemsTable).values(
+          products.map((p: ProductInput) => {
+            const price = Number(p.price);
+            const quantity = Number(p.quantity);
+
+            return {
+              visitId: visit.id,
+              productId: p.productId,
+              type: "Titip Baru",
+              quantity,
+              currentStock: 0,
+              remainingStock: quantity,
+              addedStock: quantity,
+              returnedStock: 0,
+              soldQuantity: 0,
+              newStock: quantity,
+              price: price.toString(),
+              totalAmount: (price * quantity).toString(),
+            };
+          })
+        );
+      }
+
+      if (result === "Update Titipan") {
+        await tx.insert(consignmentItemsTable).values(
+          consignmentItems.map((item: any) => {
+            const currentStock = Number(item.currentStock || 0);
+            const remainingStock = Number(item.remainingStock || 0);
+            const addedStock = Number(item.addedStock || 0);
+            const returnedStock = Number(item.returnedStock || 0);
+
+            const soldQuantity = Math.max(
+              currentStock - remainingStock - returnedStock,
+              0
+            );
+
+            const newStock = remainingStock + addedStock;
+
+            const price = Number(item.price || 0);
+
+            return {
+              visitId: visit.id,
+              productId: item.productId,
+
+              type: "update",
+
+              quantity: addedStock,
+
+              currentStock,
+              remainingStock,
+              addedStock,
+              returnedStock,
+              soldQuantity,
+              newStock,
+
+              price: price.toString(),
+              totalAmount: (price * soldQuantity).toString(),
+            };
+          })
+        );
       }
 
       return {
@@ -440,9 +509,9 @@ export const getAllVisits = async (req: Request, res: Response) => {
         id: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
         checkOutAt: visitsTable.checkOutAt,
+        checkInImage: visitsTable.checkInImage,
         visitResult: visitsTable.visitResult,
         notes: visitsTable.notes,
-        approvalStatus: visitsTable.approvalStatus,
         createdAt: visitsTable.createdAt,
 
         customerId: customersTable.id,
@@ -498,7 +567,6 @@ export const getVisitById = async (req: Request, res: Response) => {
 
     const visit = await db
       .select({
-        // visit info
         id: visitsTable.id,
         checkInAt: visitsTable.checkInAt,
         checkOutAt: visitsTable.checkOutAt,
@@ -584,9 +652,11 @@ export const getVisitById = async (req: Request, res: Response) => {
 
     const transactionItems = await db
       .select({
-        transactionId: transactionItemsTable.transactionId,
         productId: productsTable.id,
         productName: productsTable.name,
+        unit: productsTable.unit,
+        
+        transactionId: transactionItemsTable.transactionId,
         quantity: transactionItemsTable.quantity,
         price: transactionItemsTable.price,
         discount: transactionItemsTable.discount,
@@ -609,12 +679,40 @@ export const getVisitById = async (req: Request, res: Response) => {
         ),
       }));
 
+      const consignmentItems = await db
+        .select({
+          productId: productsTable.id,
+          productName: productsTable.name,
+          unit: productsTable.unit,
+
+          quantity: consignmentItemsTable.quantity,
+          currentStock: consignmentItemsTable.currentStock,
+          remainingStock: consignmentItemsTable.remainingStock,
+          addedStock: consignmentItemsTable.addedStock,
+          returnedStock: consignmentItemsTable.returnedStock,
+          soldQuantity: consignmentItemsTable.soldQuantity,
+          newStock: consignmentItemsTable.newStock,
+          price: consignmentItemsTable.price,
+          totalAmount: consignmentItemsTable.totalAmount,
+          type: consignmentItemsTable.type,
+        })
+        .from(consignmentItemsTable)
+        .leftJoin(productsTable, eq(consignmentItemsTable.productId, productsTable.id))
+        .leftJoin(visitsTable, eq(consignmentItemsTable.visitId, visitsTable.id))
+        .where(
+          and(
+            eq(consignmentItemsTable.visitId, id),
+            eq(visitsTable.companyId, user.companyId)
+          )
+        );
+
     return res.status(200).json({
       message: "Visit fetched successfully",
       data: {
         ...data,
         duration,
         transactions: formattedTransactions, 
+        consignmentItems,
       }
     });
 

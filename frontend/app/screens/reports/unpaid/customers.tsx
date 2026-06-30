@@ -150,8 +150,7 @@ const CustomersScreen = () => {
                     </Text>
 
                     <Text className="text-sm text-gray-500">
-                      {item.transactions.length} transaction
-                      {item.transactions.length !== 1 ? "s" : ""}
+                      {item.transactions.length} transaksi
                     </Text>
                   </View>
                 </View>

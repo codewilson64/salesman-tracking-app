@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { DraftProduct, VisitDraft } from "../types/visitDraft";
 import { TransactionItem, Visit } from "../types/visit";
+import { Product } from "../types/product";
 
 export type MappedItem = {
   productId: string;
@@ -12,7 +13,8 @@ export type MappedItem = {
 
 export const useVisitTransaction = (
   visit?: Visit,
-  draft?: VisitDraft
+  draft?: VisitDraft,
+  products?: Product[]
 ) => {
   return useMemo(() => {
     if (!visit) {
@@ -30,12 +32,25 @@ export const useVisitTransaction = (
 
     const isCheckedOut = !!visit.checkOutAt;
 
-    const dbItems = visit.transactions?.flatMap((t) => t.items) ?? [];
+    const isTitip = visit.visitResult === "Titip Baru" || draft?.result === "Titip Baru";
+
+    const transactionItems = visit.transactions?.flatMap((t) => t.items) ?? [];
+
+    const consignmentItems = visit.consignmentItems?.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: Number(item.price),
+        discount: 0,
+        totalAfterDiscount: Number(item.totalAmount),
+      })) ?? [];
+
+    const dbItems = isTitip ? consignmentItems : transactionItems;
 
     const displayItems: (TransactionItem | DraftProduct)[] =
       isCheckedOut ? dbItems : draft?.products || [];
 
-    const mappedItems: MappedItem[] = displayItems.map((item) => {
+    const mappedItems: MappedItem[] = displayItems.map((item: any) => {
+      const productFromList = products?.find((p) => p.id === item.productId);
       const quantity = Number(item.quantity);
       const price = Number(item.price);
       const discount = Number(item.discount || 0);
@@ -49,6 +64,8 @@ export const useVisitTransaction = (
 
       return {
         productId: item.productId,
+        productName: item.productName || productFromList?.name,
+        unit: item.unit || productFromList?.unit,
         quantity,
         price,
         discount,

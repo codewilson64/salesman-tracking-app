@@ -14,7 +14,7 @@ import unpaid from "../assets/reportIcons/unpaid.png";
 export const ReportMenus = [
   {
     id: 1,
-    label: "Paid Transactions",
+    label: "Transaksi Lunas",
     route: "screens/reports/paid",
     roles: ["owner", "salesman"],
     icon: paid,
@@ -22,7 +22,7 @@ export const ReportMenus = [
   },
   {
     id: 2,
-    label: "Unpaid / Tagihan",
+    label: "Tagihan",
     route: "screens/reports/unpaid",
     roles: ["owner", "salesman"],
     icon: unpaid,

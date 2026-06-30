@@ -80,7 +80,7 @@ const SalesmenScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">Paid Payment</Text>
+        <Text className="text-2xl font-bold">Transaksi Lunas</Text>
       </View>
 
       <FlatList

@@ -167,7 +167,7 @@ const SalesmanDetail = () => {
       {/* Info */}
       <View className="mt-4">
         <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Phone</Text>
+          <Text className="text-gray-500 text-sm">No HP</Text>
           <Text className="text-lg font-medium">
             {salesman.phone}
           </Text>
@@ -181,7 +181,7 @@ const SalesmanDetail = () => {
         </View>
 
         <View className="p-4 border-b border-gray-200">
-          <Text className="text-gray-500 text-sm">Address</Text>
+          <Text className="text-gray-500 text-sm">Alamat</Text>
           <Text className="text-lg font-medium">
             {salesman.address}
           </Text>

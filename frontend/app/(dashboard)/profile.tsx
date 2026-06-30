@@ -62,28 +62,28 @@ const Profile = () => {
           {/* Company */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-              <Text className="text-gray-500 text-sm">Company</Text>
+              <Text className="text-gray-500 text-sm">Nama Perusahaan</Text>
               <Text className="text-lg font-medium">{user.companyName || "-"}</Text>
             </View>
           </View>
           {/* Name */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-              <Text className="text-gray-500 text-sm">Name</Text>
+              <Text className="text-gray-500 text-sm">Nama</Text>
               <Text className="text-lg font-medium">{user.name || "-"}</Text>
             </View>
           </View>
           {/* Address */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-              <Text className="text-gray-500 text-sm">Address</Text>
+              <Text className="text-gray-500 text-sm">Alamat</Text>
               <Text className="text-lg font-medium">{user.address || "-"}</Text>
             </View>
           </View>
           {/* Phone */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-              <Text className="text-gray-500 text-sm">Phone</Text>
+              <Text className="text-gray-500 text-sm">No HP</Text>
               <Text className="text-lg font-medium">{user.phone || "-"}</Text>
             </View>
           </View>

@@ -25,10 +25,14 @@ import { PaymentType, TransactionType, VisitResult } from "../../../types/visitD
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Product } from "../../../types/product";
 import { Ionicons } from "@expo/vector-icons";
+import { UpdateConsignmentItemModal } from "../../../components/modal/UpdateConsignmentItemModal";
+import { useGetVisitById } from "../../../hooks/visit/useGetVisitById";
+import { CheckoutProductList } from "../../../components/checkout/CheckoutProductList";
+import { CheckoutUpdateTitipanList } from "../../../components/checkout/CheckoutUpdateTitipanList";
 
-const results: VisitResult[] = ["new order", "follow-up", "shop closed"];
-const transactionTypes: TransactionType[] = ["cash", "credit"];
-const paymentTypes: PaymentType[] = ["cash", "transfer"];
+const results: VisitResult[] = ["Order Baru", "Titip Baru", "Update Titipan", "Follow Up", "Tutup Toko"];
+const transactionTypes: TransactionType[] = ["Tunai", "Kredit"];
+const paymentTypes: PaymentType[] = ["Tunai", "Transfer"];
 
 type SelectOption<T extends string> = {
   value: T;
@@ -50,6 +54,7 @@ const CheckoutVisit = () => {
       id: id,
       notes: "",
       products: [],
+      consignmentItems: [],
       paidAmount: 0,
       paymentType: null,
       dueDate: undefined,
@@ -60,6 +65,9 @@ const CheckoutVisit = () => {
 
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
+  const [showUpdateConsignmentModal, setShowUpdateConsignmentModal] = useState(false);
+
+  const { data: visit } = useGetVisitById(id);
 
   const { isPending } = useCheckoutVisit();
   const { data: products } = useGetAllProduct()
@@ -69,6 +77,11 @@ const CheckoutVisit = () => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "products",
+  });
+
+  const { fields: consignmentFields, append: appendConsignment, remove: removeConsignment } = useFieldArray({
+    control,
+    name: "consignmentItems",
   });
 
   /* ================= PREFILL FORM ================= */
@@ -88,6 +101,13 @@ const CheckoutVisit = () => {
           quantity: p.quantity,
           discount: p.discount,
         })),
+        consignmentItems: draft.consignmentItems.map((item) => ({
+          productId: item.productId,
+          currentStock: item.currentStock,
+          remainingStock: item.remainingStock,
+          addedStock: item.addedStock,
+          returnedStock: item.returnedStock,
+        })),
         orderBy: draft.orderBy,
         paymentType: draft.paymentType,
         paidAmount: draft.paidAmount,
@@ -101,8 +121,14 @@ const CheckoutVisit = () => {
 
   const selectedResult = watch("result");
   const selectedTransactionType = watch("transactionType");
+
+  const isOrder = selectedResult === "Order Baru";
+  const isTitip = selectedResult === "Titip Baru";
+  const isUpdateTitipan = selectedResult === "Update Titipan";
+
   const paidAmount = watch("paidAmount");  
   const addedProducts = watch("products") || [];
+  const addedConsignmentItems = watch("consignmentItems") || [];
 
    /* ================= SUBMIT ================= */
 
@@ -141,7 +167,7 @@ const CheckoutVisit = () => {
                 />
               </Pressable>
 
-              <Text className="text-2xl font-bold">Checkout visit</Text>
+              <Text className="text-2xl font-bold">Checkout Kunjungan</Text>
             </View>
 
             {/* RESULT DROPDOWN */}
@@ -149,205 +175,219 @@ const CheckoutVisit = () => {
               <FormSelectModal
                   control={control}
                   name="result"
-                  label="Visit Result"
+                  label="Hasil Kunjungan"
                   options={results.map((value) => ({ value }))}
                   getLabel={(item: SelectOption<VisitResult>) => item.value}
                   errors={errors}
               />
 
-              {selectedResult === "new order" && (
-                <>
-                  <FormSelectModal
-                    control={control}
-                    name="transactionType"
-                    label="Transaction Type"
-                    options={transactionTypes.map((value) => ({ value }))}
-                    getLabel={(item: SelectOption<TransactionType>) => item.value}
-                    errors={errors}
-                  />
-
-                  {/* ADD PRODUCT BUTTON */}
-                  <Pressable
-                    onPress={() => setShowProductModal(true)}
-                    className="bg-green-600 p-3 rounded-lg"
-                  >
-                    <Text className="text-white text-center">Add Product</Text>
-                  </Pressable>
-
-                  <ProductFieldItem
-                    visible={showProductModal}
-                    products={products}
-                    onClose={() => setShowProductModal(false)}
-                    onSave={(product) => {
-                      append(product);
-                      setShowProductModal(false);
-                    }}
-                  />
-
-                  {errors.products && (
-                    <Text className="text-red-500">
-                      {errors.products.message}
-                    </Text>
-                  )}
-
-                  {/* ADDED PRODUCT LIST */}
-                  <View className="gap-3">
-                    {fields.map((field, index) => {
-                      const item = addedProducts[index];
-
-                      if (!item) return null;
-
-                      const selectedProduct = products?.find(
-                        (p: Product) => p.id === item.productId
-                      );
-
-                      const price = selectedProduct?.price || 0;
-                      const unit = selectedProduct?.unit || "-";
-                      const quantity = Number(item.quantity || 0);
-                      const discount = Number(item.discount || 0);
-                      const total = price * quantity - discount;
-
-                      return (
-                        <View
-                          key={field.id}
-                          className="border border-gray-300 rounded-lg p-3 bg-gray-50"
-                        >
-                          <View className="flex-row justify-between">
-                            <View className="flex-1">
-                              <Text className="font-semibold text-base">
-                                {selectedProduct?.name || "Unknown Product"}
-                              </Text>
-
-                              <Text className="text-gray-600 mt-1">
-                                Quantity: {quantity} {unit}
-                              </Text>
-
-                              <Text className="text-gray-600">
-                                Price / {unit}: {price}
-                              </Text>
-
-                              <Text className="text-gray-600">
-                                Discount: {discount}
-                              </Text>
-
-                              <Text className="font-semibold mt-1">
-                                Total: {total}
-                              </Text>
-                            </View>
-
-                            <Pressable
-                              onPress={() => remove(index)}
-                              className="self-start"
-                            >
-                              <Ionicons name="trash-outline" size={18} color="red" />
-                            </Pressable>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-
-                  {/* ORDER BY */}
-                  <FormInput
-                    control={control}
-                    name="orderBy"
-                    label="Order by"
-                  />
-
-                  {/* PAYMENT SECTION */}
-                  {/* CASH */}
-                  {selectedTransactionType === "cash" && (
+                {/* NEW ORDER */}
+                {isOrder && (
+                  <>
                     <FormSelectModal
                       control={control}
-                      name="paymentType"
-                      label="Payment Method"
-                      options={paymentTypes.map((value) => ({ value }))}
-                      getLabel={(item: SelectOption<PaymentType>) => item.value}
+                      name="transactionType"
+                      label="Tipe Transaksi"
+                      options={transactionTypes.map((value) => ({ value }))}
+                      getLabel={(item: SelectOption<TransactionType>) => item.value}
                       errors={errors}
                     />
-                  )}
 
-                  {/* CREDIT */}
-                  {selectedTransactionType === "credit" && (
-                    <>
-                      <FormInput
+                    <Pressable
+                      onPress={() => setShowProductModal(true)}
+                      className="bg-green-600 p-3 rounded-lg"
+                    >
+                      <Text className="text-white text-center">Tambah Produk</Text>
+                    </Pressable>
+
+                    <ProductFieldItem
+                      visible={showProductModal}
+                      products={products}
+                      isTitip={false}
+                      onClose={() => setShowProductModal(false)}
+                      onSave={(product) => {
+                        append(product);
+                        setShowProductModal(false);
+                      }}
+                    />
+
+                    {errors.products && (
+                      <Text className="text-red-500">{errors.products.message}</Text>
+                    )}
+
+                    <CheckoutProductList
+                      fields={fields}
+                      items={addedProducts}
+                      products={products}
+                      isTitip={isTitip}
+                      onRemove={remove}
+                    />
+
+                    <FormInput
+                      control={control}
+                      name="orderBy"
+                      label="Diorder oleh"
+                    />
+
+                    {selectedTransactionType === "Tunai" && (
+                      <FormSelectModal
                         control={control}
-                        name="paidAmount"
-                        label="Paid Amount"
-                        keyboardType="numeric"
+                        name="paymentType"
+                        label="Metode Pembayaran"
+                        options={paymentTypes.map((value) => ({ value }))}
+                        getLabel={(item: SelectOption<PaymentType>) => item.value}
+                        errors={errors}
                       />
+                    )}
 
-                      {/* Due Date */}
-                      <Controller
-                        control={control}
-                        name="dueDate"
-                        render={({ field: { value, onChange } }) => (
-                          <View>
-                            <Text className="mb-2 font-normal">Due Date</Text>
-
-                            <Pressable
-                              onPress={() => setShowDueDatePicker(true)}
-                              className="border border-gray-300 rounded-lg px-4 py-3"
-                            >
-                              <Text className={value ? "text-black" : "text-gray-400"}>
-                                {value
-                                  ? new Date(value).toLocaleDateString("id-ID", {
-                                      day: "2-digit",
-                                      month: "long",
-                                      year: "numeric",
-                                    })
-                                  : "Select due date"}
-                              </Text>
-                            </Pressable>
-
-                            {errors.dueDate && (
-                              <Text className="text-red-500 mt-1">
-                                {errors.dueDate.message}
-                              </Text>
-                            )}
-
-                            {showDueDatePicker && (
-                              <DateTimePicker
-                                value={value ? new Date(value) : new Date()}
-                                mode="date"
-                                display={Platform.OS === "ios" ? "spinner" : "default"}
-                                minimumDate={new Date()}
-                                onChange={(event, selectedDate) => {
-                                  setShowDueDatePicker(false);
-
-                                  if (selectedDate) {
-                                    onChange(selectedDate.toISOString());
-                                  }
-                                }}
-                              />
-                            )}
-                          </View>
-                        )}
-                      />
-
-                      {Number(paidAmount) > 0 && (
-                        <FormSelectModal
+                    {selectedTransactionType === "Kredit" && (
+                      <>
+                        <FormInput
                           control={control}
-                          name="paymentType"
-                          label="Payment Method"
-                          options={[
-                            { value: "cash" },
-                            { value: "transfer" },
-                          ]}
-                          getLabel={(item: { value: string }) => item.value}
-                          errors={errors}
+                          name="paidAmount"
+                          label="Jumlah Bayar"
+                          keyboardType="numeric"
                         />
-                      )}
-                    </>
-                  )}
-                </>
-              )}
+
+                        <Controller
+                          control={control}
+                          name="dueDate"
+                          render={({ field: { value, onChange } }) => (
+                            <View>
+                              <Text className="mb-2 font-normal">Tanggal Jatuh Tempo</Text>
+
+                              <Pressable
+                                onPress={() => setShowDueDatePicker(true)}
+                                className="border border-gray-300 rounded-lg px-4 py-3"
+                              >
+                                <Text className={value ? "text-black" : "text-gray-400"}>
+                                  {value
+                                    ? new Date(value).toLocaleDateString("id-ID", {
+                                        day: "2-digit",
+                                        month: "long",
+                                        year: "numeric",
+                                      })
+                                    : "Select due date"}
+                                </Text>
+                              </Pressable>
+
+                              {errors.dueDate && (
+                                <Text className="text-red-500 mt-1">
+                                  {errors.dueDate.message}
+                                </Text>
+                              )}
+
+                              {showDueDatePicker && (
+                                <DateTimePicker
+                                  value={value ? new Date(value) : new Date()}
+                                  mode="date"
+                                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                                  minimumDate={new Date()}
+                                  onChange={(event, selectedDate) => {
+                                    setShowDueDatePicker(false);
+                                    if (selectedDate) onChange(selectedDate.toISOString());
+                                  }}
+                                />
+                              )}
+                            </View>
+                          )}
+                        />
+
+                        {Number(paidAmount) > 0 && (
+                          <FormSelectModal
+                            control={control}
+                            name="paymentType"
+                            label="Metode Pembayaran"
+                            options={[{ value: "Tunai" }, { value: "Transfer" }]}
+                            getLabel={(item: { value: string }) => item.value}
+                            errors={errors}
+                          />
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* TITIP BARU */}
+                {isTitip && (
+                  <>
+                    <Pressable
+                      onPress={() => setShowProductModal(true)}
+                      className="bg-green-600 p-3 rounded-lg"
+                    >
+                      <Text className="text-white text-center">Tambah Produk</Text>
+                    </Pressable>
+
+                    <ProductFieldItem
+                      visible={showProductModal}
+                      products={products}
+                      isTitip
+                      onClose={() => setShowProductModal(false)}
+                      onSave={(product) => {
+                        append(product);
+                        setShowProductModal(false);
+                      }}
+                    />
+
+                    {errors.products && (
+                      <Text className="text-red-500">{errors.products.message}</Text>
+                    )}
+
+                    <CheckoutProductList
+                      fields={fields}
+                      items={addedProducts}
+                      products={products}
+                      isTitip={isTitip}
+                      onRemove={remove}
+                    />
+
+                    <FormInput
+                      control={control}
+                      name="orderBy"
+                      label="Dititip kepada"
+                    />
+                  </>
+                )}
+
+                {/* UPDATE TITIPAN */}
+                {isUpdateTitipan && (
+                  <>
+                    <Pressable
+                      onPress={() => setShowUpdateConsignmentModal(true)}
+                      className="bg-green-600 p-3 rounded-lg"
+                    >
+                      <Text className="text-white text-center">Tambah Produk</Text>
+                    </Pressable>
+
+                    <UpdateConsignmentItemModal
+                      visible={showUpdateConsignmentModal}
+                      products={products}
+                      customerId={visit?.customerId}
+                      onClose={() => setShowUpdateConsignmentModal(false)}
+                      onSave={(item) => {
+                        appendConsignment(item);
+                        setShowUpdateConsignmentModal(false);
+                      }}
+                    />
+
+                    <CheckoutUpdateTitipanList
+                      fields={consignmentFields}
+                      items={addedConsignmentItems}
+                      products={products}
+                      onRemove={removeConsignment}
+                    />
+
+                    {errors.consignmentItems && (
+                      <Text className="text-red-500">{errors.consignmentItems.message}</Text>
+                    )}
+                  </>
+                )}
 
               {/* NOTES */}
               <FormInput
                 control={control}
                 name="notes"
-                label="Notes"
+                label="Catatan"
                 placeholder="Enter visit notes..."
                 multiline
               />

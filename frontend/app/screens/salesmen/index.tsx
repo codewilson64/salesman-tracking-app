@@ -41,7 +41,7 @@ const SalesmanScreen = () => {
           />
         </Pressable>
 
-        <Text className="text-2xl font-bold">List of salesmen</Text>
+        <Text className="text-2xl font-bold">Daftar Salesman</Text>
       </View>
 
       <FlatList
@@ -84,7 +84,7 @@ const SalesmanScreen = () => {
         className="bg-black rounded-lg p-4 mb-4"
       >
         <Text className="text-white text-center font-semibold">
-          + Add Salesman
+          + Tambah Salesman
         </Text>
       </Pressable>
 

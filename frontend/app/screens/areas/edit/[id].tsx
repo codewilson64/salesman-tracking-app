@@ -24,11 +24,10 @@ import { FormMultiSelectModal } from "../../../components/areaInputForm/FormMult
 import { useAuthStore } from "../../../stores/authStore";
 import { useGetSalesmanById } from "../../../hooks/salesman/useGetSalesmanById";
 import { User } from "../../../types/user";
+import { days } from "../../../constants/days";
 
 
 type FormData = z.infer<typeof areaSchema>;
-
-const days = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday",];
 
 export default function EditAreaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -110,14 +109,14 @@ export default function EditAreaScreen() {
             <FormInput
               control={control}
               name="name"
-              label="Area Name"
+              label="Nama Area"
               errors={errors}
             />
 
             <FormInput
               control={control}
               name="city"
-              label="City"
+              label="Kota"
               errors={errors}
             />
 
@@ -149,7 +148,7 @@ export default function EditAreaScreen() {
             <FormSelectModal
               control={control}
               name="day"
-              label="Day"
+              label="Hari"
               options={days.map((d) => ({ value: d }))}
               getLabel={(item: any) => item.value}
               errors={errors}
@@ -158,7 +157,7 @@ export default function EditAreaScreen() {
             <FormMultiSelectModal
               control={control}
               name="weeks"
-              label="Weeks"
+              label="Minggu"
               options={[1, 2, 3, 4, 5]}
               errors={errors}
             />

@@ -139,7 +139,7 @@ const ProductDetail = () => {
         {/* Name */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-            <Text className="text-gray-500 text-sm">Name</Text>
+            <Text className="text-gray-500 text-sm">Nama produk</Text>
             <Text className="text-lg font-medium">{product.name}</Text>
             </View>
         </View>
@@ -147,7 +147,7 @@ const ProductDetail = () => {
         {/* Price */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-            <Text className="text-gray-500 text-sm">Price</Text>
+            <Text className="text-gray-500 text-sm">Harga</Text>
             <Text className="text-lg font-medium">{product.price}</Text>
             </View>
         </View>
@@ -155,7 +155,7 @@ const ProductDetail = () => {
         {/* Unit */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-            <Text className="text-gray-500 text-sm">Unit</Text>
+            <Text className="text-gray-500 text-sm">Satuan unit</Text>
             <Text className="text-lg font-medium">{product.unit}</Text>
             </View>
         </View>
@@ -163,7 +163,7 @@ const ProductDetail = () => {
         {/* Desc */}
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <View>
-            <Text className="text-gray-500 text-sm">Description</Text>
+            <Text className="text-gray-500 text-sm">Deskripsi produk</Text>
             <Text className="text-lg font-medium">{product.description}</Text>
             </View>
         </View>

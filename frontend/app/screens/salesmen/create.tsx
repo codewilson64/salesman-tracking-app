@@ -78,7 +78,7 @@ export default function CreateSalesmanScreen() {
               />
             </Pressable>
 
-            <Text className="text-2xl font-bold">Create salesmen</Text>
+            <Text className="text-2xl font-bold">Buat salesmen</Text>
           </View>
 
           <View className="gap-y-6">
@@ -86,7 +86,7 @@ export default function CreateSalesmanScreen() {
             <FormInput 
               control={control} 
               name="name" 
-              label="Fullname" 
+              label="Nama lengkap" 
               errors={errors} 
             />
 
@@ -110,7 +110,7 @@ export default function CreateSalesmanScreen() {
             <FormInput 
               control={control} 
               name="address" 
-              label="Address" 
+              label="Alamat" 
               errors={errors} 
             />
 
@@ -118,13 +118,13 @@ export default function CreateSalesmanScreen() {
             <FormInput 
               control={control} 
               name="phone" 
-              label="Phone" 
+              label="No HP" 
               errors={errors} 
             />
             
             {/* IMAGE */}
               <View>
-              <Text className="mb-3 text-gray-700">Photo</Text>
+              <Text className="mb-3 text-gray-700">Foto</Text>
                 <Pressable
                   onPress={pickImage}
                   className="w-full h-60 border border-gray-300 rounded-xl items-center justify-center mb-1 overflow-hidden"
@@ -168,7 +168,7 @@ export default function CreateSalesmanScreen() {
               className="bg-black rounded-lg p-4 mt-8"
             >
               <Text className="text-white text-center font-semibold">
-                {isPending ? "Creating..." : "Create Salesman"}
+                {isPending ? "Creating..." : "Save"}
               </Text>
             </Pressable>
 

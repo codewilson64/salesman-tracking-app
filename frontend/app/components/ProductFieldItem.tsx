@@ -22,6 +22,7 @@ import {
 type Props = {
   visible: boolean;
   products: Product[] | undefined;
+  isTitip?: boolean;
   onClose: () => void;
   onSave: (data: TTransactionItem) => void;
 };
@@ -29,6 +30,7 @@ type Props = {
 export const ProductFieldItem = ({
   visible,
   products,
+  isTitip = false,
   onClose,
   onSave,
 }: Props) => {
@@ -101,12 +103,12 @@ export const ProductFieldItem = ({
           showsVerticalScrollIndicator={false}
         >
           <View className="w-full bg-white rounded-2xl p-5 gap-4 max-w-[420px] self-center">
-            <Text className="text-xl font-bold">Add Product</Text>
+            <Text className="text-xl font-bold">Tambah Produk</Text>
 
             <FormSelectModal
               control={control}
               name="productId"
-              label="Product"
+              label="Produk"
               options={
                 products?.map((p: Product) => ({
                   value: p.id,
@@ -120,26 +122,28 @@ export const ProductFieldItem = ({
             <FormInput
               control={control}
               name="quantity"
-              label={`Quantity (${unit})`}
+              label={isTitip ? `Jumlah dititip (${unit})` : `Kuantitas (${unit})`}
               keyboardType="numeric"
             />
 
-            <FormInput
-              control={control}
-              name="discount"
-              label="Discount"
-              keyboardType="numeric"
-            />
+            {!isTitip && (
+              <FormInput
+                control={control}
+                name="discount"
+                label="Diskon"
+                keyboardType="numeric"
+              />
+            )}
 
             <View>
-              <Text className="mb-2">Unit</Text>
+              <Text className="mb-2">Satuan Unit</Text>
               <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
                 <Text>{unit}</Text>
               </View>
             </View>
 
             <View>
-              <Text className="mb-2">Price / {unit}</Text>
+              <Text className="mb-2">Harga / {unit}</Text>
               <View className="border border-gray-300 p-3 rounded-lg bg-gray-100">
                 <Text>{price || "-"}</Text>
               </View>

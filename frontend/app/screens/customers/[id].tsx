@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Pressable, Alert, Image, Platform, Linking, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, Pressable, Alert, Image, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,6 +9,8 @@ import { useState } from "react";
 
 import back from '../../assets/globalIcons/back.png'
 import dots from "../../assets/globalIcons/dots.png";
+import { useGetCustomerConsignmentStocks } from "../../hooks/consignment/useGetCustomerConsignmentStocks";
+import { ActiveConsignmentStockSection } from "../../components/ActiveConsignmentStock";
 
 const CustomerDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,6 +20,7 @@ const CustomerDetail = () => {
 
   const { data: customer, isLoading, isError } = useGetCustomerById(id);
   const { mutateAsync: deleteCustomer, isPending } = useDeleteCustomer();
+  const { data: consignmentStocks = [] } = useGetCustomerConsignmentStocks(id);
 
   const handleDelete = () => {
     setShowMenu(false);
@@ -148,7 +151,7 @@ const CustomerDetail = () => {
 
           {/* AREA */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Area</Text>
+            <Text className="text-gray-500 text-sm">Kawasan / Area</Text>
             <Text className="text-lg font-medium capitalize">
               {customer.areaName || "-"}
             </Text>
@@ -156,7 +159,7 @@ const CustomerDetail = () => {
 
           {/* CUSTOMER NAME */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Customer Name</Text>
+            <Text className="text-gray-500 text-sm">Nama pelanggan</Text>
             <Text className="text-lg font-medium capitalize">
               {customer.customerName}
             </Text>
@@ -164,7 +167,7 @@ const CustomerDetail = () => {
 
           {/* SHOP NAME */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Shop Name</Text>
+            <Text className="text-gray-500 text-sm">Nama toko</Text>
             <Text className="text-lg font-medium capitalize">
               {customer.shopName}
             </Text>
@@ -172,13 +175,13 @@ const CustomerDetail = () => {
 
           {/* PHONE */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Phone</Text>
+            <Text className="text-gray-500 text-sm">No HP</Text>
             <Text className="text-lg font-medium">{customer.phone}</Text>
           </View>
 
           {/* ADDRESS */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Address</Text>
+            <Text className="text-gray-500 text-sm">Alamat</Text>
             <Text className="text-lg font-medium">
               {customer.address || "-"}
             </Text>
@@ -186,10 +189,16 @@ const CustomerDetail = () => {
 
           {/* DESCRIPTION */}
           <View className="p-4 border-b border-gray-200">
-            <Text className="text-gray-500 text-sm">Description</Text>
+            <Text className="text-gray-500 text-sm">Deskripsi</Text>
             <Text className="text-lg font-medium">
               {customer.description || "-"}
             </Text>
+          </View>
+
+          <View className="p-4 border-b border-gray-200">
+            <Text className="text-gray-500 text-sm mb-3">Stok Titipan Aktif</Text>
+
+            <ActiveConsignmentStockSection stocks={consignmentStocks} />
           </View>
 
           {/* MAP */}
@@ -199,7 +208,7 @@ const CustomerDetail = () => {
                 onPress={() => openMap(lat, lng)}
                 className="bg-green-600 rounded-lg p-3"
               >
-                <Text className="text-white text-center">Open Location</Text>
+                <Text className="text-white text-center">Lihat Titik Lokasi</Text>
               </Pressable>
             </View>
           )}

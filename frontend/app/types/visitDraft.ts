@@ -1,6 +1,6 @@
-export type VisitResult = "new order" | "follow-up" | "shop closed";
-export type TransactionType = "cash" | "credit";
-export type PaymentType = "cash" | "transfer";
+export type VisitResult = "Order Baru" | "Titip Baru" | "Update Titipan" | "Follow Up" | "Tutup Toko";
+export type TransactionType = "Tunai" | "Kredit";
+export type PaymentType = "Tunai" | "Transfer";
 
 export type DraftProduct = {
   productId: string;
@@ -9,10 +9,21 @@ export type DraftProduct = {
   discount: number;
 };
 
+export type DraftConsignmentItem = {
+  productId: string;
+  currentStock: number;
+  remainingStock: number;
+  addedStock: number;
+  returnedStock: number;
+};
+
 export type VisitDraft = {
   result: VisitResult | null;
   transactionType: TransactionType | null;
+
   products: DraftProduct[];
+  consignmentItems: DraftConsignmentItem[];
+
   paidAmount: number;
   paymentType: PaymentType | null;
   orderBy: string;

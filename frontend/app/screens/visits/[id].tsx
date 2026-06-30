@@ -10,28 +10,20 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import back from '../../assets/globalIcons/back.png'
+import back from "../../assets/globalIcons/back.png";
 
 import { useGetVisitById } from "../../hooks/visit/useGetVisitById";
 import { useDeleteVisit } from "../../hooks/visit/useDeleteVisit";
 import { formatTime } from "../../helper/formatTime";
 import { formatDuration } from "../../helper/formatDuration";
 import { useVisitDraftStore } from "../../stores/visitStore";
-import { useGetAllProduct } from "../../hooks/product/useGetAllProduct";
-import { Product } from "../../types/product";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { openMap } from "../../utils/openMap";
 import { useVisitTransaction } from "../../hooks/useVisitTransaction";
-
-const getGpsAccuracyLabel = (accuracy?: number | null) => {
-  if (accuracy == null) return "-";
-
-  if (accuracy <= 10) return `Excellent`;
-  if (accuracy <= 20) return `Good`;
-
-  return `Poor`;
-};
+import { UpdateTitipanList } from "../../components/visit/UpdateTitipanList";
+import { VisitProductList } from "../../components/visit/ProductList";
+import { useGetAllProduct } from "../../hooks/product/useGetAllProduct";
 
 const VisitDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,16 +31,35 @@ const VisitDetail = () => {
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-
   const [activeTab, setActiveTab] = useState<"basic" | "transaction">("basic");
-  
+
   const { data: products } = useGetAllProduct();
   const { data: visit, isLoading, isError } = useGetVisitById(id);
   const { mutateAsync: deleteVisit, isPending } = useDeleteVisit();
-  
-  const draft = useVisitDraftStore((state) => id ? state.drafts[id] : undefined);
-  const { mappedItems, subtotal, totalDiscount, finalAmount, transactionType, paymentStatus, paidAmount, paymentType } = useVisitTransaction(visit, draft);
-  
+
+  const draft = useVisitDraftStore((state) =>
+    id ? state.drafts[id] : undefined
+  );
+
+  const visitResult = visit?.visitResult || draft?.result;
+
+  const isTitip = visitResult === "Titip Baru";
+  const isUpdateTitipan = visitResult === "Update Titipan";
+  const isOrder = visitResult === "Order Baru";
+
+  const consignmentItems = draft?.consignmentItems || visit?.consignmentItems || [];
+
+  const {
+    mappedItems,
+    subtotal,
+    totalDiscount,
+    finalAmount,
+    transactionType,
+    paymentStatus,
+    paidAmount,
+    paymentType,
+  } = useVisitTransaction(visit, draft, products);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["visit", id] });
@@ -57,7 +68,7 @@ const VisitDetail = () => {
 
   const handleDelete = () => {
     Alert.alert(
-      `Delete Visit?`,
+      "Delete Visit?",
       "Are you sure you want to delete this visit? This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
@@ -66,17 +77,21 @@ const VisitDetail = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteVisit({ id, imageId: visit?.checkInImageId });
+              await deleteVisit({
+                id,
+                imageId: visit?.checkInImageId,
+              });
               router.back();
             } catch (err: any) {
-              const message = err?.response?.data?.message || "Failed to delete visit";
+              const message =
+                err?.response?.data?.message || "Failed to delete visit";
               Alert.alert("Delete Failed", message);
             }
-          }
+          },
         },
       ]
     );
-  }
+  };
 
   if (isLoading) {
     return (
@@ -96,7 +111,6 @@ const VisitDetail = () => {
 
   const lat = visit.latitude;
   const lng = visit.longitude;
-
   const hasLocation = lat != null && lng != null;
 
   return (
@@ -135,7 +149,6 @@ const VisitDetail = () => {
         </View>
 
         <View className="px-4">
-          {/* Tabs */}
           <View className="flex-row mb-4 border-b border-gray-200">
             <Pressable
               onPress={() => setActiveTab("basic")}
@@ -148,7 +161,7 @@ const VisitDetail = () => {
                   activeTab === "basic" ? "text-blue-500" : "text-gray-400"
                 }`}
               >
-                Visit Info
+                Informasi Kunjungan
               </Text>
             </Pressable>
 
@@ -160,150 +173,96 @@ const VisitDetail = () => {
             >
               <Text
                 className={`text-center font-medium ${
-                  activeTab === "transaction" ? "text-blue-500" : "text-gray-400"
+                  activeTab === "transaction"
+                    ? "text-blue-500"
+                    : "text-gray-400"
                 }`}
               >
-                Visit Result
+                Hasil Kunjungan
               </Text>
             </Pressable>
           </View>
 
           {activeTab === "basic" && (
             <>
-              {/* Status */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Status</Text>
-                  <Text className="text-lg font-medium">{visit.status}</Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Status</Text>
+                <Text className="text-lg font-medium">{visit.status}</Text>
               </View>
 
-              {/* Result */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Result</Text>
-                  <Text className="text-lg font-medium capitalize">
-                    {visit.visitResult || draft?.result || "-"}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Check In</Text>
+                <Text className="text-lg font-medium">
+                  {formatTime(visit.checkInAt)}
+                </Text>
               </View>
 
-              {/* Check In */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Check In</Text>
-                  <Text className="text-lg font-medium">
-                    {formatTime(visit.checkInAt)}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Check Out</Text>
+                <Text className="text-lg font-medium">
+                  {formatTime(visit.checkOutAt)}
+                </Text>
               </View>
 
-              {/* Check Out */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Check Out</Text>
-                  <Text className="text-lg font-medium">
-                    {formatTime(visit.checkOutAt)}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Durasi</Text>
+                <Text className="text-lg font-medium">
+                  {formatDuration(visit.duration)}
+                </Text>
               </View>
 
-              {/* Duration */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Duration</Text>
-                  <Text className="text-lg font-medium">
-                    {formatDuration(visit.duration)}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Jarak Check In</Text>
+                <Text className="text-lg font-medium">
+                  {visit.checkInDistanceMeters != null
+                    ? `${visit.checkInDistanceMeters} m`
+                    : "-"}
+                </Text>
               </View>
 
-              {/* Check In Distance */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">
-                    Check In Distance
-                  </Text>
-
-                  <Text className="text-lg font-medium">
-                    {visit.checkInDistanceMeters != null
-                      ? `${visit.checkInDistanceMeters} m`
-                      : "-"}
-                    {/* {" / "} */}
-                    {/* {getGpsAccuracyLabel(visit.checkInGpsAccuracy)} */}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Jarak Check Out</Text>
+                <Text className="text-lg font-medium">
+                  {visit.checkOutDistanceMeters != null
+                    ? `${visit.checkOutDistanceMeters} m`
+                    : "-"}
+                </Text>
               </View>
 
-              {/* Check Out Distance */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">
-                    Check Out Distance
-                  </Text>
-
-                  <Text className="text-lg font-medium">
-                    {visit.checkOutDistanceMeters != null
-                      ? `${visit.checkOutDistanceMeters} m`
-                      : "-"}
-                    {/* {" / "} */}
-                    {/* {getGpsAccuracyLabel(visit.checkOutGpsAccuracy)} */}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Toko</Text>
+                <Text className="text-lg font-medium">{visit.shopName}</Text>
               </View>
 
-              {/* Shop Name */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Shop</Text>
-                  <Text className="text-lg font-medium">{visit.shopName}</Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Nama Pelanggan</Text>
+                <Text className="text-lg font-medium">
+                  {visit.customerName}
+                </Text>
               </View>
 
-              {/* Customer */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Customer</Text>
-                  <Text className="text-lg font-medium">
-                    {visit.customerName}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Alamat</Text>
+                <Text className="text-lg font-medium">{visit.address}</Text>
               </View>
 
-              {/* Address */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Address</Text>
-                  <Text className="text-lg font-medium">{visit.address}</Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Kawasan / Area</Text>
+                <Text className="text-lg font-medium">{visit.areaName}</Text>
               </View>
 
-              {/* Area */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Area</Text>
-                  <Text className="text-lg font-medium">{visit.areaName}</Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Kota</Text>
+                <Text className="text-lg font-medium">{visit.city}</Text>
               </View>
 
-              {/* City */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">City</Text>
-                  <Text className="text-lg font-medium">{visit.city}</Text>
-                </View>
-              </View>
-
-              {/* MAP */}
               {hasLocation && (
                 <View className="rounded-lg pt-4 pb-4">
                   <Pressable
                     onPress={() => openMap(lat, lng)}
                     className="bg-green-600 rounded-lg p-3"
                   >
-                    <Text className="text-white text-center">
-                      Open Location
-                    </Text>
+                    <Text className="text-white text-center">Lihat Titik Lokasi</Text>
                   </Pressable>
                 </View>
               )}
@@ -312,171 +271,96 @@ const VisitDetail = () => {
 
           {activeTab === "transaction" && (
             <>
-              {/* Transaction type */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Hasil</Text>
+                <Text className="text-lg font-medium capitalize">
+                  {visitResult || "-"}
+                </Text>
+              </View>
+
+              {isOrder && (
+                <View className="p-4 border-b border-gray-200">
                   <Text className="text-gray-500 text-sm">
-                    Transaction type
+                    Tipe Transaksi
                   </Text>
                   <Text className="text-lg font-medium capitalize">
                     {transactionType || "-"}
                   </Text>
                 </View>
-              </View>
+              )}
 
-              {/* Products */}
-              <View className="p-4 border-b border-gray-200">
-                <Text className="text-gray-500 text-sm mb-3">Products</Text>
+              {isUpdateTitipan ? (
+                <UpdateTitipanList
+                  items={consignmentItems}
+                  products={products}
+                />
+              ) : (
+                <VisitProductList
+                  items={mappedItems}
+                  products={products}
+                  isOrder={isOrder}
+                  isTitip={isTitip}
+                  subtotal={subtotal}
+                  totalDiscount={totalDiscount}
+                  finalAmount={finalAmount}
+                />
+              )}
 
-                {mappedItems.length ? (
-                  <View className="bg-gray-50 overflow-hidden">
-                    {/* Header */}
-                    <View className="flex-row justify-between px-3 py-2 bg-gray-100">
-                      <Text className="flex-1 text-xs font-semibold text-gray-500">
-                        Product
-                      </Text>
-                      <Text className="w-12 text-xs font-semibold text-gray-500 text-right">
-                        Qty
-                      </Text>
-                      <Text className="w-20 text-xs font-semibold text-gray-500 text-right">
-                        Price
-                      </Text>
-                      <Text className="w-24 text-xs font-semibold text-gray-500 text-right">
-                        Total
-                      </Text>
-                    </View>
-
-                    {/* Items */}
-                    {mappedItems.map((item: any, index: any) => {
-                      const product = products?.find(
-                        (p: Product) => p.id === item.productId
-                      );
-
-                      return (
-                        <View
-                          key={index}
-                          className="px-3 py-3 border-t border-gray-200"
-                        >
-                          <View className="flex-row justify-between">
-                            <Text className="flex-1 text-sm font-medium text-gray-800">
-                              {product?.name}
-                            </Text>
-
-                            <Text className="w-12 text-sm text-right text-gray-700">
-                              {item.quantity}
-                            </Text>
-
-                            <View className="w-20 items-end">
-                              <Text className="text-sm text-gray-700">
-                                Rp {Number(item.price).toLocaleString()}
-                              </Text>
-
-                              <Text className="text-xs text-red-500">
-                                - Rp {Number(item.discount).toLocaleString()}
-                              </Text>
-                            </View>
-
-                            <Text className="w-24 text-sm text-right font-semibold text-gray-900">
-                              Rp{" "}
-                              {Number(item.totalAfterDiscount).toLocaleString()}
-                            </Text>
-                          </View>
-                        </View>
-                      );
-                    })}
-
-                    {/* Summary */}
-                    <View className="px-3 py-3 border-t border-gray-300 bg-white">
-                      <View className="flex-row justify-between mb-1">
-                        <Text className="text-sm text-gray-500">Subtotal</Text>
-                        <Text className="text-sm text-gray-700">
-                          Rp {Number(subtotal).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between mb-1">
-                        <Text className="text-sm text-gray-500">Discount</Text>
-                        <Text className="text-sm text-red-500">
-                          - Rp {Number(totalDiscount).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between mt-2">
-                        <Text className="text-base font-semibold text-gray-800">
-                          Total
-                        </Text>
-                        <Text className="text-base font-bold text-gray-900">
-                          Rp {Number(finalAmount).toLocaleString()}
-                        </Text>
-                      </View>
-                    </View>
+              {isOrder && (
+                <>
+                  <View className="p-4 border-b border-gray-200">
+                    <Text className="text-gray-500 text-sm">
+                      Status Pembayaran
+                    </Text>
+                    <Text
+                      className={`text-lg font-medium capitalize ${
+                        paymentStatus === "Lunas"
+                          ? "text-green-600"
+                          : paymentStatus === "Bayar Sebagian"
+                          ? "text-yellow-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {paymentStatus || "-"}
+                    </Text>
                   </View>
-                ) : (
-                  <Text className="text-gray-400 text-sm">No products</Text>
-                )}
-              </View>
 
-              {/* Payment Status */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Payment Status</Text>
-                  <Text
-                    className={`text-lg font-medium capitalize ${
-                      paymentStatus === "paid"
-                        ? "text-green-600"
-                        : paymentStatus === "partial"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {paymentStatus || "-"}
+                  <View className="p-4 border-b border-gray-200">
+                    <Text className="text-gray-500 text-sm">Jumlah Pembayaran</Text>
+                    <Text className="text-lg font-medium">
+                      Rp {Number(paidAmount).toLocaleString()}
+                    </Text>
+                  </View>
+
+                  <View className="p-4 border-b border-gray-200">
+                    <Text className="text-gray-500 text-sm">Metode Pembayaran</Text>
+                    <Text className="text-lg font-medium capitalize">
+                      {paymentType || "-"}
+                    </Text>
+                  </View>
+                </>
+              )}
+
+              {!isUpdateTitipan && (
+                <View className="p-4 border-b border-gray-200">
+                  <Text className="text-gray-500 text-sm">
+                    {isTitip ? "Dititip kepada" : "Di Order Oleh"}
                   </Text>
-                </View>
-              </View>
-
-              {/* Paid Amount */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Paid Amount</Text>
-                  <Text className="text-lg font-medium">
-                    Rp {Number(paidAmount).toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Payment Type */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Payment Type</Text>
-                  <Text className="text-lg font-medium capitalize">
-                    {paymentType || "-"}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Order by */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Order by</Text>
                   <Text className="text-lg font-medium">
                     {visit.orderBy || draft?.orderBy || "-"}
                   </Text>
                 </View>
-              </View>
+              )}
 
-              {/* Notes */}
-              <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-                <View>
-                  <Text className="text-gray-500 text-sm">Notes</Text>
-                  <Text className="text-lg font-medium">
-                    {visit.notes || draft?.notes || "-"}
-                  </Text>
-                </View>
+              <View className="p-4 border-b border-gray-200">
+                <Text className="text-gray-500 text-sm">Keterangan Tambahan</Text>
+                <Text className="text-lg font-medium">
+                  {visit.notes || draft?.notes || "-"}
+                </Text>
               </View>
             </>
           )}
 
-          {/* Button */}
           <View className="mt-6">
             <Pressable
               onPress={handleDelete}

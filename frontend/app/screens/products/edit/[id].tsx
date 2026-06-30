@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Image, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Image, ScrollView } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -86,7 +86,7 @@ export default function EditProductScreen() {
             />
           </Pressable>
 
-          <Text className="text-2xl font-bold">Edit product</Text>
+          <Text className="text-2xl font-bold">Edit produk</Text>
         </View>
 
         <View className="gap-y-6">
@@ -113,7 +113,7 @@ export default function EditProductScreen() {
 
           {/* NAME */}
           <View>
-            <Text className="mb-3 text-gray-700">Name</Text>
+            <Text className="mb-3 text-gray-700">Nama produk</Text>
             <Controller
               control={control}
               name="name"
@@ -134,7 +134,7 @@ export default function EditProductScreen() {
 
           {/* DESC */}
           <View>
-            <Text className="mb-3 text-gray-700">Description</Text>
+            <Text className="mb-3 text-gray-700">Deskripsi produk</Text>
             <Controller
               control={control}
               name="description"
@@ -155,7 +155,7 @@ export default function EditProductScreen() {
 
           {/* PRICE */}
           <View>
-            <Text className="mb-3 text-gray-700">Price</Text>
+            <Text className="mb-3 text-gray-700">Harga</Text>
             <Controller
               control={control}
               name="price"
@@ -179,7 +179,7 @@ export default function EditProductScreen() {
           <FormSelectModal
             control={control}
             name="unit"
-            label="Unit"
+            label="Satuan unit"
             options={units.map((u) => ({ value: u }))}
             getLabel={(item: { value: string }) => item.value}
             errors={errors}

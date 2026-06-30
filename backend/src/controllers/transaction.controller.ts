@@ -31,8 +31,8 @@ export const getOutstandingTransactions = async (req: Request, res: Response) =>
     // payment filter
     conditions.push(
       or(
-        eq(transactionsTable.paymentStatus, "unpaid"),
-        eq(transactionsTable.paymentStatus, "partial")
+        eq(transactionsTable.paymentStatus, "Belum Lunas"),
+        eq(transactionsTable.paymentStatus, "Bayar Sebagian")
       )
     );
 
@@ -111,7 +111,7 @@ export const getPaidTransactions = async (req: Request, res: Response) => {
       conditions.push(eq(visitsTable.salesmanId, user.userId));
     }
 
-    conditions.push(eq(transactionsTable.paymentStatus, "paid"));
+    conditions.push(eq(transactionsTable.paymentStatus, "Lunas"));
 
     if (startDate) {
       conditions.push(gte(transactionsTable.createdAt, new Date(startDate as string)));
@@ -277,14 +277,14 @@ export const updateTransactionPayment = async (req: Request, res: Response) => {
         throw new Error("Paid amount cannot exceed total amount");
       }
 
-      let paymentStatus: "paid" | "partial" | "unpaid" = "unpaid";
+      let paymentStatus: "Lunas" | "Bayar Sebagian" | "Belum Lunas" = "Belum Lunas";
 
       if (newPaidAmount === 0) {
-        paymentStatus = "unpaid";
+        paymentStatus = "Belum Lunas";
       } else if (newPaidAmount < finalAmount) {
-        paymentStatus = "partial";
+        paymentStatus = "Bayar Sebagian";
       } else {
-        paymentStatus = "paid";
+        paymentStatus = "Lunas";
       }
 
       let finalPaymentType = paymentType || transaction.paymentType;
@@ -302,26 +302,26 @@ export const updateTransactionPayment = async (req: Request, res: Response) => {
           remainingAmount: remainingAmount.toString(),
           paymentStatus,
           paymentType: finalPaymentType,
-          paidAt: paymentStatus === "paid" ? transaction.paidAt || new Date() : null,
+          paidAt: paymentStatus === "Lunas" ? transaction.paidAt || new Date() : null,
 
           adminPaidNotificationRead:
-            paymentStatus === "paid" ? false : true,
+            paymentStatus === "Lunas" ? false : true,
 
           salesmanPaidNotificationRead:
-            paymentStatus === "paid" ? false : true,
+            paymentStatus === "Lunas" ? false : true,
 
           adminUnpaidNotificationRead:
-            paymentStatus !== "paid" ? false : true,
+            paymentStatus !== "Lunas" ? false : true,
 
           salesmanUnpaidNotificationRead:
-            paymentStatus !== "paid" ? false : true,
+            paymentStatus !== "Lunas" ? false : true,
         })
         .where(eq(transactionsTable.id, id))
         .returning();
 
         const previousStatus = transaction.paymentStatus;
 
-        const movedToPaid = previousStatus !== "paid" && paymentStatus === "paid";
+        const movedToPaid = previousStatus !== "Lunas" && paymentStatus === "Lunas";
 
         if (movedToPaid) {
           await tx
